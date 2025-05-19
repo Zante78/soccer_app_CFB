@@ -1,0 +1,141 @@
+-- Drop existing functions and views
+DROP FUNCTION IF EXISTS get_player_stats(uuid) CASCADE;
+DROP FUNCTION IF EXISTS get_player_statistics(uuid) CASCADE;
+DROP FUNCTION IF EXISTS get_player_stats_v1(uuid) CASCADE;
+DROP VIEW IF EXISTS player_statistics CASCADE;
+
+-- Create player statistics function
+CREATE OR REPLACE FUNCTION get_player_stats(p_id uuid)
+RETURNS TABLE (
+  total_teams bigint,
+  total_evaluations bigint,
+  avg_rating numeric
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    COALESCE(COUNT(DISTINCT tm.team_id), 0)::bigint as total_teams,
+    COALESCE(COUNT(DISTINCT e.id), 0)::bigint as total_evaluations,
+    COALESCE(AVG(e.overall_rating), 0)::numeric as avg_rating
+  FROM players p
+  LEFT JOIN team_memberships tm ON tm.player_id = p.id
+  LEFT JOIN evaluations e ON e.player_id = p.id
+  WHERE p.id = p_id
+  GROUP BY p.id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Create search function
+CREATE OR REPLACE FUNCTION search_players(
+  search_term text,
+  position_filter text DEFAULT NULL
+) 
+RETURNS TABLE (
+  id uuid,
+  first_name text,
+  last_name text,
+  player_position text,
+  avg_rating numeric
+) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    p.id,
+    p.first_name,
+    p.last_name,
+    p.position as player_position,
+    COALESCE(
+      (SELECT AVG(overall_rating) 
+       FROM evaluations 
+       WHERE player_id = p.id),
+      0
+    ) as avg_rating
+  FROM players p
+  WHERE 
+    (position_filter IS NULL OR p.position = position_filter)
+    AND (
+      search_term IS NULL 
+      OR p.first_name ILIKE '%' || search_term || '%'
+      OR p.last_name ILIKE '%' || search_term || '%'
+      OR p.position ILIKE '%' || search_term || '%'
+    )
+  ORDER BY p.last_name, p.first_name;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Create indexes for better performance
+CREATE INDEX IF NOT EXISTS idx_players_name ON players(last_name, first_name);
+CREATE INDEX IF NOT EXISTS idx_players_position ON players(position);
+CREATE INDEX IF NOT EXISTS idx_evaluations_player ON evaluations(player_id);
+CREATE INDEX IF NOT EXISTS idx_team_memberships_player ON team_memberships(player_id);
+CREATE INDEX IF NOT EXISTS idx_evaluations_player_rating ON evaluations(player_id, overall_rating);
+
+-- Grant permissions
+GRANT EXECUTE ON FUNCTION get_player_stats(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION search_players(text,text) TO authenticated;
+
+-- Ensure club_settings table exists with proper structure
+CREATE TABLE IF NOT EXISTS club_settings (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text NOT NULL DEFAULT 'Mein Verein',
+  logo_url text,
+  primary_color text DEFAULT '#000000',
+  secondary_color text DEFAULT '#ffffff',
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+-- Enable RLS
+ALTER TABLE club_settings ENABLE ROW LEVEL SECURITY;
+
+-- Create simplified RLS policy for development
+DROP POLICY IF EXISTS "authenticated_access_policy" ON club_settings;
+CREATE POLICY "authenticated_access_policy"
+ON club_settings
+FOR ALL
+TO authenticated
+USING (true)
+WITH CHECK (true);
+
+-- Ensure initial settings exist
+INSERT INTO club_settings (name)
+SELECT 'Mein Verein'
+WHERE NOT EXISTS (SELECT 1 FROM club_settings);
+
+-- Ensure storage buckets exist
+INSERT INTO storage.buckets (id, name, public)
+VALUES 
+  ('teams', 'teams', true),
+  ('players', 'players', true),
+  ('logos', 'logos', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Create storage policies
+DO $$ 
+BEGIN
+  -- Drop existing policies
+  DROP POLICY IF EXISTS "storage_objects_upload_policy" ON storage.objects;
+  DROP POLICY IF EXISTS "storage_objects_select_policy" ON storage.objects;
+  DROP POLICY IF EXISTS "storage_objects_delete_policy" ON storage.objects;
+  
+  -- Create new policies
+  CREATE POLICY "storage_objects_upload_policy"
+  ON storage.objects
+  FOR INSERT
+  TO authenticated
+  WITH CHECK (bucket_id IN ('teams', 'players', 'logos'));
+
+  CREATE POLICY "storage_objects_select_policy"
+  ON storage.objects
+  FOR SELECT
+  TO public
+  USING (bucket_id IN ('teams', 'players', 'logos'));
+
+  CREATE POLICY "storage_objects_delete_policy"
+  ON storage.objects
+  FOR DELETE
+  TO authenticated
+  USING (bucket_id IN ('teams', 'players', 'logos'));
+EXCEPTION
+  WHEN undefined_object THEN NULL;
+END $$;

@@ -1,0 +1,80 @@
+/* Mobile-optimierte Styles */
+@layer utilities {
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .mobile-text {
+    @apply text-base leading-relaxed;
+  }
+
+  .mobile-heading {
+    @apply text-xl font-bold;
+  }
+
+  .mobile-button {
+    @apply touch-target px-4 py-2 rounded-lg;
+  }
+
+  .mobile-input {
+    @apply touch-target px-3 py-2 rounded-lg;
+  }
+
+  .mobile-select {
+    @apply touch-target px-3 py-2 rounded-lg appearance-none bg-no-repeat bg-right;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+    background-size: 1.5rem;
+    padding-right: 2.5rem;
+  }
+}
+
+/* Media Queries für verschiedene Bildschirmgrößen */
+@media (max-width: 640px) {
+  .container {
+    @apply px-4;
+  }
+
+  .grid {
+    @apply grid-cols-1;
+  }
+
+  .hidden-mobile {
+    @apply hidden;
+  }
+
+  .stack-mobile {
+    @apply flex-col;
+  }
+}
+
+/* Unterstützung für Landscape Mode */
+@media (orientation: landscape) and (max-height: 500px) {
+  .landscape-adjust {
+    @apply max-h-screen overflow-y-auto;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .dark-mode-support {
+    @apply bg-gray-900 text-white;
+  }
+}
+
+/* Reduzierte Bewegung */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

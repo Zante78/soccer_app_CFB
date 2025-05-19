@@ -1,0 +1,308 @@
+import { supabase, handleDatabaseError, testDatabaseConnection } from './database';
+import { Player, defaultSkills, PlayerSkill } from '../types/player';
+
+export class PlayerService {
+  private static instance: PlayerService | null = null;
+  private initialized: boolean = false;
+  private initPromise: Promise<void> | null = null;
+  
+  private constructor() {}
+
+  public static getInstance(): PlayerService {
+    if (!PlayerService.instance) {
+      PlayerService.instance = new PlayerService();
+    }
+    return PlayerService.instance;
+  }
+
+  private async initialize() {
+    if (this.initialized) return;
+    
+    try {
+      const isConnected = await testDatabaseConnection();
+      if (!isConnected) {
+        throw new Error('Bitte klicken Sie auf "Connect to Supabase" um die Datenbankverbindung herzustellen');
+      }
+      
+      this.initialized = true;
+    } catch (err) {
+      this.initialized = false;
+      throw err;
+    }
+  }
+
+  private async ensureInitialized() {
+    if (!this.initialized) {
+      if (!this.initPromise) {
+        this.initPromise = this.initialize();
+      }
+      await this.initPromise;
+      this.initPromise = null;
+    }
+  }
+
+  async getPlayers(): Promise<Player[]> {
+    try {
+      await this.ensureInitialized();
+      
+      const { data, error } = await supabase
+        .from('players')
+        .select(`
+          *,
+          team_memberships (
+            id,
+            team_id,
+            role,
+            start_date,
+            end_date
+          )
+        `)
+        .order('last_name');
+      
+      if (error) throw error;
+      return (data || []).map(player => this.parsePlayerData(player));
+    } catch (err) {
+      throw handleDatabaseError(err);
+    }
+  }
+
+  async getPlayer(id: string): Promise<Player | null> {
+    try {
+      await this.ensureInitialized();
+      
+      const { data, error } = await supabase
+        .from('players')
+        .select(`
+          *,
+          team_memberships (
+            id,
+            team_id,
+            role,
+            start_date,
+            end_date
+          )
+        `)
+        .eq('id', id)
+        .single();
+      
+      if (error) {
+        if (error.code === 'PGRST116') return null; // Not found
+        throw error;
+      }
+      
+      return this.parsePlayerData(data);
+    } catch (err) {
+      throw handleDatabaseError(err);
+    }
+  }
+
+  async createPlayer(player: Omit<Player, 'id' | 'createdAt' | 'updatedAt'>): Promise<Player> {
+    try {
+      await this.ensureInitialized();
+
+      // Validate and format date
+      const dateOfBirth = player.dateOfBirth?.trim() 
+        ? new Date(player.dateOfBirth).toISOString().split('T')[0]
+        : null;
+
+      const { data, error } = await supabase
+        .from('players')
+        .insert([{
+          first_name: player.firstName.trim(),
+          last_name: player.lastName.trim(),
+          position: player.position?.trim() || null,
+          date_of_birth: dateOfBirth,
+          email: player.email?.trim() || null,
+          phone: player.phone?.trim() || null,
+          skills: player.skills || defaultSkills
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+      return this.parsePlayerData(data);
+    } catch (err) {
+      throw handleDatabaseError(err);
+    }
+  }
+
+  async updatePlayer(id: string, updates: Partial<Player>): Promise<Player> {
+    try {
+      await this.ensureInitialized();
+
+      // Validate and format date
+      const dateOfBirth = updates.dateOfBirth?.trim() 
+        ? new Date(updates.dateOfBirth).toISOString().split('T')[0]
+        : null;
+
+      const updateData: any = {
+        first_name: updates.firstName?.trim(),
+        last_name: updates.lastName?.trim(),
+        position: updates.position?.trim() || null,
+        date_of_birth: dateOfBirth,
+        email: updates.email?.trim() || null,
+        phone: updates.phone?.trim() || null,
+        updated_at: new Date().toISOString()
+      };
+
+      // Only include defined fields
+      Object.keys(updateData).forEach(key => {
+        if (updateData[key] === undefined) {
+          delete updateData[key];
+        }
+      });
+
+      if (updates.skills) {
+        const validatedSkills = this.validateSkills(updates.skills);
+        updateData.skills = validatedSkills;
+      }
+
+      if (updates.photoUrl !== undefined) {
+        updateData.photo_url = updates.photoUrl;
+      }
+
+      const { data, error } = await supabase
+        .from('players')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return this.parsePlayerData(data);
+    } catch (err) {
+      throw handleDatabaseError(err);
+    }
+  }
+
+  async deletePlayer(id: string): Promise<void> {
+    try {
+      await this.ensureInitialized();
+
+      // Delete old photo if exists
+      const { data: player } = await supabase
+        .from('players')
+        .select('photo_url')
+        .eq('id', id)
+        .single();
+
+      if (player?.photo_url) {
+        const fileName = player.photo_url.split('/').pop();
+        if (fileName) {
+          await supabase.storage
+            .from('players')
+            .remove([fileName]);
+        }
+      }
+
+      const { error } = await supabase
+        .from('players')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+    } catch (err) {
+      throw handleDatabaseError(err);
+    }
+  }
+
+  async uploadPlayerPhoto(playerId: string, file: File): Promise<string> {
+    try {
+      await this.ensureInitialized();
+
+      // Validate file type
+      if (!file.type.match(/^image\/(jpeg|png|gif)$/)) {
+        throw new Error('Nur JPEG, PNG und GIF Dateien sind erlaubt');
+      }
+
+      // Validate file size (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error('Die Datei darf maximal 5MB groß sein');
+      }
+
+      // Generate unique filename with player ID prefix
+      const fileExt = file.name.split('.').pop();
+      const fileName = `players/${playerId}-${Date.now()}.${fileExt}`;
+
+      // Delete old photo if exists
+      const { data: player } = await supabase
+        .from('players')
+        .select('photo_url')
+        .eq('id', playerId)
+        .single();
+
+      if (player?.photo_url) {
+        const oldFileName = player.photo_url.split('/').pop();
+        if (oldFileName) {
+          await supabase.storage
+            .from('players')
+            .remove([`players/${oldFileName}`]);
+        }
+      }
+
+      // Upload new photo
+      const { error: uploadError, data } = await supabase.storage
+        .from('players')
+        .upload(fileName, file, {
+          upsert: true,
+          contentType: file.type
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('players')
+        .getPublicUrl(fileName);
+
+      // Update player record with new photo URL
+      const { error: updateError } = await supabase
+        .from('players')
+        .update({ photo_url: urlData.publicUrl })
+        .eq('id', playerId);
+
+      if (updateError) throw updateError;
+
+      return urlData.publicUrl;
+    } catch (err) {
+      throw handleDatabaseError(err);
+    }
+  }
+
+  private validateSkills(skills: PlayerSkill[]): PlayerSkill[] {
+    return skills.map(skill => ({
+      name: skill.name,
+      value: Math.max(0, Math.min(20, skill.value)),
+      category: skill.category
+    }));
+  }
+
+  private parsePlayerData(data: any): Player {
+    // Parse team memberships
+    const teamMemberships = data.team_memberships?.map((tm: any) => ({
+      id: tm.id,
+      teamId: tm.team_id,
+      role: tm.role,
+      startDate: tm.start_date,
+      endDate: tm.end_date
+    })) || [];
+
+    // Parse skills with validation
+    const skills = Array.isArray(data.skills) ? data.skills : defaultSkills;
+
+    return {
+      id: data.id,
+      firstName: data.first_name || '',
+      lastName: data.last_name || '',
+      position: data.position || '',
+      dateOfBirth: data.date_of_birth || null,
+      photoUrl: data.photo_url || null,
+      email: data.email || null,
+      phone: data.phone || null,
+      skills,
+      teamMemberships,
+      createdAt: data.created_at,
+      updatedAt: data.updated_at
+    };
+  }
+}

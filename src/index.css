@@ -1,0 +1,52 @@
+@import './styles/mobile.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* A11y Verbesserungen */
+@layer base {
+  /* Fokus Styles */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+  }
+
+  /* Verbesserte Lesbarkeit */
+  body {
+    @apply text-base leading-relaxed text-gray-900;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Reduzierte Bewegung */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* High Contrast Mode */
+  @media (forced-colors: active) {
+    * {
+      forced-color-adjust: auto;
+    }
+  }
+}
+
+/* Keyboard Navigation */
+.keyboard-focus:focus {
+  @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+}
+
+/* Skip Links */
+.skip-link {
+  @apply sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50;
+  @apply focus:p-4 focus:bg-white focus:text-blue-600 focus:shadow-lg focus:rounded-lg;
+}
+
+/* Mobile Touch Targets */
+.touch-target {
+  @apply min-h-[44px] min-w-[44px];
+}
