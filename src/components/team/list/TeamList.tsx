@@ -1,7 +1,9 @@
-import React from 'react';
-import { Plus, Users } from 'lucide-react';
+import React, { useState } from 'react';
+import { Plus, Users, LayoutGrid, List, Rows } from 'lucide-react';
 import { Team } from '../../../types/core/team';
 import { TeamGrid } from './TeamGrid';
+
+export type ViewMode = 'large-grid' | 'small-grid' | 'list' | 'detail-list';
 
 interface TeamListProps {
   teams: Team[];
@@ -22,11 +24,36 @@ export function TeamList({
   onUpdateTeam,
   onShowPlayers
 }: TeamListProps) {
+  const [viewMode, setViewMode] = useState<ViewMode>('large-grid');
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-gray-900">Teams</h2>
         <div className="flex gap-4">
+          <div className="flex items-center bg-white rounded-lg shadow-sm p-1">
+            <button
+              onClick={() => setViewMode('large-grid')}
+              className={`p-2 rounded-md ${viewMode === 'large-grid' ? 'bg-blue-100 text-blue-600' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'}`}
+              title="Large Grid View"
+            >
+              <LayoutGrid className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => setViewMode('small-grid')}
+              className={`p-2 rounded-md ${viewMode === 'small-grid' ? 'bg-blue-100 text-blue-600' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'}`}
+              title="Small Grid View"
+            >
+              <Rows className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-2 rounded-md ${viewMode === 'list' ? 'bg-blue-100 text-blue-600' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'}`}
+              title="List View"
+            >
+              <List className="w-5 h-5" />
+            </button>
+          </div>
           <button
             onClick={onShowPlayers}
             className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
@@ -57,6 +84,7 @@ export function TeamList({
       ) : (
         <TeamGrid 
           teams={teams}
+          viewMode={viewMode}
           onSelectTeam={onSelectTeam}
           onEditTeam={onEditTeam}
           onDeleteTeam={onDeleteTeam}
