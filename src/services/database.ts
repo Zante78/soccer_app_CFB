@@ -1,11 +1,25 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Get environment variables with proper validation
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL?.trim();
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim();
 
+// Validate environment variables
 if (!supabaseUrl || !supabaseKey) {
-  throw new Error('Missing Supabase configuration');
+  console.error('Missing Supabase configuration:', {
+    url: supabaseUrl ? 'present' : 'missing',
+    key: supabaseKey ? 'present' : 'missing'
+  });
+  throw new Error('Missing Supabase configuration. Please check your .env file.');
 }
+
+// Validate URL format
+if (!supabaseUrl.startsWith('https://') || !supabaseUrl.includes('.supabase.co')) {
+  console.error('Invalid Supabase URL format:', supabaseUrl);
+  throw new Error('Invalid Supabase URL format. Expected format: https://[project-id].supabase.co');
+}
+
+console.log('Initializing Supabase client with URL:', supabaseUrl);
 
 export const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
@@ -73,6 +87,8 @@ export async function testDatabaseConnection(): Promise<boolean> {
   // Start new connection check with timeout and retries
   connectionCheckPromise = (async () => {
     try {
+      console.log('Testing database connection to:', supabaseUrl);
+      
       // Create a timeout promise
       const timeoutPromise = new Promise<never>((_, reject) => {
         connectionCheckTimeout = setTimeout(() => {
@@ -94,14 +110,17 @@ export async function testDatabaseConnection(): Promise<boolean> {
       ]);
 
       if (error) {
+        console.error('Database connection test failed:', error);
         if (retryCount < MAX_RETRIES) {
           retryCount++;
+          console.log(`Retrying connection (attempt ${retryCount}/${MAX_RETRIES})`);
           await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
           return testDatabaseConnection();
         }
         throw error;
       }
 
+      console.log('Database connection successful');
       retryCount = 0;
       isConnected = true;
       return true;
