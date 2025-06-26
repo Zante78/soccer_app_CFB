@@ -328,14 +328,14 @@ export function PlayerCard({
       {/* Duplicate warning tooltip at bottom */}
       {hasDuplicateIssue && (
         <div 
-          className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/70 to-transparent cursor-pointer hover:underline"
+          className="absolute bottom-0 left-0 right-0 p-2 bg-gray-100 cursor-pointer hover:underline"
           onClick={(e) => {
             e.stopPropagation();
             setShowDuplicateDetailsModal(true);
           }}
         >
-          <div className={`text-xs ${duplicateStatus.isDuplicate ? 'text-red-400' : 'text-yellow-400'} flex items-center`}>
-            <AlertTriangle className="w-3 h-3 mr-1 flex-shrink-0" />
+          <div className="text-xs text-gray-900 flex items-center">
+            <AlertTriangle className="w-3 h-3 mr-1 flex-shrink-0 text-gray-700" />
             <span className="truncate">{duplicateStatus.message}</span>
           </div>
         </div>
