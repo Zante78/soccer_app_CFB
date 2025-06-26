@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Eye } from 'lucide-react';
 import { Player, DuplicateStatus } from '../../types/player';
 
 interface DuplicateIndicatorProps {
   duplicateStatus: DuplicateStatus;
   position?: 'top-right' | 'bottom-left' | 'inline';
+  onViewDetails?: (player: Player) => void;
 }
 
 export function DuplicateIndicator({ 
   duplicateStatus, 
-  position = 'top-right' 
+  position = 'top-right',
+  onViewDetails
 }: DuplicateIndicatorProps) {
   const [showDetails, setShowDetails] = useState(false);
 
@@ -26,6 +28,14 @@ export function DuplicateIndicator({
   const bgColor = duplicateStatus.isDuplicate ? 'bg-red-500' : 'bg-yellow-500';
   const textColor = 'text-white';
 
+  const handleViewDetails = (player: Player, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onViewDetails) {
+      onViewDetails(player);
+      setShowDetails(false);
+    }
+  };
+
   return (
     <div className="relative">
       <div 
@@ -41,7 +51,7 @@ export function DuplicateIndicator({
 
       {showDetails && (
         <div 
-          className="absolute z-20 bg-white shadow-lg rounded-lg p-3 mt-1 w-64 right-0 text-sm"
+          className="absolute z-20 bg-white shadow-lg rounded-lg p-3 mt-1 w-72 right-0 text-sm"
           onClick={(e) => e.stopPropagation()}
         >
           <div className={`font-medium mb-2 ${duplicateStatus.isDuplicate ? 'text-red-600' : 'text-yellow-600'}`}>
@@ -51,7 +61,7 @@ export function DuplicateIndicator({
           {duplicateStatus.duplicatePlayers.length > 0 && (
             <div>
               <p className="font-medium text-gray-700 mb-1">Gefundene Spieler:</p>
-              <ul className="space-y-2">
+              <ul className="space-y-2 max-h-60 overflow-y-auto">
                 {duplicateStatus.duplicatePlayers.map((player, index) => (
                   <li key={index} className="border-t pt-2 first:border-t-0 first:pt-0">
                     <p className="font-medium">{player.firstName} {player.lastName}</p>
@@ -69,6 +79,15 @@ export function DuplicateIndicator({
                       <p className="text-xs text-gray-600">
                         Team: {player.teamName}
                       </p>
+                    )}
+                    {onViewDetails && (
+                      <button
+                        onClick={(e) => handleViewDetails(player, e)}
+                        className="mt-1 flex items-center text-xs text-blue-600 hover:text-blue-800"
+                      >
+                        <Eye className="w-3 h-3 mr-1" />
+                        Details anzeigen
+                      </button>
                     )}
                   </li>
                 ))}
