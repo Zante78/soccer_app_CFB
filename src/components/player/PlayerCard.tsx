@@ -321,10 +321,6 @@ export function PlayerCard({
         </div>
       )}
 
-      {announcement && (
-        <A11yAnnouncer message={announcement} />
-      )}
-
       {/* Duplicate warning tooltip at bottom */}
       {hasDuplicateIssue && (
         <div 
@@ -348,6 +344,10 @@ export function PlayerCard({
           onClose={() => setShowDuplicateDetailsModal(false)}
           onViewDetails={onViewDuplicate}
         />
+      )}
+
+      {announcement && (
+        <A11yAnnouncer message={announcement} />
       )}
     </div>
   );
