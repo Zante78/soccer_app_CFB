@@ -12,10 +12,16 @@ interface PlayerState {
   dbConnected: boolean;
   initialize: () => Promise<void>;
   checkConnection: () => Promise<boolean>;
-  addPlayer: (player: Omit<Player, 'id'>) => Promise<void>;
+  addPlayer: (player: Omit<Player, 'id'>) => Promise<Player>;
   updatePlayer: (id: string, updates: Partial<Player>) => Promise<void>;
   removePlayer: (id: string) => Promise<void>;
   getPlayersByTeam: (teamId: string) => Player[];
+  checkDuplicatePlayer: (player: Partial<Player>, playerId?: string) => { 
+    isDuplicate: boolean; 
+    isPotentialDuplicate: boolean; 
+    message: string | null;
+    duplicatePlayer?: Player;
+  };
 }
 
 let playerService: PlayerService | null = null;
@@ -87,6 +93,88 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     }
   },
 
+  checkDuplicatePlayer: (player, playerId) => {
+    const { players } = get();
+    let isDuplicate = false;
+    let isPotentialDuplicate = false;
+    let message: string | null = null;
+    let duplicatePlayer: Player | undefined;
+
+    // Skip checking against the player being edited
+    const existingPlayers = players.filter(p => p.id !== playerId);
+
+    for (const existingPlayer of existingPlayers) {
+      // Count matching fields
+      let matchCount = 0;
+      let fieldsToCheck = 0;
+
+      // Check first name
+      if (player.firstName && existingPlayer.firstName) {
+        fieldsToCheck++;
+        if (player.firstName.toLowerCase() === existingPlayer.firstName.toLowerCase()) {
+          matchCount++;
+        }
+      }
+
+      // Check last name
+      if (player.lastName && existingPlayer.lastName) {
+        fieldsToCheck++;
+        if (player.lastName.toLowerCase() === existingPlayer.lastName.toLowerCase()) {
+          matchCount++;
+        }
+      }
+
+      // Check date of birth
+      if (player.dateOfBirth && existingPlayer.dateOfBirth) {
+        fieldsToCheck++;
+        if (player.dateOfBirth === existingPlayer.dateOfBirth) {
+          matchCount++;
+        }
+      }
+
+      // Check email
+      if (player.email && existingPlayer.email) {
+        fieldsToCheck++;
+        if (player.email.toLowerCase() === existingPlayer.email.toLowerCase()) {
+          matchCount++;
+        }
+      }
+
+      // If three or more fields match, it's a duplicate
+      if (matchCount >= 3 && fieldsToCheck >= 3) {
+        isDuplicate = true;
+        duplicatePlayer = existingPlayer;
+        message = `Ein Spieler mit ähnlichen Daten existiert bereits: ${existingPlayer.firstName} ${existingPlayer.lastName}`;
+        break;
+      }
+
+      // If first and last name match, and either email or date of birth is missing for both players
+      if (player.firstName && 
+          player.lastName && 
+          player.firstName.toLowerCase() === existingPlayer.firstName.toLowerCase() && 
+          player.lastName.toLowerCase() === existingPlayer.lastName.toLowerCase()) {
+        
+        const missingEmail = !player.email && !existingPlayer.email;
+        const missingDob = !player.dateOfBirth && !existingPlayer.dateOfBirth;
+        
+        if (missingEmail || missingDob) {
+          isPotentialDuplicate = true;
+          duplicatePlayer = existingPlayer;
+          message = `Möglicher Duplikat gefunden: ${existingPlayer.firstName} ${existingPlayer.lastName}. Bitte überprüfen Sie die Daten.`;
+          
+          // Don't break here, continue checking for exact duplicates
+        }
+      }
+    }
+
+    return { 
+      isDuplicate, 
+      isPotentialDuplicate, 
+      message,
+      duplicatePlayer
+    };
+  },
+
   addPlayer: async (player) => {
     try {
       if (!playerService) {
@@ -98,10 +186,18 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       if (!get().dbConnected) {
         throw new Error('Keine Datenbankverbindung');
       }
+
+      // Check for duplicates
+      const { isDuplicate, message } = get().checkDuplicatePlayer(player);
+      if (isDuplicate) {
+        throw new Error(message || 'Spieler existiert bereits');
+      }
+
       set({ error: null });
       const newPlayer = await playerService.createPlayer(player);
       set(state => ({ players: [...state.players, newPlayer] }));
       eventBus.emit('player:created', newPlayer);
+      return newPlayer;
     } catch (err) {
       const error = err instanceof Error ? err.message : 'Fehler beim Erstellen des Spielers';
       set({ error });
@@ -120,6 +216,13 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       if (!get().dbConnected) {
         throw new Error('Keine Datenbankverbindung');
       }
+
+      // Check for duplicates
+      const { isDuplicate, message } = get().checkDuplicatePlayer(updates, id);
+      if (isDuplicate) {
+        throw new Error(message || 'Spieler existiert bereits');
+      }
+
       set({ error: null });
       const updatedPlayer = await playerService.updatePlayer(id, updates);
       set(state => ({
