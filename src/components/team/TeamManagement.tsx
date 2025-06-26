@@ -4,7 +4,7 @@ import { TeamList } from './list/TeamList';
 import { TeamForm } from './form/TeamForm';
 import { TeamDetails } from './TeamDetails';
 import { DatabaseConnectionError } from '../common/DatabaseConnectionError';
-import { Loader, UserPlus } from 'lucide-react';
+import { Loader, UserPlus, Plus } from 'lucide-react';
 import { SkipLink } from '../common/SkipLink';
 import { useKeyboardNavigation } from '../../hooks/useKeyboardNavigation';
 import { useStore } from '../../store/store';
@@ -145,16 +145,13 @@ export function TeamManagement() {
           >
             ← Zurück zu Teams
           </button>
-          <div className="relative">
+          <div className="flex items-center gap-2">
             <button
               onClick={handleAddPlayer}
-              className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-full transition-colors group relative"
-              title="Spieler hinzufügen"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
             >
-              <UserPlus className="w-5 h-5" />
-              <span className="absolute hidden group-hover:block bg-gray-900 text-white text-xs rounded py-1 px-2 right-0 top-full mt-1 whitespace-nowrap">
-                Spieler hinzufügen
-              </span>
+              <Plus className="w-4 h-4" />
+              Neuer Spieler
             </button>
           </div>
         </div>
