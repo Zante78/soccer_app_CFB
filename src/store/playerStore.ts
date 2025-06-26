@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Player } from '../types/player';
+import { Player, DuplicateStatus } from '../types/player';
 import { PlayerService } from '../services/player.service';
 import { EventBus } from '../services/events/EventBus';
 import { testDatabaseConnection } from '../services/database';
@@ -10,18 +10,15 @@ interface PlayerState {
   error: string | null;
   initialized: boolean;
   dbConnected: boolean;
+  duplicateStatuses: Record<string, DuplicateStatus>;
   initialize: () => Promise<void>;
   checkConnection: () => Promise<boolean>;
   addPlayer: (player: Omit<Player, 'id'>) => Promise<Player>;
   updatePlayer: (id: string, updates: Partial<Player>) => Promise<void>;
   removePlayer: (id: string) => Promise<void>;
   getPlayersByTeam: (teamId: string) => Player[];
-  checkDuplicatePlayer: (player: Partial<Player>, playerId?: string) => { 
-    isDuplicate: boolean; 
-    isPotentialDuplicate: boolean; 
-    message: string | null;
-    duplicatePlayer?: Player;
-  };
+  getDuplicateStatusForPlayer: (player: Partial<Player>, playerId?: string) => DuplicateStatus;
+  calculateAllDuplicateStatuses: () => void;
 }
 
 let playerService: PlayerService | null = null;
@@ -39,6 +36,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   error: null,
   initialized: false,
   dbConnected: false,
+  duplicateStatuses: {},
 
   checkConnection: async () => {
     try {
@@ -81,6 +79,9 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
         dbConnected: true
       });
 
+      // Calculate duplicate statuses after initialization
+      get().calculateAllDuplicateStatuses();
+
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Fehler beim Laden der Spieler';
       set({ 
@@ -93,12 +94,12 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     }
   },
 
-  checkDuplicatePlayer: (player, playerId) => {
+  getDuplicateStatusForPlayer: (player, playerId) => {
     const { players } = get();
     let isDuplicate = false;
     let isPotentialDuplicate = false;
     let message: string | null = null;
-    let duplicatePlayer: Player | undefined;
+    let duplicatePlayers: Player[] = [];
 
     // Skip checking against the player being edited
     const existingPlayers = players.filter(p => p.id !== playerId);
@@ -143,9 +144,9 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       // If three or more fields match, it's a duplicate
       if (matchCount >= 3 && fieldsToCheck >= 3) {
         isDuplicate = true;
-        duplicatePlayer = existingPlayer;
+        duplicatePlayers.push(existingPlayer);
         message = `Ein Spieler mit ähnlichen Daten existiert bereits: ${existingPlayer.firstName} ${existingPlayer.lastName}`;
-        break;
+        // Don't break here, continue to find all duplicates
       }
 
       // If first and last name match, and either email or date of birth is missing for both players
@@ -159,10 +160,9 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
         
         if (missingEmail || missingDob) {
           isPotentialDuplicate = true;
-          duplicatePlayer = existingPlayer;
+          duplicatePlayers.push(existingPlayer);
           message = `Möglicher Duplikat gefunden: ${existingPlayer.firstName} ${existingPlayer.lastName}. Bitte überprüfen Sie die Daten.`;
-          
-          // Don't break here, continue checking for exact duplicates
+          // Don't break here, continue to find all duplicates
         }
       }
     }
@@ -171,8 +171,20 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       isDuplicate, 
       isPotentialDuplicate, 
       message,
-      duplicatePlayer
+      duplicatePlayers
     };
+  },
+
+  calculateAllDuplicateStatuses: () => {
+    const { players } = get();
+    const duplicateStatuses: Record<string, DuplicateStatus> = {};
+
+    // Check each player against all others
+    for (const player of players) {
+      duplicateStatuses[player.id] = get().getDuplicateStatusForPlayer(player, player.id);
+    }
+
+    set({ duplicateStatuses });
   },
 
   addPlayer: async (player) => {
@@ -188,15 +200,19 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       }
 
       // Check for duplicates
-      const { isDuplicate, message } = get().checkDuplicatePlayer(player);
-      if (isDuplicate) {
-        throw new Error(message || 'Spieler existiert bereits');
+      const duplicateStatus = get().getDuplicateStatusForPlayer(player);
+      if (duplicateStatus.isDuplicate) {
+        throw new Error(duplicateStatus.message || 'Spieler existiert bereits');
       }
 
       set({ error: null });
       const newPlayer = await playerService.createPlayer(player);
       set(state => ({ players: [...state.players, newPlayer] }));
       eventBus.emit('player:created', newPlayer);
+      
+      // Recalculate duplicate statuses after adding a player
+      get().calculateAllDuplicateStatuses();
+      
       return newPlayer;
     } catch (err) {
       const error = err instanceof Error ? err.message : 'Fehler beim Erstellen des Spielers';
@@ -218,9 +234,9 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       }
 
       // Check for duplicates
-      const { isDuplicate, message } = get().checkDuplicatePlayer(updates, id);
-      if (isDuplicate) {
-        throw new Error(message || 'Spieler existiert bereits');
+      const duplicateStatus = get().getDuplicateStatusForPlayer(updates, id);
+      if (duplicateStatus.isDuplicate) {
+        throw new Error(duplicateStatus.message || 'Spieler existiert bereits');
       }
 
       set({ error: null });
@@ -229,6 +245,9 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
         players: state.players.map(p => p.id === id ? updatedPlayer : p)
       }));
       eventBus.emit('player:updated', updatedPlayer);
+      
+      // Recalculate duplicate statuses after updating a player
+      get().calculateAllDuplicateStatuses();
     } catch (err) {
       const error = err instanceof Error ? err.message : 'Fehler beim Aktualisieren des Spielers';
       set({ error });
@@ -250,9 +269,15 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       set({ error: null });
       await playerService.deletePlayer(id);
       set(state => ({
-        players: state.players.filter(p => p.id !== id)
+        players: state.players.filter(p => p.id !== id),
+        duplicateStatuses: Object.fromEntries(
+          Object.entries(state.duplicateStatuses).filter(([key]) => key !== id)
+        )
       }));
       eventBus.emit('player:deleted', id);
+      
+      // Recalculate duplicate statuses after removing a player
+      get().calculateAllDuplicateStatuses();
     } catch (err) {
       const error = err instanceof Error ? err.message : 'Fehler beim Löschen des Spielers';
       set({ error });
@@ -272,7 +297,16 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
 
 // Subscribe to real-time updates
 eventBus.on('player:updated', (player: Player) => {
-  usePlayerStore.setState(state => ({
-    players: state.players.map(p => p.id === player.id ? player : p)
-  }));
+  usePlayerStore.setState(state => {
+    const newState = {
+      players: state.players.map(p => p.id === player.id ? player : p)
+    };
+    
+    // Recalculate duplicate statuses
+    setTimeout(() => {
+      usePlayerStore.getState().calculateAllDuplicateStatuses();
+    }, 0);
+    
+    return newState;
+  });
 });

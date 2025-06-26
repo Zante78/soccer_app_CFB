@@ -10,7 +10,7 @@ interface PlayerFormProps {
 }
 
 export function PlayerForm({ player, onSave, onClose }: PlayerFormProps) {
-  const { checkDuplicatePlayer } = usePlayerStore();
+  const { getDuplicateStatusForPlayer } = usePlayerStore();
   const [formData, setFormData] = useState({
     firstName: player?.firstName || '',
     lastName: player?.lastName || '',
@@ -23,14 +23,14 @@ export function PlayerForm({ player, onSave, onClose }: PlayerFormProps) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [warning, setWarning] = useState<string | null>(null);
-  const [duplicatePlayer, setDuplicatePlayer] = useState<Player | null>(null);
+  const [duplicatePlayers, setDuplicatePlayers] = useState<Player[]>([]);
   const [forceSubmit, setForceSubmit] = useState(false);
 
   useEffect(() => {
     // Reset warnings and errors when form data changes
     setError(null);
     setWarning(null);
-    setDuplicatePlayer(null);
+    setDuplicatePlayers([]);
     setForceSubmit(false);
   }, [formData]);
 
@@ -60,18 +60,18 @@ export function PlayerForm({ player, onSave, onClose }: PlayerFormProps) {
 
     // Check for duplicates if not forcing submit
     if (!forceSubmit) {
-      const { isDuplicate, isPotentialDuplicate, message, duplicatePlayer: foundDuplicate } = 
-        checkDuplicatePlayer(formData, player?.id);
+      const { isDuplicate, isPotentialDuplicate, message, duplicatePlayers: foundDuplicates } = 
+        getDuplicateStatusForPlayer(formData, player?.id);
 
       if (isDuplicate) {
         setError(message || 'Ein Spieler mit diesen Daten existiert bereits');
-        setDuplicatePlayer(foundDuplicate || null);
+        setDuplicatePlayers(foundDuplicates);
         return;
       }
 
       if (isPotentialDuplicate) {
         setWarning(message || 'Möglicher Duplikat gefunden');
-        setDuplicatePlayer(foundDuplicate || null);
+        setDuplicatePlayers(foundDuplicates);
         return;
       }
     }
@@ -92,7 +92,7 @@ export function PlayerForm({ player, onSave, onClose }: PlayerFormProps) {
   const handleForceSubmit = () => {
     setForceSubmit(true);
     setWarning(null);
-    setDuplicatePlayer(null);
+    setDuplicatePlayers([]);
   };
 
   return (
@@ -113,14 +113,18 @@ export function PlayerForm({ player, onSave, onClose }: PlayerFormProps) {
               <AlertCircle className="w-5 h-5 flex-shrink-0" />
               <div>
                 <p>{error}</p>
-                {duplicatePlayer && (
+                {duplicatePlayers.length > 0 && (
                   <div className="mt-2 text-sm">
-                    <p>Gefundener Spieler:</p>
+                    <p>Gefundene Spieler:</p>
                     <ul className="list-disc pl-5 mt-1">
-                      <li>Name: {duplicatePlayer.firstName} {duplicatePlayer.lastName}</li>
-                      {duplicatePlayer.dateOfBirth && <li>Geburtsdatum: {new Date(duplicatePlayer.dateOfBirth).toLocaleDateString()}</li>}
-                      {duplicatePlayer.email && <li>Email: {duplicatePlayer.email}</li>}
-                      {duplicatePlayer.teamName && <li>Team: {duplicatePlayer.teamName}</li>}
+                      {duplicatePlayers.map((duplicatePlayer, index) => (
+                        <li key={index}>
+                          Name: {duplicatePlayer.firstName} {duplicatePlayer.lastName}
+                          {duplicatePlayer.dateOfBirth && <span> | Geburtsdatum: {new Date(duplicatePlayer.dateOfBirth).toLocaleDateString()}</span>}
+                          {duplicatePlayer.email && <span> | Email: {duplicatePlayer.email}</span>}
+                          {duplicatePlayer.teamName && <span> | Team: {duplicatePlayer.teamName}</span>}
+                        </li>
+                      ))}
                     </ul>
                   </div>
                 )}
@@ -133,14 +137,18 @@ export function PlayerForm({ player, onSave, onClose }: PlayerFormProps) {
               <AlertTriangle className="w-5 h-5 flex-shrink-0" />
               <div>
                 <p>{warning}</p>
-                {duplicatePlayer && (
+                {duplicatePlayers.length > 0 && (
                   <div className="mt-2 text-sm">
-                    <p>Gefundener Spieler:</p>
+                    <p>Gefundene Spieler:</p>
                     <ul className="list-disc pl-5 mt-1">
-                      <li>Name: {duplicatePlayer.firstName} {duplicatePlayer.lastName}</li>
-                      {duplicatePlayer.dateOfBirth && <li>Geburtsdatum: {new Date(duplicatePlayer.dateOfBirth).toLocaleDateString()}</li>}
-                      {duplicatePlayer.email && <li>Email: {duplicatePlayer.email}</li>}
-                      {duplicatePlayer.teamName && <li>Team: {duplicatePlayer.teamName}</li>}
+                      {duplicatePlayers.map((duplicatePlayer, index) => (
+                        <li key={index}>
+                          Name: {duplicatePlayer.firstName} {duplicatePlayer.lastName}
+                          {duplicatePlayer.dateOfBirth && <span> | Geburtsdatum: {new Date(duplicatePlayer.dateOfBirth).toLocaleDateString()}</span>}
+                          {duplicatePlayer.email && <span> | Email: {duplicatePlayer.email}</span>}
+                          {duplicatePlayer.teamName && <span> | Team: {duplicatePlayer.teamName}</span>}
+                        </li>
+                      ))}
                     </ul>
                     <button 
                       onClick={handleForceSubmit}

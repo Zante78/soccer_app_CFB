@@ -1,6 +1,7 @@
 import React, { memo } from 'react';
-import { User } from 'lucide-react';
+import { User, AlertTriangle } from 'lucide-react';
 import { CachedImage } from '../../common/CachedImage';
+import { DuplicateStatus } from '../../../types/player';
 
 interface PlayerCardHeaderProps {
   photoUrl?: string;
@@ -8,6 +9,7 @@ interface PlayerCardHeaderProps {
   lastName: string;
   averageRating: number;
   uploading?: boolean;
+  duplicateStatus?: DuplicateStatus;
 }
 
 export const PlayerCardHeader = memo(function PlayerCardHeader({ 
@@ -15,7 +17,8 @@ export const PlayerCardHeader = memo(function PlayerCardHeader({
   firstName, 
   lastName, 
   averageRating,
-  uploading = false
+  uploading = false,
+  duplicateStatus
 }: PlayerCardHeaderProps) {
   const fullName = `${firstName} ${lastName}`;
   const ratingLabel = `Durchschnittliche Bewertung: ${averageRating.toFixed(1)}`;
@@ -26,6 +29,8 @@ export const PlayerCardHeader = memo(function PlayerCardHeader({
     if (rating >= 8) return 'bg-yellow-600';
     return 'bg-red-600';
   };
+
+  const hasDuplicateIssue = duplicateStatus && (duplicateStatus.isDuplicate || duplicateStatus.isPotentialDuplicate);
 
   return (
     <div className="relative">

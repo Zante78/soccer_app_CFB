@@ -1,6 +1,7 @@
 import React from 'react';
 import { Player } from '../../types/player';
 import { PlayerCard } from './PlayerCard';
+import { usePlayerStore } from '../../store/playerStore';
 
 interface PlayerListProps {
   players: Player[];
@@ -17,6 +18,14 @@ export function PlayerList({
   onEditPlayer,
   onDelete
 }: PlayerListProps) {
+  // Get duplicate statuses from the store
+  const { duplicateStatuses, calculateAllDuplicateStatuses } = usePlayerStore();
+
+  // Calculate duplicate statuses when component mounts
+  React.useEffect(() => {
+    calculateAllDuplicateStatuses();
+  }, [calculateAllDuplicateStatuses]);
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {players.map((player) => (
@@ -24,7 +33,7 @@ export function PlayerList({
           key={player.id}
           player={player}
           onClick={() => onSelectPlayer(player)}
-          onEdit={onEditPlayer ? () => onEditPlayer(player) : undefined}
+          onEdit={onEditPlayer ? () => onEditPlayer(player) : () => {}}
           onDelete={onDelete ? () => onDelete(player.id) : undefined}
         />
       ))}

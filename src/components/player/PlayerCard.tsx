@@ -14,7 +14,7 @@ import { useNotes } from '../../hooks/useNotes';
 import NotesPanel from '../notes/NotesPanel';
 import { usePlayerStore } from '../../store/playerStore';
 import { supabase } from '../../services/database';
-import { Loader, Users } from 'lucide-react';
+import { Loader, Users, AlertTriangle } from 'lucide-react';
 
 interface PlayerCardProps {
   player: Player;
@@ -36,6 +36,7 @@ export function PlayerCard({
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const { updatePlayer } = usePlayerStore();
+  const { duplicateStatuses } = usePlayerStore();
   
   const {
     viewMode,
@@ -197,6 +198,10 @@ export function PlayerCard({
     }
   };
 
+  // Get duplicate status for this player
+  const duplicateStatus = duplicateStatuses[player.id];
+  const hasDuplicateIssue = duplicateStatus && (duplicateStatus.isDuplicate || duplicateStatus.isPotentialDuplicate);
+
   if (!currentUser) {
     return null;
   }
@@ -223,6 +228,16 @@ export function PlayerCard({
           <div className="absolute top-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full flex items-center">
             <Users className="w-3 h-3 mr-1" />
             {player.teamName}
+          </div>
+        )}
+
+        {/* Duplicate Warning Badge */}
+        {hasDuplicateIssue && (
+          <div 
+            className={`absolute top-2 right-2 ${duplicateStatus.isDuplicate ? 'bg-red-500' : 'bg-yellow-500'} text-white p-1 rounded-full`}
+            title={duplicateStatus.message || (duplicateStatus.isDuplicate ? 'Duplikat gefunden' : 'Mögliches Duplikat')}
+          >
+            <AlertTriangle className="w-4 h-4" />
           </div>
         )}
 
@@ -313,6 +328,16 @@ export function PlayerCard({
 
       {announcement && (
         <A11yAnnouncer message={announcement} />
+      )}
+
+      {/* Duplicate warning tooltip */}
+      {hasDuplicateIssue && (
+        <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/70 to-transparent">
+          <div className={`text-xs ${duplicateStatus.isDuplicate ? 'text-red-300' : 'text-yellow-300'} flex items-center`}>
+            <AlertTriangle className="w-3 h-3 mr-1 flex-shrink-0" />
+            <span className="truncate">{duplicateStatus.message}</span>
+          </div>
+        </div>
       )}
     </div>
   );
