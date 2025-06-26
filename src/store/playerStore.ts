@@ -248,6 +248,8 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       
       // Recalculate duplicate statuses after updating a player
       get().calculateAllDuplicateStatuses();
+      
+      return updatedPlayer;
     } catch (err) {
       const error = err instanceof Error ? err.message : 'Fehler beim Aktualisieren des Spielers';
       set({ error });

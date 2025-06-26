@@ -1,3 +1,4 @@
+// Player interface
 export interface Player {
   id: string;
   firstName: string;

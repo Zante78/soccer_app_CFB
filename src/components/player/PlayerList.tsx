@@ -37,7 +37,7 @@ export function PlayerList({
           onClick={() => onSelectPlayer(player)}
           onEdit={onEditPlayer ? () => onEditPlayer(player) : () => {}}
           onDelete={onDelete ? () => onDelete(player.id) : undefined}
-          onViewDuplicate={onViewDuplicate}
+          onViewDuplicate={onViewDuplicate ? () => onViewDuplicate(player) : undefined}
         />
       ))}
     </div>
