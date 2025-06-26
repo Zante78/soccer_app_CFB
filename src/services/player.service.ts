@@ -281,111 +281,100 @@ export class PlayerService {
     try {
       await this.ensureInitialized();
       
-      // Start a transaction
-      const { error: txError } = await supabase.rpc('begin_transaction');
-      if (txError) throw txError;
+      // Execute operations sequentially without explicit transaction management
+      // Supabase will handle individual operation consistency
       
-      try {
-        // 1. Update the master player with the merged data
-        const { data: updatedMaster, error: updateError } = await supabase
-          .from('players')
-          .update({
-            first_name: masterPlayer.firstName,
-            last_name: masterPlayer.lastName,
-            position: masterPlayer.position || null,
-            date_of_birth: masterPlayer.dateOfBirth || null,
-            email: masterPlayer.email || null,
-            phone: masterPlayer.phone || null,
-            skills: masterPlayer.skills || defaultSkills,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', masterPlayer.id)
-          .select()
-          .single();
+      // 1. Update the master player with the merged data
+      const { data: updatedMaster, error: updateError } = await supabase
+        .from('players')
+        .update({
+          first_name: masterPlayer.firstName,
+          last_name: masterPlayer.lastName,
+          position: masterPlayer.position || null,
+          date_of_birth: masterPlayer.dateOfBirth || null,
+          email: masterPlayer.email || null,
+          phone: masterPlayer.phone || null,
+          skills: masterPlayer.skills || defaultSkills,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', masterPlayer.id)
+        .select()
+        .single();
+      
+      if (updateError) throw updateError;
+      
+      // 2. For each duplicate player, update related records to point to the master player
+      for (const duplicatePlayer of duplicatePlayers) {
+        // Update evaluations
+        const { error: evalError } = await supabase
+          .from('evaluations')
+          .update({ player_id: masterPlayer.id })
+          .eq('player_id', duplicatePlayer.id);
         
-        if (updateError) throw updateError;
+        if (evalError) throw evalError;
         
-        // 2. For each duplicate player, update related records to point to the master player
-        for (const duplicatePlayer of duplicatePlayers) {
-          // Update evaluations
-          const { error: evalError } = await supabase
-            .from('evaluations')
-            .update({ player_id: masterPlayer.id })
-            .eq('player_id', duplicatePlayer.id);
-          
-          if (evalError) throw evalError;
-          
-          // Update notes
-          const { error: notesError } = await supabase
-            .from('notes')
-            .update({ player_id: masterPlayer.id })
-            .eq('player_id', duplicatePlayer.id);
-          
-          if (notesError) throw notesError;
-          
-          // Update player_history
-          const { error: historyError } = await supabase
-            .from('player_history')
-            .update({ player_id: masterPlayer.id })
-            .eq('player_id', duplicatePlayer.id);
-          
-          if (historyError) throw historyError;
-          
-          // Handle team memberships - only transfer if master player doesn't have an active membership
-          const { data: masterMemberships } = await supabase
-            .from('team_memberships')
-            .select('*')
-            .eq('player_id', masterPlayer.id)
-            .is('end_date', null);
-          
-          if (!masterMemberships || masterMemberships.length === 0) {
-            // Master has no active membership, so we can transfer active memberships from duplicate
-            const { error: membershipError } = await supabase
-              .from('team_memberships')
-              .update({ player_id: masterPlayer.id })
-              .eq('player_id', duplicatePlayer.id)
-              .is('end_date', null);
-            
-            if (membershipError) throw membershipError;
-          } else {
-            // Master already has an active membership, so end any active memberships from duplicate
-            const { error: endMembershipError } = await supabase
-              .from('team_memberships')
-              .update({ end_date: new Date().toISOString().split('T')[0] })
-              .eq('player_id', duplicatePlayer.id)
-              .is('end_date', null);
-            
-            if (endMembershipError) throw endMembershipError;
-          }
-          
-          // Transfer inactive memberships
-          const { error: inactiveMembershipError } = await supabase
+        // Update notes
+        const { error: notesError } = await supabase
+          .from('notes')
+          .update({ player_id: masterPlayer.id })
+          .eq('player_id', duplicatePlayer.id);
+        
+        if (notesError) throw notesError;
+        
+        // Update player_history
+        const { error: historyError } = await supabase
+          .from('player_history')
+          .update({ player_id: masterPlayer.id })
+          .eq('player_id', duplicatePlayer.id);
+        
+        if (historyError) throw historyError;
+        
+        // Handle team memberships - only transfer if master player doesn't have an active membership
+        const { data: masterMemberships } = await supabase
+          .from('team_memberships')
+          .select('*')
+          .eq('player_id', masterPlayer.id)
+          .is('end_date', null);
+        
+        if (!masterMemberships || masterMemberships.length === 0) {
+          // Master has no active membership, so we can transfer active memberships from duplicate
+          const { error: membershipError } = await supabase
             .from('team_memberships')
             .update({ player_id: masterPlayer.id })
             .eq('player_id', duplicatePlayer.id)
-            .not('end_date', 'is', null);
+            .is('end_date', null);
           
-          if (inactiveMembershipError) throw inactiveMembershipError;
+          if (membershipError) throw membershipError;
+        } else {
+          // Master already has an active membership, so end any active memberships from duplicate
+          const { error: endMembershipError } = await supabase
+            .from('team_memberships')
+            .update({ end_date: new Date().toISOString().split('T')[0] })
+            .eq('player_id', duplicatePlayer.id)
+            .is('end_date', null);
           
-          // Delete the duplicate player
-          const { error: deleteError } = await supabase
-            .from('players')
-            .delete()
-            .eq('id', duplicatePlayer.id);
-          
-          if (deleteError) throw deleteError;
+          if (endMembershipError) throw endMembershipError;
         }
         
-        // Commit the transaction
-        const { error: commitError } = await supabase.rpc('commit_transaction');
-        if (commitError) throw commitError;
+        // Transfer inactive memberships
+        const { error: inactiveMembershipError } = await supabase
+          .from('team_memberships')
+          .update({ player_id: masterPlayer.id })
+          .eq('player_id', duplicatePlayer.id)
+          .not('end_date', 'is', null);
         
-        return this.parsePlayerData(updatedMaster);
-      } catch (error) {
-        // Rollback the transaction on error
-        await supabase.rpc('rollback_transaction');
-        throw error;
+        if (inactiveMembershipError) throw inactiveMembershipError;
+        
+        // Delete the duplicate player
+        const { error: deleteError } = await supabase
+          .from('players')
+          .delete()
+          .eq('id', duplicatePlayer.id);
+        
+        if (deleteError) throw deleteError;
       }
+      
+      return this.parsePlayerData(updatedMaster);
     } catch (err) {
       throw handleDatabaseError(err);
     }
