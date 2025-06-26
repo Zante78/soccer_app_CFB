@@ -15,7 +15,7 @@ import NotesPanel from '../notes/NotesPanel';
 import { usePlayerStore } from '../../store/playerStore';
 import { supabase } from '../../services/database';
 import { Loader, Users, AlertTriangle } from 'lucide-react';
-import { DuplicateIndicator } from './DuplicateIndicator';
+import { DuplicateDetailsModal } from './DuplicateDetailsModal';
 
 interface PlayerCardProps {
   player: Player;
@@ -53,6 +53,7 @@ export function PlayerCard({
   } = usePlayerCard(player);
 
   const [showNotesModal, setShowNotesModal] = useState(false);
+  const [showDuplicateDetailsModal, setShowDuplicateDetailsModal] = useState(false);
   const { notes, addNote, deleteNote } = useNotes(player.id);
   const [currentUser, setCurrentUser] = useState<string | null>(null);
 
@@ -235,15 +236,6 @@ export function PlayerCard({
           </div>
         )}
 
-        {/* Duplicate Warning Indicator */}
-        {hasDuplicateIssue && (
-          <DuplicateIndicator 
-            duplicateStatus={duplicateStatus} 
-            position="top-right"
-            onViewDetails={onViewDuplicate}
-          />
-        )}
-
         <ViewModeSelector
           currentMode={viewMode}
           onModeChange={handleViewModeChange}
@@ -335,12 +327,27 @@ export function PlayerCard({
 
       {/* Duplicate warning tooltip at bottom */}
       {hasDuplicateIssue && (
-        <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/70 to-transparent">
-          <div className={`text-xs ${duplicateStatus.isDuplicate ? 'text-red-300' : 'text-yellow-300'} flex items-center`}>
+        <div 
+          className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/70 to-transparent cursor-pointer hover:underline"
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowDuplicateDetailsModal(true);
+          }}
+        >
+          <div className={`text-xs ${duplicateStatus.isDuplicate ? 'text-red-400' : 'text-yellow-400'} flex items-center`}>
             <AlertTriangle className="w-3 h-3 mr-1 flex-shrink-0" />
             <span className="truncate">{duplicateStatus.message}</span>
           </div>
         </div>
+      )}
+
+      {/* Duplicate Details Modal */}
+      {showDuplicateDetailsModal && duplicateStatus && (
+        <DuplicateDetailsModal
+          duplicateStatus={duplicateStatus}
+          onClose={() => setShowDuplicateDetailsModal(false)}
+          onViewDetails={onViewDuplicate}
+        />
       )}
     </div>
   );
