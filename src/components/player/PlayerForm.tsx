@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Player, defaultSkills } from '../../types/player';
-import { X, Loader, AlertCircle, AlertTriangle } from 'lucide-react';
+import { X, Loader, AlertCircle, AlertTriangle, ExternalLink } from 'lucide-react';
 import { usePlayerStore } from '../../store/playerStore';
 
 interface PlayerFormProps {
@@ -95,6 +95,15 @@ export function PlayerForm({ player, onSave, onClose }: PlayerFormProps) {
     setDuplicatePlayers([]);
   };
 
+  const handleViewExistingPlayer = (player: Player) => {
+    // This would typically navigate to the player's details page
+    // For now, we'll just log it and close the form
+    console.log('View existing player:', player);
+    // In a real implementation, you might use a router to navigate
+    // history.push(`/players/${player.id}`);
+    onClose();
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -109,53 +118,89 @@ export function PlayerForm({ player, onSave, onClose }: PlayerFormProps) {
           </div>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-50 text-red-700 rounded-lg flex items-center gap-2">
-              <AlertCircle className="w-5 h-5 flex-shrink-0" />
-              <div>
-                <p>{error}</p>
+            <div className="mb-6 p-4 bg-red-50 text-red-700 rounded-lg flex items-start gap-2">
+              <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="font-medium">{error}</p>
                 {duplicatePlayers.length > 0 && (
                   <div className="mt-2 text-sm">
-                    <p>Gefundene Spieler:</p>
-                    <ul className="list-disc pl-5 mt-1">
+                    <p className="font-medium mb-1">Gefundene Spieler:</p>
+                    <ul className="space-y-2 border-t border-red-200 pt-2 mt-1">
                       {duplicatePlayers.map((duplicatePlayer, index) => (
-                        <li key={index}>
-                          Name: {duplicatePlayer.firstName} {duplicatePlayer.lastName}
-                          {duplicatePlayer.dateOfBirth && <span> | Geburtsdatum: {new Date(duplicatePlayer.dateOfBirth).toLocaleDateString()}</span>}
-                          {duplicatePlayer.email && <span> | Email: {duplicatePlayer.email}</span>}
-                          {duplicatePlayer.teamName && <span> | Team: {duplicatePlayer.teamName}</span>}
+                        <li key={index} className="flex justify-between items-start">
+                          <div>
+                            <p className="font-medium">{duplicatePlayer.firstName} {duplicatePlayer.lastName}</p>
+                            <div className="text-xs space-y-0.5 mt-0.5">
+                              {duplicatePlayer.dateOfBirth && (
+                                <p>Geburtsdatum: {new Date(duplicatePlayer.dateOfBirth).toLocaleDateString()}</p>
+                              )}
+                              {duplicatePlayer.email && <p>Email: {duplicatePlayer.email}</p>}
+                              {duplicatePlayer.teamName && <p>Team: {duplicatePlayer.teamName}</p>}
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => handleViewExistingPlayer(duplicatePlayer)}
+                            className="text-red-700 hover:text-red-800 text-xs flex items-center"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5 mr-1" />
+                            Bestehenden Spieler überprüfen
+                          </button>
                         </li>
                       ))}
                     </ul>
                   </div>
                 )}
+                <div className="mt-3">
+                  <button
+                    onClick={onClose}
+                    className="text-sm font-medium text-red-700 hover:text-red-800"
+                  >
+                    Abbrechen
+                  </button>
+                </div>
               </div>
             </div>
           )}
 
           {warning && !error && (
-            <div className="mb-6 p-4 bg-yellow-50 text-yellow-700 rounded-lg flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 flex-shrink-0" />
-              <div>
-                <p>{warning}</p>
+            <div className="mb-6 p-4 bg-yellow-50 text-yellow-700 rounded-lg flex items-start gap-2">
+              <AlertTriangle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="font-medium">{warning}</p>
                 {duplicatePlayers.length > 0 && (
                   <div className="mt-2 text-sm">
-                    <p>Gefundene Spieler:</p>
-                    <ul className="list-disc pl-5 mt-1">
+                    <p className="font-medium mb-1">Gefundene Spieler:</p>
+                    <ul className="space-y-2 border-t border-yellow-200 pt-2 mt-1">
                       {duplicatePlayers.map((duplicatePlayer, index) => (
-                        <li key={index}>
-                          Name: {duplicatePlayer.firstName} {duplicatePlayer.lastName}
-                          {duplicatePlayer.dateOfBirth && <span> | Geburtsdatum: {new Date(duplicatePlayer.dateOfBirth).toLocaleDateString()}</span>}
-                          {duplicatePlayer.email && <span> | Email: {duplicatePlayer.email}</span>}
-                          {duplicatePlayer.teamName && <span> | Team: {duplicatePlayer.teamName}</span>}
+                        <li key={index} className="flex justify-between items-start">
+                          <div>
+                            <p className="font-medium">{duplicatePlayer.firstName} {duplicatePlayer.lastName}</p>
+                            <div className="text-xs space-y-0.5 mt-0.5">
+                              {duplicatePlayer.dateOfBirth && (
+                                <p>Geburtsdatum: {new Date(duplicatePlayer.dateOfBirth).toLocaleDateString()}</p>
+                              )}
+                              {duplicatePlayer.email && <p>Email: {duplicatePlayer.email}</p>}
+                              {duplicatePlayer.teamName && <p>Team: {duplicatePlayer.teamName}</p>}
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => handleViewExistingPlayer(duplicatePlayer)}
+                            className="text-yellow-700 hover:text-yellow-800 text-xs flex items-center"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5 mr-1" />
+                            Bestehenden Spieler überprüfen
+                          </button>
                         </li>
                       ))}
                     </ul>
-                    <button 
-                      onClick={handleForceSubmit}
-                      className="mt-2 px-3 py-1 bg-yellow-100 hover:bg-yellow-200 text-yellow-800 rounded-md text-sm font-medium transition-colors"
-                    >
-                      Trotzdem fortfahren
-                    </button>
+                    <div className="mt-3 flex justify-end">
+                      <button 
+                        onClick={handleForceSubmit}
+                        className="px-3 py-1.5 bg-yellow-100 hover:bg-yellow-200 text-yellow-800 rounded-md text-sm font-medium transition-colors"
+                      >
+                        Trotzdem fortfahren
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>

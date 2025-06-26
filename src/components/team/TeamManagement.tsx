@@ -28,6 +28,7 @@ export function TeamManagement() {
   const [localError, setLocalError] = useState<string | null>(null);
   const [showPlayers, setShowPlayers] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedDuplicatePlayer, setSelectedDuplicatePlayer] = useState<Player | null>(null);
 
   const teamService = TeamService.getInstance();
 
@@ -89,6 +90,12 @@ export function TeamManagement() {
       setLocalError(errorMessage);
       throw err;
     }
+  };
+
+  const handleViewDuplicate = (duplicatePlayer: Player) => {
+    setSelectedDuplicatePlayer(duplicatePlayer);
+    setEditingPlayer(duplicatePlayer);
+    setShowPlayerForm(true);
   };
 
   if (error?.includes('Failed to fetch') || error?.includes('Datenbankverbindung')) {
@@ -157,6 +164,7 @@ export function TeamManagement() {
                 }
               }
             }}
+            onViewDuplicate={handleViewDuplicate}
           />
         )}
 

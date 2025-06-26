@@ -30,8 +30,6 @@ export const PlayerCardHeader = memo(function PlayerCardHeader({
     return 'bg-red-600';
   };
 
-  const hasDuplicateIssue = duplicateStatus && (duplicateStatus.isDuplicate || duplicateStatus.isPotentialDuplicate);
-
   return (
     <div className="relative">
       <div className="aspect-square sm:aspect-video md:aspect-square lg:aspect-video xl:aspect-square bg-gray-100 relative overflow-hidden">

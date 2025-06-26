@@ -15,6 +15,7 @@ import NotesPanel from '../notes/NotesPanel';
 import { usePlayerStore } from '../../store/playerStore';
 import { supabase } from '../../services/database';
 import { Loader, Users, AlertTriangle } from 'lucide-react';
+import { DuplicateIndicator } from './DuplicateIndicator';
 
 interface PlayerCardProps {
   player: Player;
@@ -22,6 +23,7 @@ interface PlayerCardProps {
   onEdit: () => void;
   onDelete?: (id: string) => void;
   onUpdateSkills?: (playerId: string, skills: any[]) => Promise<void>;
+  onViewDuplicate?: (player: Player) => void;
 }
 
 export function PlayerCard({ 
@@ -29,7 +31,8 @@ export function PlayerCard({
   onClick, 
   onEdit, 
   onDelete,
-  onUpdateSkills 
+  onUpdateSkills,
+  onViewDuplicate
 }: PlayerCardProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -52,6 +55,10 @@ export function PlayerCard({
   const [showNotesModal, setShowNotesModal] = useState(false);
   const { notes, addNote, deleteNote } = useNotes(player.id);
   const [currentUser, setCurrentUser] = useState<string | null>(null);
+
+  // Get duplicate status for this player
+  const duplicateStatus = duplicateStatuses[player.id];
+  const hasDuplicateIssue = duplicateStatus && (duplicateStatus.isDuplicate || duplicateStatus.isPotentialDuplicate);
 
   // Get current user session
   React.useEffect(() => {
@@ -198,10 +205,6 @@ export function PlayerCard({
     }
   };
 
-  // Get duplicate status for this player
-  const duplicateStatus = duplicateStatuses[player.id];
-  const hasDuplicateIssue = duplicateStatus && (duplicateStatus.isDuplicate || duplicateStatus.isPotentialDuplicate);
-
   if (!currentUser) {
     return null;
   }
@@ -221,6 +224,7 @@ export function PlayerCard({
           lastName={player.lastName}
           averageRating={averageRating}
           uploading={uploading}
+          duplicateStatus={duplicateStatus}
         />
 
         {/* Team Badge - Display if player has a team */}
@@ -231,14 +235,13 @@ export function PlayerCard({
           </div>
         )}
 
-        {/* Duplicate Warning Badge */}
+        {/* Duplicate Warning Indicator */}
         {hasDuplicateIssue && (
-          <div 
-            className={`absolute top-2 right-2 ${duplicateStatus.isDuplicate ? 'bg-red-500' : 'bg-yellow-500'} text-white p-1 rounded-full`}
-            title={duplicateStatus.message || (duplicateStatus.isDuplicate ? 'Duplikat gefunden' : 'Mögliches Duplikat')}
-          >
-            <AlertTriangle className="w-4 h-4" />
-          </div>
+          <DuplicateIndicator 
+            duplicateStatus={duplicateStatus} 
+            position="top-right"
+            onViewDetails={onViewDuplicate}
+          />
         )}
 
         <ViewModeSelector
@@ -330,7 +333,7 @@ export function PlayerCard({
         <A11yAnnouncer message={announcement} />
       )}
 
-      {/* Duplicate warning tooltip */}
+      {/* Duplicate warning tooltip at bottom */}
       {hasDuplicateIssue && (
         <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/70 to-transparent">
           <div className={`text-xs ${duplicateStatus.isDuplicate ? 'text-red-300' : 'text-yellow-300'} flex items-center`}>

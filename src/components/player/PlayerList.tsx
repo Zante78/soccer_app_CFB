@@ -9,6 +9,7 @@ interface PlayerListProps {
   onSelectPlayer: (player: Player) => void;
   onEditPlayer?: (player: Player) => void;
   onDelete?: (id: string) => void;
+  onViewDuplicate?: (player: Player) => void;
 }
 
 export function PlayerList({ 
@@ -16,7 +17,8 @@ export function PlayerList({
   onAddPlayer, 
   onSelectPlayer,
   onEditPlayer,
-  onDelete
+  onDelete,
+  onViewDuplicate
 }: PlayerListProps) {
   // Get duplicate statuses from the store
   const { duplicateStatuses, calculateAllDuplicateStatuses } = usePlayerStore();
@@ -35,6 +37,7 @@ export function PlayerList({
           onClick={() => onSelectPlayer(player)}
           onEdit={onEditPlayer ? () => onEditPlayer(player) : () => {}}
           onDelete={onDelete ? () => onDelete(player.id) : undefined}
+          onViewDuplicate={onViewDuplicate}
         />
       ))}
     </div>
