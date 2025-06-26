@@ -21,10 +21,27 @@ export function PlayerForm({ player, onSave, onClose }: PlayerFormProps) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const validateAge = (dateOfBirth: string): boolean => {
+    if (!dateOfBirth) return true; // Allow empty date of birth
+    
+    const birthDate = new Date(dateOfBirth);
+    const today = new Date();
+    const fiveYearsAgo = new Date();
+    fiveYearsAgo.setFullYear(today.getFullYear() - 5);
+    
+    return birthDate <= fiveYearsAgo;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.firstName || !formData.lastName) {
       setError('Bitte füllen Sie alle Pflichtfelder aus');
+      return;
+    }
+
+    // Validate age requirement
+    if (formData.dateOfBirth && !validateAge(formData.dateOfBirth)) {
+      setError('Der Spieler muss mindestens 5 Jahre alt sein');
       return;
     }
 
@@ -112,6 +129,11 @@ export function PlayerForm({ player, onSave, onClose }: PlayerFormProps) {
                   onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 />
+                {formData.dateOfBirth && (
+                  <p className="mt-1 text-xs text-gray-500">
+                    Spieler muss mindestens 5 Jahre alt sein
+                  </p>
+                )}
               </div>
             </div>
 
