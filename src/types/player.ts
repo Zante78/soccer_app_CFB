@@ -30,6 +30,14 @@ export interface TeamMembership {
   endDate?: string;
 }
 
+// Define the DuplicateStatus interface
+export interface DuplicateStatus {
+  isDuplicate: boolean;
+  isPotentialDuplicate: boolean;
+  message: string | null;
+  duplicatePlayers: Player[];
+}
+
 // Default skills for new players
 export const defaultSkills: PlayerSkill[] = [
   // Technische Fähigkeiten
