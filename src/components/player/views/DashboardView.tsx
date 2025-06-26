@@ -1,5 +1,6 @@
 import React from 'react';
 import { Player } from '../../../types/player';
+import { Users } from 'lucide-react';
 
 interface DashboardViewProps {
   player: Player;
@@ -25,6 +26,16 @@ export function DashboardView({ player }: DashboardViewProps) {
             {player.firstName} {player.lastName}
           </h3>
           <p className="text-sm text-gray-600">{player.position || 'Keine Position'}</p>
+          
+          {/* Team information */}
+          {player.teamName ? (
+            <div className="mt-1 flex items-center text-sm text-blue-600">
+              <Users className="w-4 h-4 mr-1" />
+              <span>Team: {player.teamName}</span>
+            </div>
+          ) : (
+            <p className="mt-1 text-sm text-gray-500 italic">Keinem Team zugewiesen</p>
+          )}
         </div>
         <div className={`text-2xl font-bold ${getValueColor(averageRating)}`}>
           {averageRating.toFixed(1)}

@@ -26,8 +26,11 @@ export class TeamErrorBoundary extends Component<Props, State> {
     if (error.message.includes('keine Berechtigung')) {
       return 'Sie haben keine Berechtigung für diese Aktion. Bitte wenden Sie sich an einen Administrator.';
     }
-    if (error.message.includes('bereits Mitglied')) {
-      return 'Der Spieler ist bereits Mitglied eines Teams.';
+    if (error.message.includes('bereits Mitglied') || error.message.includes('already has an active team membership') || error.message.includes('Player already has an active team membership')) {
+      return 'Der Spieler ist bereits Mitglied eines anderen Teams. Ein Spieler kann nur einem Team zugewiesen werden.';
+    }
+    if (error.message.includes('Player must be at least 5 years old')) {
+      return 'Der Spieler muss mindestens 5 Jahre alt sein.';
     }
     return 'Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
   }

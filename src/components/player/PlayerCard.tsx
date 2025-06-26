@@ -14,7 +14,7 @@ import { useNotes } from '../../hooks/useNotes';
 import NotesPanel from '../notes/NotesPanel';
 import { usePlayerStore } from '../../store/playerStore';
 import { supabase } from '../../services/database';
-import { Loader } from 'lucide-react';
+import { Loader, Users } from 'lucide-react';
 
 interface PlayerCardProps {
   player: Player;
@@ -217,6 +217,14 @@ export function PlayerCard({
           averageRating={averageRating}
           uploading={uploading}
         />
+
+        {/* Team Badge - Display if player has a team */}
+        {player.teamName && (
+          <div className="absolute top-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full flex items-center">
+            <Users className="w-3 h-3 mr-1" />
+            {player.teamName}
+          </div>
+        )}
 
         <ViewModeSelector
           currentMode={viewMode}

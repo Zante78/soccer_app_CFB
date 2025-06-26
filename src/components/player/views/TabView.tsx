@@ -1,5 +1,6 @@
 import React from 'react';
 import { Player } from '../../../types/player';
+import { Users } from 'lucide-react';
 
 interface TabViewProps {
   player: Player;
@@ -43,6 +44,17 @@ export function TabView({ player, activeTab, onTabChange }: TabViewProps) {
               {player.firstName} {player.lastName}
             </h3>
             <p className="text-gray-600 mt-1">{player.position || 'Keine Position'}</p>
+            
+            {/* Team information */}
+            {player.teamName ? (
+              <div className="mt-2 flex items-center text-sm text-blue-600">
+                <Users className="w-4 h-4 mr-1" />
+                <span>Team: {player.teamName}</span>
+              </div>
+            ) : (
+              <p className="mt-2 text-sm text-gray-500 italic">Keinem Team zugewiesen</p>
+            )}
+            
             {player.dateOfBirth && (
               <p className="text-sm text-gray-500 mt-2">
                 {new Date(player.dateOfBirth).toLocaleDateString()}
