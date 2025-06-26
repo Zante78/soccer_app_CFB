@@ -14,6 +14,8 @@ import { PlayerForm } from '../player/PlayerForm';
 import { usePlayerStore } from '../../store/playerStore';
 import { AddMemberForm } from './members/AddMemberForm';
 import { TeamEditModal } from './modals/TeamEditModal';
+import { Player } from '../../types/player';
+import { TeamErrorBoundary } from '../common/TeamErrorBoundary';
 
 export function TeamManagement() {
   const { teams, isLoading, error, initialize, addTeam, updateTeam, removeTeam } = useStore();
@@ -21,6 +23,7 @@ export function TeamManagement() {
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [showPlayerForm, setShowPlayerForm] = useState(false);
+  const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
   const [showAddMemberForm, setShowAddMemberForm] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
   const [showPlayers, setShowPlayers] = useState(false);
@@ -49,6 +52,7 @@ export function TeamManagement() {
   }, [showPlayers, initializePlayers]);
 
   const handleAddPlayer = () => {
+    setEditingPlayer(null);
     if (showPlayers) {
       setShowPlayerForm(true);
       return;
@@ -58,6 +62,32 @@ export function TeamManagement() {
       setShowAddMemberForm(true);
     } else {
       setLocalError('Bitte wählen Sie zuerst ein Team aus');
+    }
+  };
+
+  const handleEditPlayer = (player: Player) => {
+    setEditingPlayer(player);
+    setShowPlayerForm(true);
+  };
+
+  const onSave = async (playerData: Omit<Player, 'id' | 'createdAt' | 'updatedAt'>) => {
+    try {
+      setLocalError(null);
+      
+      if (editingPlayer) {
+        // Update existing player
+        await updatePlayer(editingPlayer.id, playerData);
+      } else {
+        // Add new player
+        await addPlayer(playerData);
+      }
+      
+      setShowPlayerForm(false);
+      setEditingPlayer(null);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Fehler beim Speichern des Spielers';
+      setLocalError(errorMessage);
+      throw err;
     }
   };
 
@@ -100,10 +130,12 @@ export function TeamManagement() {
           </div>
         </div>
 
-        {playersError && (
-          <div className="p-4 bg-red-50 text-red-700 rounded-lg">
-            {playersError}
-          </div>
+        {(playersError || localError) && (
+          <TeamErrorBoundary>
+            <div className="p-4 bg-red-50 text-red-700 rounded-lg">
+              {playersError || localError}
+            </div>
+          </TeamErrorBoundary>
         )}
 
         {playersLoading ? (
@@ -115,9 +147,7 @@ export function TeamManagement() {
             players={players}
             onAddPlayer={handleAddPlayer}
             onSelectPlayer={() => {}}
-            onEditPlayer={(player) => {
-              setShowPlayerForm(true);
-            }}
+            onEditPlayer={handleEditPlayer}
             onDelete={async (id) => {
               if (window.confirm('Möchten Sie diesen Spieler wirklich löschen?')) {
                 try {
@@ -132,15 +162,12 @@ export function TeamManagement() {
 
         {showPlayerForm && (
           <PlayerForm
-            onSave={async (player) => {
-              try {
-                await addPlayer(player);
-                setShowPlayerForm(false);
-              } catch (err) {
-                console.error('Fehler beim Speichern des Spielers:', err);
-              }
+            player={editingPlayer}
+            onSave={onSave}
+            onClose={() => {
+              setShowPlayerForm(false);
+              setEditingPlayer(null);
             }}
-            onClose={() => setShowPlayerForm(false)}
           />
         )}
       </div>
