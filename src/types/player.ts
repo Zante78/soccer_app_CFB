@@ -1,5 +1,36 @@
-// Vorheriger Code bleibt gleich bis zu defaultSkills...
+export interface Player {
+  id: string;
+  firstName: string;
+  lastName: string;
+  position?: string;
+  dateOfBirth?: string;
+  photoUrl?: string;
+  email?: string;
+  phone?: string;
+  skills: PlayerSkill[];
+  teamId?: string;
+  teamName?: string; // New property to store the team name
+  teamMemberships?: TeamMembership[];
+  createdAt?: string;
+  updatedAt?: string;
+}
 
+export interface PlayerSkill {
+  name: string;
+  value: number;
+  category: string;
+  weight?: number;
+}
+
+export interface TeamMembership {
+  id: string;
+  teamId: string;
+  role: 'player' | 'captain' | 'viceCaptain';
+  startDate: string;
+  endDate?: string;
+}
+
+// Default skills for new players
 export const defaultSkills: PlayerSkill[] = [
   // Technische Fähigkeiten
   { name: 'Ballkontrolle', value: 10, category: 'technical' },

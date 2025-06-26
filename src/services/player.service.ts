@@ -54,7 +54,11 @@ export class PlayerService {
             team_id,
             role,
             start_date,
-            end_date
+            end_date,
+            teams:team_id (
+              id,
+              name
+            )
           )
         `)
         .order('last_name');
@@ -79,7 +83,11 @@ export class PlayerService {
             team_id,
             role,
             start_date,
-            end_date
+            end_date,
+            teams:team_id (
+              id,
+              name
+            )
           )
         `)
         .eq('id', id)
@@ -287,6 +295,24 @@ export class PlayerService {
       endDate: tm.end_date
     })) || [];
 
+    // Find active team membership (where end_date is null)
+    const activeTeamMembership = teamMemberships.find((tm: any) => !tm.endDate);
+    
+    // Extract team name from active membership if it exists
+    let teamName = null;
+    let teamId = null;
+    
+    if (activeTeamMembership) {
+      const teamData = data.team_memberships?.find((tm: any) => 
+        tm.id === activeTeamMembership.id && tm.teams
+      )?.teams;
+      
+      if (teamData) {
+        teamName = teamData.name;
+        teamId = teamData.id;
+      }
+    }
+
     // Parse skills with validation
     const skills = Array.isArray(data.skills) ? data.skills : defaultSkills;
 
@@ -301,6 +327,8 @@ export class PlayerService {
       phone: data.phone || null,
       skills,
       teamMemberships,
+      teamId,
+      teamName,
       createdAt: data.created_at,
       updatedAt: data.updated_at
     };
