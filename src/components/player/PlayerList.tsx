@@ -2,6 +2,7 @@ import React from 'react';
 import { Player } from '../../types/player';
 import { PlayerCard } from './PlayerCard';
 import { usePlayerStore } from '../../store/playerStore';
+import { DuplicateDetailsModal } from './DuplicateDetailsModal';
 
 interface PlayerListProps {
   players: Player[];
@@ -21,25 +22,54 @@ export function PlayerList({
   onViewDuplicate
 }: PlayerListProps) {
   // Get duplicate statuses from the store
-  const { duplicateStatuses, calculateAllDuplicateStatuses } = usePlayerStore();
+  const { duplicateStatuses, calculateAllDuplicateStatuses, mergePlayers, deletePlayers } = usePlayerStore();
+  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
 
   // Calculate duplicate statuses when component mounts
   React.useEffect(() => {
     calculateAllDuplicateStatuses();
   }, [calculateAllDuplicateStatuses]);
 
+  const handleViewDuplicate = (player: Player) => {
+    setSelectedPlayer(player);
+    setShowDuplicateModal(true);
+  };
+
+  const handleMergePlayers = async (masterPlayer: Player, duplicatePlayers: Player[]) => {
+    await mergePlayers(masterPlayer, duplicatePlayers);
+    setShowDuplicateModal(false);
+  };
+
+  const handleDeletePlayers = async (playerIds: string[]) => {
+    await deletePlayers(playerIds);
+    setShowDuplicateModal(false);
+  };
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {players.map((player) => (
-        <PlayerCard
-          key={player.id}
-          player={player}
-          onClick={() => onSelectPlayer(player)}
-          onEdit={onEditPlayer ? () => onEditPlayer(player) : () => {}}
-          onDelete={onDelete ? () => onDelete(player.id) : undefined}
-          onViewDuplicate={onViewDuplicate ? () => onViewDuplicate(player) : undefined}
+    <>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {players.map((player) => (
+          <PlayerCard
+            key={player.id}
+            player={player}
+            onClick={() => onSelectPlayer(player)}
+            onEdit={onEditPlayer ? () => onEditPlayer(player) : () => {}}
+            onDelete={onDelete ? () => onDelete(player.id) : undefined}
+            onViewDuplicate={() => handleViewDuplicate(player)}
+          />
+        ))}
+      </div>
+
+      {showDuplicateModal && selectedPlayer && duplicateStatuses[selectedPlayer.id] && (
+        <DuplicateDetailsModal
+          duplicateStatus={duplicateStatuses[selectedPlayer.id]}
+          onClose={() => setShowDuplicateModal(false)}
+          onViewDetails={onViewDuplicate}
+          onMergePlayers={handleMergePlayers}
+          onDeletePlayers={handleDeletePlayers}
         />
-      ))}
-    </div>
+      )}
+    </>
   );
 }

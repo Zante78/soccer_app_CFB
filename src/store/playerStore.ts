@@ -16,6 +16,8 @@ interface PlayerState {
   addPlayer: (player: Omit<Player, 'id'>) => Promise<Player>;
   updatePlayer: (id: string, updates: Partial<Player>) => Promise<void>;
   removePlayer: (id: string) => Promise<void>;
+  mergePlayers: (masterPlayer: Player, duplicatePlayers: Player[]) => Promise<void>;
+  deletePlayers: (playerIds: string[]) => Promise<void>;
   getPlayersByTeam: (teamId: string) => Player[];
   getDuplicateStatusForPlayer: (player: Partial<Player>, playerId?: string) => DuplicateStatus;
   calculateAllDuplicateStatuses: () => void;
@@ -282,6 +284,100 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       get().calculateAllDuplicateStatuses();
     } catch (err) {
       const error = err instanceof Error ? err.message : 'Fehler beim Löschen des Spielers';
+      set({ error });
+      throw err;
+    }
+  },
+
+  mergePlayers: async (masterPlayer, duplicatePlayers) => {
+    try {
+      if (!playerService) {
+        playerService = PlayerService.getInstance();
+      }
+      if (!playerService) {
+        throw new Error('PlayerService nicht verfügbar');
+      }
+      if (!get().dbConnected) {
+        throw new Error('Keine Datenbankverbindung');
+      }
+      
+      set({ error: null });
+      
+      // Call the service method to merge players
+      const mergedPlayer = await playerService.mergePlayers(masterPlayer, duplicatePlayers);
+      
+      // Update the store
+      set(state => {
+        // Remove duplicate players from the state
+        const duplicateIds = duplicatePlayers.map(p => p.id);
+        const filteredPlayers = state.players.filter(p => !duplicateIds.includes(p.id));
+        
+        // Add the merged player
+        const updatedPlayers = filteredPlayers.map(p => 
+          p.id === masterPlayer.id ? mergedPlayer : p
+        );
+        
+        // Remove duplicate statuses for deleted players
+        const updatedDuplicateStatuses = { ...state.duplicateStatuses };
+        duplicateIds.forEach(id => {
+          delete updatedDuplicateStatuses[id];
+        });
+        
+        return {
+          players: updatedPlayers,
+          duplicateStatuses: updatedDuplicateStatuses
+        };
+      });
+      
+      // Recalculate duplicate statuses
+      setTimeout(() => {
+        get().calculateAllDuplicateStatuses();
+      }, 0);
+      
+      return mergedPlayer;
+    } catch (err) {
+      const error = err instanceof Error ? err.message : 'Fehler beim Zusammenführen der Spieler';
+      set({ error });
+      throw err;
+    }
+  },
+
+  deletePlayers: async (playerIds) => {
+    try {
+      if (!playerService) {
+        playerService = PlayerService.getInstance();
+      }
+      if (!playerService) {
+        throw new Error('PlayerService nicht verfügbar');
+      }
+      if (!get().dbConnected) {
+        throw new Error('Keine Datenbankverbindung');
+      }
+      
+      set({ error: null });
+      
+      // Call the service method to delete multiple players
+      await playerService.deletePlayers(playerIds);
+      
+      // Update the store
+      set(state => ({
+        players: state.players.filter(p => !playerIds.includes(p.id)),
+        duplicateStatuses: Object.fromEntries(
+          Object.entries(state.duplicateStatuses).filter(([key]) => !playerIds.includes(key))
+        )
+      }));
+      
+      // Emit events for each deleted player
+      playerIds.forEach(id => {
+        eventBus.emit('player:deleted', id);
+      });
+      
+      // Recalculate duplicate statuses
+      setTimeout(() => {
+        get().calculateAllDuplicateStatuses();
+      }, 0);
+    } catch (err) {
+      const error = err instanceof Error ? err.message : 'Fehler beim Löschen der Spieler';
       set({ error });
       throw err;
     }

@@ -19,7 +19,7 @@ import { TeamErrorBoundary } from '../common/TeamErrorBoundary';
 
 export function TeamManagement() {
   const { teams, isLoading, error, initialize, addTeam, updateTeam, removeTeam } = useStore();
-  const { players, loading: playersLoading, error: playersError, initialize: initializePlayers, addPlayer, updatePlayer, removePlayer } = usePlayerStore();
+  const { players, loading: playersLoading, error: playersError, initialize: initializePlayers, addPlayer, updatePlayer, removePlayer, mergePlayers, deletePlayers } = usePlayerStore();
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [showPlayerForm, setShowPlayerForm] = useState(false);
@@ -96,6 +96,28 @@ export function TeamManagement() {
     setSelectedDuplicatePlayer(duplicatePlayer);
     setEditingPlayer(duplicatePlayer);
     setShowPlayerForm(true);
+  };
+
+  const handleMergePlayers = async (masterPlayer: Player, duplicatePlayers: Player[]) => {
+    try {
+      setLocalError(null);
+      await mergePlayers(masterPlayer, duplicatePlayers);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Fehler beim Zusammenführen der Spieler';
+      setLocalError(errorMessage);
+      throw err;
+    }
+  };
+
+  const handleDeletePlayers = async (playerIds: string[]) => {
+    try {
+      setLocalError(null);
+      await deletePlayers(playerIds);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Fehler beim Löschen der Spieler';
+      setLocalError(errorMessage);
+      throw err;
+    }
   };
 
   if (error?.includes('Failed to fetch') || error?.includes('Datenbankverbindung')) {
