@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Player, defaultSkills } from '../../types/player';
-import { X, Loader, AlertCircle } from 'lucide-react';
+import { X, Loader, AlertCircle, AlertTriangle } from 'lucide-react';
+import { usePlayerStore } from '../../store/playerStore';
 
 interface PlayerFormProps {
   player?: Player;
@@ -9,6 +10,7 @@ interface PlayerFormProps {
 }
 
 export function PlayerForm({ player, onSave, onClose }: PlayerFormProps) {
+  const { checkDuplicatePlayer } = usePlayerStore();
   const [formData, setFormData] = useState({
     firstName: player?.firstName || '',
     lastName: player?.lastName || '',
@@ -20,6 +22,17 @@ export function PlayerForm({ player, onSave, onClose }: PlayerFormProps) {
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [warning, setWarning] = useState<string | null>(null);
+  const [duplicatePlayer, setDuplicatePlayer] = useState<Player | null>(null);
+  const [forceSubmit, setForceSubmit] = useState(false);
+
+  useEffect(() => {
+    // Reset warnings and errors when form data changes
+    setError(null);
+    setWarning(null);
+    setDuplicatePlayer(null);
+    setForceSubmit(false);
+  }, [formData]);
 
   const validateAge = (dateOfBirth: string): boolean => {
     if (!dateOfBirth) return true; // Allow empty date of birth
@@ -45,9 +58,28 @@ export function PlayerForm({ player, onSave, onClose }: PlayerFormProps) {
       return;
     }
 
+    // Check for duplicates if not forcing submit
+    if (!forceSubmit) {
+      const { isDuplicate, isPotentialDuplicate, message, duplicatePlayer: foundDuplicate } = 
+        checkDuplicatePlayer(formData, player?.id);
+
+      if (isDuplicate) {
+        setError(message || 'Ein Spieler mit diesen Daten existiert bereits');
+        setDuplicatePlayer(foundDuplicate || null);
+        return;
+      }
+
+      if (isPotentialDuplicate) {
+        setWarning(message || 'Möglicher Duplikat gefunden');
+        setDuplicatePlayer(foundDuplicate || null);
+        return;
+      }
+    }
+
     try {
       setSaving(true);
       setError(null);
+      setWarning(null);
       await onSave(formData);
       onClose();
     } catch (err) {
@@ -55,6 +87,12 @@ export function PlayerForm({ player, onSave, onClose }: PlayerFormProps) {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleForceSubmit = () => {
+    setForceSubmit(true);
+    setWarning(null);
+    setDuplicatePlayer(null);
   };
 
   return (
@@ -73,7 +111,46 @@ export function PlayerForm({ player, onSave, onClose }: PlayerFormProps) {
           {error && (
             <div className="mb-6 p-4 bg-red-50 text-red-700 rounded-lg flex items-center gap-2">
               <AlertCircle className="w-5 h-5 flex-shrink-0" />
-              {error}
+              <div>
+                <p>{error}</p>
+                {duplicatePlayer && (
+                  <div className="mt-2 text-sm">
+                    <p>Gefundener Spieler:</p>
+                    <ul className="list-disc pl-5 mt-1">
+                      <li>Name: {duplicatePlayer.firstName} {duplicatePlayer.lastName}</li>
+                      {duplicatePlayer.dateOfBirth && <li>Geburtsdatum: {new Date(duplicatePlayer.dateOfBirth).toLocaleDateString()}</li>}
+                      {duplicatePlayer.email && <li>Email: {duplicatePlayer.email}</li>}
+                      {duplicatePlayer.teamName && <li>Team: {duplicatePlayer.teamName}</li>}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {warning && !error && (
+            <div className="mb-6 p-4 bg-yellow-50 text-yellow-700 rounded-lg flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 flex-shrink-0" />
+              <div>
+                <p>{warning}</p>
+                {duplicatePlayer && (
+                  <div className="mt-2 text-sm">
+                    <p>Gefundener Spieler:</p>
+                    <ul className="list-disc pl-5 mt-1">
+                      <li>Name: {duplicatePlayer.firstName} {duplicatePlayer.lastName}</li>
+                      {duplicatePlayer.dateOfBirth && <li>Geburtsdatum: {new Date(duplicatePlayer.dateOfBirth).toLocaleDateString()}</li>}
+                      {duplicatePlayer.email && <li>Email: {duplicatePlayer.email}</li>}
+                      {duplicatePlayer.teamName && <li>Team: {duplicatePlayer.teamName}</li>}
+                    </ul>
+                    <button 
+                      onClick={handleForceSubmit}
+                      className="mt-2 px-3 py-1 bg-yellow-100 hover:bg-yellow-200 text-yellow-800 rounded-md text-sm font-medium transition-colors"
+                    >
+                      Trotzdem fortfahren
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
