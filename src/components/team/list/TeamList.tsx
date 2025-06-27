@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Users, LayoutGrid, List, Rows } from 'lucide-react';
+import { Plus, Users, LayoutGrid, List, Rows, Table } from 'lucide-react';
 import { Team } from '../../../types/core/team';
 import { TeamGrid } from './TeamGrid';
 
@@ -35,23 +35,30 @@ export function TeamList({
             <button
               onClick={() => setViewMode('large-grid')}
               className={`p-2 rounded-md ${viewMode === 'large-grid' ? 'bg-blue-100 text-blue-600' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'}`}
-              title="Large Grid View"
+              title="Große Kacheln"
             >
               <LayoutGrid className="w-5 h-5" />
             </button>
             <button
               onClick={() => setViewMode('small-grid')}
               className={`p-2 rounded-md ${viewMode === 'small-grid' ? 'bg-blue-100 text-blue-600' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'}`}
-              title="Small Grid View"
+              title="Kleine Kacheln"
             >
               <Rows className="w-5 h-5" />
             </button>
             <button
               onClick={() => setViewMode('list')}
               className={`p-2 rounded-md ${viewMode === 'list' ? 'bg-blue-100 text-blue-600' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'}`}
-              title="List View"
+              title="Liste"
             >
               <List className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => setViewMode('detail-list')}
+              className={`p-2 rounded-md ${viewMode === 'detail-list' ? 'bg-blue-100 text-blue-600' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'}`}
+              title="Detail"
+            >
+              <Table className="w-5 h-5" />
             </button>
           </div>
           <button
