@@ -223,6 +223,27 @@ export class TeamService {
         throw new Error('Sie müssen angemeldet sein');
       }
 
+      // First check if user has permission to view team memberships
+      const { data: userProfile, error: userError } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      if (userError) {
+        console.warn('Could not fetch user profile:', userError);
+        // If we can't get user profile, return empty array instead of throwing
+        return [];
+      }
+
+      // Check if user has required role
+      const allowedRoles = ['admin', 'coach', 'manager'];
+      if (!userProfile?.role || !allowedRoles.includes(userProfile.role)) {
+        // User doesn't have permission, return empty array instead of throwing
+        console.warn('User does not have permission to view team memberships');
+        return [];
+      }
+
       const { data, error } = await supabase
         .from('team_memberships')
         .select(`
@@ -246,9 +267,22 @@ export class TeamService {
         .is('end_date', null)
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        // If it's a permission error, return empty array instead of throwing
+        if (error.code === 'P0001' || error.code === '42501') {
+          console.warn('Permission denied for team memberships:', error.message);
+          return [];
+        }
+        throw error;
+      }
+      
       return data || [];
     } catch (err) {
+      // For permission errors, return empty array instead of throwing
+      if (err instanceof Error && (err.message.includes('Berechtigung') || err.message.includes('permission'))) {
+        console.warn('Permission error in getTeamMembers:', err.message);
+        return [];
+      }
       throw this.handleMembershipError(err);
     }
   }
@@ -270,6 +304,22 @@ export class TeamService {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         throw new Error('Sie müssen angemeldet sein');
+      }
+
+      // Check user permissions first
+      const { data: userProfile, error: userError } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      if (userError || !userProfile?.role) {
+        throw new Error('Benutzerrolle konnte nicht ermittelt werden');
+      }
+
+      const allowedRoles = ['admin', 'coach', 'manager'];
+      if (!allowedRoles.includes(userProfile.role)) {
+        throw new Error('Sie haben keine Berechtigung, Teammitglieder zu verwalten');
       }
 
       // Check if player already has an active membership
@@ -353,6 +403,22 @@ export class TeamService {
         throw new Error('Sie müssen angemeldet sein');
       }
 
+      // Check user permissions first
+      const { data: userProfile, error: userError } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      if (userError || !userProfile?.role) {
+        throw new Error('Benutzerrolle konnte nicht ermittelt werden');
+      }
+
+      const allowedRoles = ['admin', 'coach', 'manager'];
+      if (!allowedRoles.includes(userProfile.role)) {
+        throw new Error('Sie haben keine Berechtigung, Teammitglieder zu verwalten');
+      }
+
       const { error } = await supabase
         .from('team_memberships')
         .update({ end_date: new Date().toISOString().split('T')[0] })
@@ -373,6 +439,22 @@ export class TeamService {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         throw new Error('Sie müssen angemeldet sein');
+      }
+
+      // Check user permissions first
+      const { data: userProfile, error: userError } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      if (userError || !userProfile?.role) {
+        throw new Error('Benutzerrolle konnte nicht ermittelt werden');
+      }
+
+      const allowedRoles = ['admin', 'coach', 'manager'];
+      if (!allowedRoles.includes(userProfile.role)) {
+        throw new Error('Sie haben keine Berechtigung, Teammitglieder zu verwalten');
       }
 
       // Find active membership
@@ -465,6 +547,27 @@ export class TeamService {
       return urlData.publicUrl;
     } catch (err) {
       throw this.handleTeamError(err);
+    }
+  }
+
+  // Helper method to check if user can manage team members
+  async canManageTeamMembers(): Promise<boolean> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return false;
+
+      const { data: userProfile, error } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      if (error || !userProfile?.role) return false;
+
+      const allowedRoles = ['admin', 'coach', 'manager'];
+      return allowedRoles.includes(userProfile.role);
+    } catch {
+      return false;
     }
   }
 
