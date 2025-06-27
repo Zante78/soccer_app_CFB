@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { 
   X, Save, AlertCircle, Check, ChevronDown, Users, Calendar, 
   MapPin, Clock, Phone, Mail, Trophy, UserPlus, Palette, Settings,
-  ArrowLeft, Star
+  ArrowLeft, Star, Shield
 } from 'lucide-react';
 import { Team } from '../../types/core/team';
 import { TeamColors } from './shared/TeamColors';
 import { usePlayerStore } from '../../store/playerStore';
 import { AddMemberForm } from './members/AddMemberForm';
 import { PlayerSkillsDialog } from './members/PlayerSkillsDialog';
+import { TeamService } from '../../services/team.service';
 
 interface TeamEditModalProps {
   team: Team;
@@ -34,8 +35,39 @@ export function TeamEditModal({ team, onSave, onClose }: TeamEditModalProps) {
   const [showAddMember, setShowAddMember] = useState(false);
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
   const [showSkillsDialog, setShowSkillsDialog] = useState(false);
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
+  const [loadingMembers, setLoadingMembers] = useState(false);
+  const [canManageMembers, setCanManageMembers] = useState(false);
 
   const { players } = usePlayerStore();
+  const teamService = TeamService.getInstance();
+
+  // Check permissions and load team members
+  useEffect(() => {
+    const checkPermissionsAndLoadMembers = async () => {
+      try {
+        // Check if user can manage team members
+        const canManage = await teamService.canManageTeamMembers();
+        setCanManageMembers(canManage);
+
+        // Load team members if user has permission
+        if (canManage) {
+          setLoadingMembers(true);
+          const members = await teamService.getTeamMembers(team.id);
+          setTeamMembers(members);
+        }
+      } catch (error) {
+        console.warn('Error loading team members:', error);
+        setTeamMembers([]);
+      } finally {
+        setLoadingMembers(false);
+      }
+    };
+
+    checkPermissionsAndLoadMembers();
+  }, [team.id, teamService]);
+
+  // Get team players from store (fallback if no permission for memberships)
   const teamPlayers = players.filter(p => p.teamId === team.id);
 
   // ESC Key Handler
@@ -97,6 +129,18 @@ export function TeamEditModal({ team, onSave, onClose }: TeamEditModalProps) {
     }
   };
 
+  const handleAddMember = async (playerId: string, role: 'player' | 'captain' | 'viceCaptain') => {
+    try {
+      await teamService.addTeamMember(team.id, playerId, role);
+      // Reload team members
+      const members = await teamService.getTeamMembers(team.id);
+      setTeamMembers(members);
+      setShowAddMember(false);
+    } catch (error) {
+      throw error; // Let AddMemberForm handle the error
+    }
+  };
+
   const categoryOptions = [
     'Bambini', 'U7', 'U8', 'U9', 'U10', 'U11', 'U12', 'U13', 'U14',
     'U15', 'U16', 'U17', 'U18', 'U19', '1. Mannschaft', '2. Mannschaft'
@@ -113,6 +157,13 @@ export function TeamEditModal({ team, onSave, onClose }: TeamEditModalProps) {
     if (!player.skills?.length) return 0;
     return player.skills.reduce((sum: number, skill: any) => sum + skill.value, 0) / player.skills.length;
   };
+
+  // Use team members from API if available, otherwise fall back to players from store
+  const displayPlayers = canManageMembers ? teamMembers.map(member => ({
+    ...member.player,
+    role: member.role,
+    membershipId: member.id
+  })) : teamPlayers;
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
@@ -150,7 +201,10 @@ export function TeamEditModal({ team, onSave, onClose }: TeamEditModalProps) {
               }`}
             >
               <Users className="w-5 h-5" />
-              Spieler ({teamPlayers.length})
+              Spieler ({displayPlayers.length})
+              {!canManageMembers && (
+                <Shield className="w-4 h-4 text-gray-400" title="Eingeschränkte Berechtigung" />
+              )}
             </button>
             <button
               onClick={() => setActiveTab('design')}
@@ -321,88 +375,109 @@ export function TeamEditModal({ team, onSave, onClose }: TeamEditModalProps) {
             {/* Players Tab */}
             <div className={activeTab === 'players' ? 'space-y-6' : 'hidden'}>
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Teammitglieder</h3>
-                <button
-                  onClick={() => setShowAddMember(true)}
-                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <UserPlus className="w-4 h-4" />
-                  Spieler hinzufügen
-                </button>
-              </div>
-
-              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                {teamPlayers.length === 0 ? (
-                  <div className="p-4 text-center text-gray-500">
-                    Noch keine Spieler im Team
-                  </div>
-                ) : (
-                  <div className="divide-y divide-gray-200">
-                    {teamPlayers.map(player => {
-                      const avgRating = getAverageSkillRating(player);
-                      return (
-                        <div key={player.id} className="p-4 flex items-center justify-between hover:bg-gray-50">
-                          <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                              {player.photoUrl ? (
-                                <img 
-                                  src={player.photoUrl} 
-                                  alt={`${player.firstName} ${player.lastName}`}
-                                  className="w-10 h-10 rounded-full object-cover"
-                                />
-                              ) : (
-                                <Users className="w-6 h-6 text-gray-400" />
-                              )}
-                            </div>
-                            <div>
-                              <p className="font-medium text-gray-900">
-                                {player.firstName} {player.lastName}
-                              </p>
-                              <div className="flex items-center gap-2 text-sm text-gray-500">
-                                <span>{player.position || 'Keine Position'}</span>
-                                <span className="flex items-center gap-1">
-                                  <Star className="w-4 h-4 text-yellow-400" />
-                                  {avgRating.toFixed(1)}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => {
-                                setSelectedPlayerId(player.id);
-                                setShowSkillsDialog(true);
-                              }}
-                              className="px-3 py-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
-                            >
-                              Fähigkeiten
-                            </button>
-                            <select
-                              value={player.role || 'player'}
-                              onChange={(e) => {
-                                // Handle role change
-                              }}
-                              className="text-sm border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                            >
-                              <option value="player">Spieler</option>
-                              <option value="captain">Kapitän</option>
-                              <option value="viceCaptain">Vize-Kapitän</option>
-                            </select>
-                            <button
-                              onClick={() => {
-                                // Handle remove player
-                              }}
-                              className="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-red-50"
-                            >
-                              <X className="w-5 h-5" />
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900">Teammitglieder</h3>
+                  {!canManageMembers && (
+                    <p className="text-sm text-gray-500 mt-1">
+                      Eingeschränkte Ansicht - Sie haben keine Berechtigung zur Verwaltung von Teammitgliedern
+                    </p>
+                  )}
+                </div>
+                {canManageMembers && (
+                  <button
+                    onClick={() => setShowAddMember(true)}
+                    className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    <UserPlus className="w-4 h-4" />
+                    Spieler hinzufügen
+                  </button>
                 )}
               </div>
+
+              {loadingMembers ? (
+                <div className="p-4 text-center text-gray-500">
+                  Lade Teammitglieder...
+                </div>
+              ) : (
+                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                  {displayPlayers.length === 0 ? (
+                    <div className="p-4 text-center text-gray-500">
+                      Noch keine Spieler im Team
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-gray-200">
+                      {displayPlayers.map(player => {
+                        const avgRating = getAverageSkillRating(player);
+                        return (
+                          <div key={player.id} className="p-4 flex items-center justify-between hover:bg-gray-50">
+                            <div className="flex items-center gap-4">
+                              <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                                {player.photoUrl || player.photo_url ? (
+                                  <img 
+                                    src={player.photoUrl || player.photo_url} 
+                                    alt={`${player.firstName || player.first_name} ${player.lastName || player.last_name}`}
+                                    className="w-10 h-10 rounded-full object-cover"
+                                  />
+                                ) : (
+                                  <Users className="w-6 h-6 text-gray-400" />
+                                )}
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-900">
+                                  {player.firstName || player.first_name} {player.lastName || player.last_name}
+                                </p>
+                                <div className="flex items-center gap-2 text-sm text-gray-500">
+                                  <span>{player.position || 'Keine Position'}</span>
+                                  {avgRating > 0 && (
+                                    <span className="flex items-center gap-1">
+                                      <Star className="w-4 h-4 text-yellow-400" />
+                                      {avgRating.toFixed(1)}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => {
+                                  setSelectedPlayerId(player.id);
+                                  setShowSkillsDialog(true);
+                                }}
+                                className="px-3 py-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
+                              >
+                                Fähigkeiten
+                              </button>
+                              {canManageMembers && (
+                                <>
+                                  <select
+                                    value={player.role || 'player'}
+                                    onChange={(e) => {
+                                      // Handle role change
+                                    }}
+                                    className="text-sm border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                  >
+                                    <option value="player">Spieler</option>
+                                    <option value="captain">Kapitän</option>
+                                    <option value="viceCaptain">Vize-Kapitän</option>
+                                  </select>
+                                  <button
+                                    onClick={() => {
+                                      // Handle remove player
+                                    }}
+                                    className="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-red-50"
+                                  >
+                                    <X className="w-5 h-5" />
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Design Tab */}
@@ -535,13 +610,10 @@ export function TeamEditModal({ team, onSave, onClose }: TeamEditModalProps) {
       </div>
 
       {/* Add Member Modal */}
-      {showAddMember && (
+      {showAddMember && canManageMembers && (
         <AddMemberForm
           teamId={team.id}
-          onAdd={async (playerId, role) => {
-            // Handle adding member
-            setShowAddMember(false);
-          }}
+          onAdd={handleAddMember}
           onClose={() => setShowAddMember(false)}
         />
       )}
@@ -549,8 +621,8 @@ export function TeamEditModal({ team, onSave, onClose }: TeamEditModalProps) {
       {/* Player Skills Dialog */}
       {showSkillsDialog && selectedPlayerId && (
         <PlayerSkillsDialog
-          playerName={teamPlayers.find(p => p.id === selectedPlayerId)?.firstName + ' ' + teamPlayers.find(p => p.id === selectedPlayerId)?.lastName}
-          skills={teamPlayers.find(p => p.id === selectedPlayerId)?.skills || []}
+          playerName={displayPlayers.find(p => p.id === selectedPlayerId)?.firstName + ' ' + displayPlayers.find(p => p.id === selectedPlayerId)?.lastName}
+          skills={displayPlayers.find(p => p.id === selectedPlayerId)?.skills || []}
           onClose={() => {
             setShowSkillsDialog(false);
             setSelectedPlayerId(null);
