@@ -148,15 +148,6 @@ export function TeamManagement() {
           >
             ← Zurück zu Teams
           </button>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleAddPlayer}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
-            >
-              <Plus className="w-4 h-4" />
-              Neuer Spieler
-            </button>
-          </div>
         </div>
 
         {(playersError || localError) && (
@@ -245,7 +236,7 @@ export function TeamManagement() {
             try {
               await teamService.addTeamMember(selectedTeam.id, playerId, role);
               setShowAddMemberForm(false);
-              window.location.reload(); // Refresh to update UI
+              window.location.reload(); // Refresh to update the UI
             } catch (err) {
               console.error('Failed to add team member:', err);
               throw err;
