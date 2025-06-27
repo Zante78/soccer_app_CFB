@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Player, defaultSkills } from '../../types/player';
-import { X, Loader, AlertCircle, AlertTriangle, ExternalLink } from 'lucide-react';
+import { X, Loader, AlertCircle, AlertTriangle, ExternalLink, Users } from 'lucide-react';
 import { usePlayerStore } from '../../store/playerStore';
+import { PlayerManagementModal } from './PlayerManagementModal';
 
 interface PlayerFormProps {
   player?: Player;
@@ -25,6 +26,7 @@ export function PlayerForm({ player, onSave, onClose }: PlayerFormProps) {
   const [warning, setWarning] = useState<string | null>(null);
   const [duplicatePlayers, setDuplicatePlayers] = useState<Player[]>([]);
   const [forceSubmit, setForceSubmit] = useState(false);
+  const [useNewModal, setUseNewModal] = useState(true);
 
   useEffect(() => {
     // Reset warnings and errors when form data changes
@@ -103,6 +105,16 @@ export function PlayerForm({ player, onSave, onClose }: PlayerFormProps) {
     // history.push(`/players/${player.id}`);
     onClose();
   };
+
+  if (useNewModal && player) {
+    return (
+      <PlayerManagementModal
+        player={player}
+        onClose={onClose}
+        onSave={onSave}
+      />
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">

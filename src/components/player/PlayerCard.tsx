@@ -18,6 +18,7 @@ import { Loader, Users, AlertTriangle } from 'lucide-react';
 import { DuplicateDetailsModal } from './DuplicateDetailsModal';
 import { TeamAssignmentModal } from './TeamAssignmentModal';
 import { TeamService } from '../../services/team.service';
+import { PlayerManagementModal } from './PlayerManagementModal';
 
 interface PlayerCardProps {
   player: Player;
@@ -57,6 +58,7 @@ export function PlayerCard({
   const [showNotesModal, setShowNotesModal] = useState(false);
   const [showDuplicateDetailsModal, setShowDuplicateDetailsModal] = useState(false);
   const [showTeamAssignmentModal, setShowTeamAssignmentModal] = useState(false);
+  const [showManagementModal, setShowManagementModal] = useState(false);
   const { notes, addNote, deleteNote } = useNotes(player.id);
   const [currentUser, setCurrentUser] = useState<string | null>(null);
   const teamService = TeamService.getInstance();
@@ -265,6 +267,26 @@ export function PlayerCard({
     }
   };
 
+  const handleSavePlayer = async (playerData: Omit<Player, 'id' | 'createdAt' | 'updatedAt'>) => {
+    try {
+      await updatePlayer(player.id, {
+        ...player,
+        ...playerData
+      });
+      
+      const toast = document.createElement('div');
+      toast.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+      toast.textContent = 'Spielerdaten erfolgreich gespeichert';
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+      
+      setShowManagementModal(false);
+    } catch (error) {
+      console.error('Failed to update player:', error);
+      throw error;
+    }
+  };
+
   if (!currentUser) {
     return null;
   }
@@ -301,11 +323,11 @@ export function PlayerCard({
         />
 
         <PlayerCardActions
-          onEdit={onEdit}
+          onEdit={() => setShowManagementModal(true)}
           onDelete={handleDelete}
-          onSkills={toggleSkillsModal}
+          onSkills={() => setShowManagementModal(true)}
           onNotes={() => setShowNotesModal(true)}
-          onTeam={() => setShowTeamAssignmentModal(true)}
+          onTeam={() => setShowManagementModal(true)}
           onPhotoUpload={handlePhotoUpload}
           fileInputRef={fileInputRef}
           disabled={uploading}
@@ -386,6 +408,14 @@ export function PlayerCard({
           player={player}
           onClose={() => setShowTeamAssignmentModal(false)}
           onAssign={handleAssignTeam}
+        />
+      )}
+
+      {showManagementModal && (
+        <PlayerManagementModal
+          player={player}
+          onClose={() => setShowManagementModal(false)}
+          onSave={handleSavePlayer}
         />
       )}
 

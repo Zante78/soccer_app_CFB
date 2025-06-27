@@ -16,6 +16,7 @@ import { AddMemberForm } from './members/AddMemberForm';
 import { TeamEditModal } from './modals/TeamEditModal';
 import { Player } from '../../types/player';
 import { TeamErrorBoundary } from '../common/TeamErrorBoundary';
+import { PlayerManagementModal } from '../player/PlayerManagementModal';
 
 export function TeamManagement() {
   const { teams, isLoading, error, initialize, addTeam, updateTeam, removeTeam } = useStore();
@@ -29,6 +30,7 @@ export function TeamManagement() {
   const [showPlayers, setShowPlayers] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedDuplicatePlayer, setSelectedDuplicatePlayer] = useState<Player | null>(null);
+  const [showManagementModal, setShowManagementModal] = useState(false);
 
   const teamService = TeamService.getInstance();
 
@@ -68,7 +70,7 @@ export function TeamManagement() {
 
   const handleEditPlayer = (player: Player) => {
     setEditingPlayer(player);
-    setShowPlayerForm(true);
+    setShowManagementModal(true);
   };
 
   const onSave = async (playerData: Omit<Player, 'id' | 'createdAt' | 'updatedAt'>) => {
@@ -84,6 +86,7 @@ export function TeamManagement() {
       }
       
       setShowPlayerForm(false);
+      setShowManagementModal(false);
       setEditingPlayer(null);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Fehler beim Speichern des Spielers';
@@ -95,7 +98,7 @@ export function TeamManagement() {
   const handleViewDuplicate = (duplicatePlayer: Player) => {
     setSelectedDuplicatePlayer(duplicatePlayer);
     setEditingPlayer(duplicatePlayer);
-    setShowPlayerForm(true);
+    setShowManagementModal(true);
   };
 
   const handleMergePlayers = async (masterPlayer: Player, duplicatePlayers: Player[]) => {
@@ -195,6 +198,17 @@ export function TeamManagement() {
               setShowPlayerForm(false);
               setEditingPlayer(null);
             }}
+          />
+        )}
+
+        {showManagementModal && editingPlayer && (
+          <PlayerManagementModal
+            player={editingPlayer}
+            onClose={() => {
+              setShowManagementModal(false);
+              setEditingPlayer(null);
+            }}
+            onSave={onSave}
           />
         )}
       </div>
