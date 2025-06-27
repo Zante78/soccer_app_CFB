@@ -323,11 +323,10 @@ export function PlayerCard({
         />
 
         <PlayerCardActions
-          onEdit={() => setShowManagementModal(true)}
+          onEdit={onEdit}
           onDelete={handleDelete}
-          onSkills={() => setShowManagementModal(true)}
           onNotes={() => setShowNotesModal(true)}
-          onTeam={() => setShowManagementModal(true)}
+          onManagePlayer={() => setShowManagementModal(true)}
           onPhotoUpload={handlePhotoUpload}
           fileInputRef={fileInputRef}
           disabled={uploading}

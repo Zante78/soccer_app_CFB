@@ -1,12 +1,11 @@
 import React, { memo } from 'react';
-import { Edit, Upload, Trash2, Layout, FileText, Users } from 'lucide-react';
+import { Edit, Upload, Trash2, FileText, Settings } from 'lucide-react';
 
 interface PlayerCardActionsProps {
   onEdit: () => void;
   onDelete: () => void;
-  onSkills: () => void;
   onNotes: () => void;
-  onTeam: () => void;
+  onManagePlayer: () => void;
   onPhotoUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   fileInputRef: React.RefObject<HTMLInputElement>;
   disabled?: boolean;
@@ -15,9 +14,8 @@ interface PlayerCardActionsProps {
 export const PlayerCardActions = memo(function PlayerCardActions({ 
   onEdit, 
   onDelete, 
-  onSkills,
   onNotes,
-  onTeam,
+  onManagePlayer,
   onPhotoUpload,
   fileInputRef,
   disabled = false
@@ -39,21 +37,6 @@ export const PlayerCardActions = memo(function PlayerCardActions({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            onTeam();
-          }}
-          onKeyDown={(e) => handleKeyDown(e, onTeam)}
-          className="p-2 bg-white text-blue-600 rounded-full hover:bg-blue-50 shadow-lg transform hover:scale-110 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
-          title="Team zuweisen"
-          aria-label="Team zuweisen"
-          disabled={disabled}
-        >
-          <Users className="w-4 h-4" aria-hidden="true" />
-          <span className="sr-only">Team zuweisen</span>
-        </button>
-
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
             onNotes();
           }}
           onKeyDown={(e) => handleKeyDown(e, onNotes)}
@@ -69,31 +52,16 @@ export const PlayerCardActions = memo(function PlayerCardActions({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            onSkills();
+            onManagePlayer();
           }}
-          onKeyDown={(e) => handleKeyDown(e, onSkills)}
-          className="p-2 bg-white text-green-600 rounded-full hover:bg-green-50 shadow-lg transform hover:scale-110 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50"
-          title="Fähigkeiten bearbeiten"
-          aria-label="Fähigkeiten bearbeiten"
-          disabled={disabled}
-        >
-          <Layout className="w-4 h-4" aria-hidden="true" />
-          <span className="sr-only">Fähigkeiten bearbeiten</span>
-        </button>
-
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onEdit();
-          }}
-          onKeyDown={(e) => handleKeyDown(e, onEdit)}
+          onKeyDown={(e) => handleKeyDown(e, onManagePlayer)}
           className="p-2 bg-white text-blue-600 rounded-full hover:bg-blue-50 shadow-lg transform hover:scale-110 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
-          title="Spieler bearbeiten"
-          aria-label="Spieler bearbeiten"
+          title="Spieler verwalten"
+          aria-label="Spieler verwalten"
           disabled={disabled}
         >
-          <Edit className="w-4 h-4" aria-hidden="true" />
-          <span className="sr-only">Spieler bearbeiten</span>
+          <Settings className="w-4 h-4" aria-hidden="true" />
+          <span className="sr-only">Spieler verwalten</span>
         </button>
 
         <button

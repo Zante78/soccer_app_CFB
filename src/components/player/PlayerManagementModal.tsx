@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { X, User, Users, BarChart, Settings, Loader, AlertCircle } from 'lucide-react';
+import { X, User, Users, BarChart, Settings, Loader, AlertCircle, Check } from 'lucide-react';
 import { Player, PlayerSkill } from '../../types/player';
-import { Team } from '../../types/core/team';
 import { useStore } from '../../store/store';
 import { usePlayerStore } from '../../store/playerStore';
 import { TeamService } from '../../services/team.service';
 import { supabase } from '../../services/database';
+import { PlayerSkillsEditor } from './PlayerSkillsEditor';
 
 interface PlayerManagementModalProps {
   player?: Player;
@@ -81,18 +81,24 @@ export function PlayerManagementModal({ player, onClose, onSave }: PlayerManagem
     }
   };
 
-  const handleSkillsSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const handleSkillsSubmit = async (updatedSkills: PlayerSkill[]) => {
     if (!player) return;
 
     try {
       setSaving(true);
       setError(null);
+      
+      // Update formData with the new skills
+      setFormData(prev => ({
+        ...prev,
+        skills: updatedSkills
+      }));
+      
       await updatePlayer(player.id, {
         ...player,
-        skills: formData.skills
+        skills: updatedSkills
       });
+      
       setSuccessMessage('Fähigkeiten erfolgreich gespeichert');
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
@@ -153,29 +159,6 @@ export function PlayerManagementModal({ player, onClose, onSave }: PlayerManagem
     } finally {
       setSaving(false);
     }
-  };
-
-  const handleSkillChange = (index: number, value: number) => {
-    const updatedSkills = [...formData.skills];
-    updatedSkills[index] = {
-      ...updatedSkills[index],
-      value: Math.max(0, Math.min(20, value))
-    };
-    setFormData(prev => ({ ...prev, skills: updatedSkills }));
-  };
-
-  const getValueColor = (value: number) => {
-    if (value >= 16) return 'text-green-600';
-    if (value >= 12) return 'text-blue-600';
-    if (value >= 8) return 'text-yellow-600';
-    return 'text-red-600';
-  };
-
-  const getProgressColor = (value: number) => {
-    if (value >= 16) return 'bg-green-500';
-    if (value >= 12) return 'bg-blue-500';
-    if (value >= 8) return 'bg-yellow-500';
-    return 'bg-red-500';
   };
 
   return (
@@ -375,84 +358,13 @@ export function PlayerManagementModal({ player, onClose, onSave }: PlayerManagem
 
           {/* Skills Tab */}
           {activeTab === 'skills' && player && (
-            <form onSubmit={handleSkillsSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {Object.entries(
-                  formData.skills.reduce((acc, skill) => {
-                    acc[skill.category] = acc[skill.category] || [];
-                    acc[skill.category].push(skill);
-                    return acc;
-                  }, {} as Record<string, PlayerSkill[]>)
-                ).map(([category, skills]) => (
-                  <div key={category} className="bg-white rounded-lg shadow-sm p-6">
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">
-                      {category.charAt(0).toUpperCase() + category.slice(1)}
-                    </h3>
-                    <div className="space-y-4">
-                      {skills.map((skill, idx) => {
-                        const skillIndex = formData.skills.findIndex(s => 
-                          s.name === skill.name && s.category === skill.category
-                        );
-                        
-                        return (
-                          <div key={skill.name} className="space-y-2">
-                            <div className="flex justify-between items-center">
-                              <label className="text-sm font-medium text-gray-700">
-                                {skill.name}
-                              </label>
-                              <span className={`text-sm font-medium ${getValueColor(skill.value)}`}>
-                                {skill.value.toFixed(1)}
-                              </span>
-                            </div>
-                            <div className="w-full bg-gray-200 rounded-full h-1.5">
-                              <div 
-                                className={`h-1.5 rounded-full ${getProgressColor(skill.value)}`}
-                                style={{ width: `${(skill.value / 20) * 100}%` }}
-                              />
-                            </div>
-                            <input
-                              type="range"
-                              min="0"
-                              max="20"
-                              step="0.5"
-                              value={skill.value}
-                              onChange={(e) => handleSkillChange(skillIndex, parseFloat(e.target.value))}
-                              className="w-full"
-                              disabled={saving}
-                            />
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex justify-end gap-4">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-                  disabled={saving}
-                >
-                  Abbrechen
-                </button>
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
-                >
-                  {saving ? (
-                    <>
-                      <Loader className="w-4 h-4 animate-spin" />
-                      Wird gespeichert...
-                    </>
-                  ) : (
-                    'Fähigkeiten speichern'
-                  )}
-                </button>
-              </div>
-            </form>
+            <div className="space-y-6">
+              <PlayerSkillsEditor
+                skills={formData.skills}
+                onSave={handleSkillsSubmit}
+                saving={saving}
+              />
+            </div>
           )}
 
           {/* Team Assignment Tab */}
