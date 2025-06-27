@@ -253,6 +253,153 @@ export class TeamService {
     }
   }
 
+  async addTeamMember(teamId: string, playerId: string, role: string): Promise<TeamMembership> {
+    try {
+      if (!this.isValidUUID(teamId)) {
+        throw new Error('Ungültige Team ID');
+      }
+
+      if (!this.isValidUUID(playerId)) {
+        throw new Error('Ungültige Spieler ID');
+      }
+
+      if (!['player', 'captain', 'viceCaptain'].includes(role)) {
+        throw new Error('Ungültige Rolle');
+      }
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('Sie müssen angemeldet sein');
+      }
+
+      // Check if player already has an active membership
+      const { data: existingMemberships, error: checkError } = await supabase
+        .from('team_memberships')
+        .select('id, team_id')
+        .eq('player_id', playerId)
+        .is('end_date', null);
+      
+      if (checkError) throw checkError;
+
+      // If player has an active membership in another team, end it
+      if (existingMemberships && existingMemberships.length > 0) {
+        const existingMembership = existingMemberships[0];
+        
+        // If player is already in this team, just update the role
+        if (existingMembership.team_id === teamId) {
+          const { data: updatedMembership, error: updateError } = await supabase
+            .from('team_memberships')
+            .update({ role })
+            .eq('id', existingMembership.id)
+            .select()
+            .single();
+          
+          if (updateError) throw updateError;
+          return updatedMembership;
+        }
+        
+        // End the current membership
+        const { error: endError } = await supabase
+          .from('team_memberships')
+          .update({ end_date: new Date().toISOString().split('T')[0] })
+          .eq('id', existingMembership.id);
+        
+        if (endError) throw endError;
+      }
+
+      // Create new membership
+      const { data: newMembership, error: createError } = await supabase
+        .from('team_memberships')
+        .insert([{
+          team_id: teamId,
+          player_id: playerId,
+          role,
+          start_date: new Date().toISOString().split('T')[0]
+        }])
+        .select()
+        .single();
+      
+      if (createError) throw createError;
+      
+      // Get team name for the response
+      const { data: team, error: teamError } = await supabase
+        .from('teams')
+        .select('name')
+        .eq('id', teamId)
+        .single();
+      
+      if (teamError) throw teamError;
+      
+      // Return membership with team name
+      return {
+        ...newMembership,
+        team: {
+          name: team.name
+        }
+      };
+    } catch (err) {
+      throw this.handleMembershipError(err);
+    }
+  }
+
+  async removeMember(membershipId: string): Promise<void> {
+    try {
+      if (!this.isValidUUID(membershipId)) {
+        throw new Error('Ungültige Mitgliedschafts-ID');
+      }
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('Sie müssen angemeldet sein');
+      }
+
+      const { error } = await supabase
+        .from('team_memberships')
+        .update({ end_date: new Date().toISOString().split('T')[0] })
+        .eq('id', membershipId);
+      
+      if (error) throw error;
+    } catch (err) {
+      throw this.handleMembershipError(err);
+    }
+  }
+
+  async removePlayerFromTeam(playerId: string): Promise<void> {
+    try {
+      if (!this.isValidUUID(playerId)) {
+        throw new Error('Ungültige Spieler ID');
+      }
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('Sie müssen angemeldet sein');
+      }
+
+      // Find active membership
+      const { data: memberships, error: findError } = await supabase
+        .from('team_memberships')
+        .select('id')
+        .eq('player_id', playerId)
+        .is('end_date', null);
+      
+      if (findError) throw findError;
+      
+      if (!memberships || memberships.length === 0) {
+        throw new Error('Spieler ist keinem Team zugewiesen');
+      }
+
+      // End the membership
+      const { error: updateError } = await supabase
+        .from('team_memberships')
+        .update({ end_date: new Date().toISOString().split('T')[0] })
+        .eq('id', memberships[0].id);
+      
+      if (updateError) throw updateError;
+    } catch (err) {
+      throw this.handleMembershipError(err);
+    }
+  }
+
   async uploadTeamPhoto(teamId: string, file: File): Promise<string> {
     try {
       if (!this.isValidUUID(teamId)) {

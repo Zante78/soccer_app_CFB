@@ -16,6 +16,8 @@ import { usePlayerStore } from '../../store/playerStore';
 import { supabase } from '../../services/database';
 import { Loader, Users, AlertTriangle } from 'lucide-react';
 import { DuplicateDetailsModal } from './DuplicateDetailsModal';
+import { TeamAssignmentModal } from './TeamAssignmentModal';
+import { TeamService } from '../../services/team.service';
 
 interface PlayerCardProps {
   player: Player;
@@ -54,8 +56,10 @@ export function PlayerCard({
 
   const [showNotesModal, setShowNotesModal] = useState(false);
   const [showDuplicateDetailsModal, setShowDuplicateDetailsModal] = useState(false);
+  const [showTeamAssignmentModal, setShowTeamAssignmentModal] = useState(false);
   const { notes, addNote, deleteNote } = useNotes(player.id);
   const [currentUser, setCurrentUser] = useState<string | null>(null);
+  const teamService = TeamService.getInstance();
 
   // Get duplicate status for this player
   const duplicateStatus = duplicateStatuses[player.id];
@@ -175,6 +179,61 @@ export function PlayerCard({
     setShowNotesModal(false);
   };
 
+  const handleAssignTeam = async (teamId: string, role: string) => {
+    try {
+      // If teamId is empty, remove player from team
+      if (!teamId) {
+        await teamService.removePlayerFromTeam(player.id);
+        
+        // Update player in store
+        await updatePlayer(player.id, {
+          ...player,
+          teamId: null,
+          teamName: null
+        });
+        
+        // Show success message
+        const toast = document.createElement('div');
+        toast.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+        toast.textContent = 'Spieler erfolgreich aus dem Team entfernt';
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+        
+        return;
+      }
+      
+      // Add player to team
+      const result = await teamService.addTeamMember(teamId, player.id, role);
+      
+      // Get team name
+      const { data: team } = await supabase
+        .from('teams')
+        .select('name')
+        .eq('id', teamId)
+        .single();
+      
+      // Update player in store
+      await updatePlayer(player.id, {
+        ...player,
+        teamId,
+        teamName: team?.name
+      });
+      
+      // Show success message
+      const toast = document.createElement('div');
+      toast.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+      toast.textContent = player.teamId 
+        ? 'Team des Spielers erfolgreich geändert' 
+        : 'Spieler erfolgreich einem Team zugewiesen';
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+      
+    } catch (error) {
+      console.error('Failed to assign team:', error);
+      throw error;
+    }
+  };
+
   const handleSkillsUpdate = async (updatedSkills: any[]) => {
     try {
       if (!updatedSkills || updatedSkills.length === 0) {
@@ -246,6 +305,7 @@ export function PlayerCard({
           onDelete={handleDelete}
           onSkills={toggleSkillsModal}
           onNotes={() => setShowNotesModal(true)}
+          onTeam={() => setShowTeamAssignmentModal(true)}
           onPhotoUpload={handlePhotoUpload}
           fileInputRef={fileInputRef}
           disabled={uploading}
@@ -319,6 +379,14 @@ export function PlayerCard({
             />
           </div>
         </div>
+      )}
+
+      {showTeamAssignmentModal && (
+        <TeamAssignmentModal
+          player={player}
+          onClose={() => setShowTeamAssignmentModal(false)}
+          onAssign={handleAssignTeam}
+        />
       )}
 
       {/* Duplicate warning tooltip at bottom */}

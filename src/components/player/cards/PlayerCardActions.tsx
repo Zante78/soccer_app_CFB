@@ -1,11 +1,12 @@
 import React, { memo } from 'react';
-import { Edit, Upload, Trash2, Layout, FileText } from 'lucide-react';
+import { Edit, Upload, Trash2, Layout, FileText, Users } from 'lucide-react';
 
 interface PlayerCardActionsProps {
   onEdit: () => void;
   onDelete: () => void;
   onSkills: () => void;
   onNotes: () => void;
+  onTeam: () => void;
   onPhotoUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   fileInputRef: React.RefObject<HTMLInputElement>;
   disabled?: boolean;
@@ -16,6 +17,7 @@ export const PlayerCardActions = memo(function PlayerCardActions({
   onDelete, 
   onSkills,
   onNotes,
+  onTeam,
   onPhotoUpload,
   fileInputRef,
   disabled = false
@@ -34,6 +36,21 @@ export const PlayerCardActions = memo(function PlayerCardActions({
       aria-label="Spieler Aktionen"
     >
       <div className="flex justify-end gap-1.5">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onTeam();
+          }}
+          onKeyDown={(e) => handleKeyDown(e, onTeam)}
+          className="p-2 bg-white text-blue-600 rounded-full hover:bg-blue-50 shadow-lg transform hover:scale-110 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+          title="Team zuweisen"
+          aria-label="Team zuweisen"
+          disabled={disabled}
+        >
+          <Users className="w-4 h-4" aria-hidden="true" />
+          <span className="sr-only">Team zuweisen</span>
+        </button>
+
         <button
           onClick={(e) => {
             e.stopPropagation();
