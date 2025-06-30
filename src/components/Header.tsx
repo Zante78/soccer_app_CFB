@@ -1,17 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Upload, MessageSquare, Bell } from 'lucide-react';
+import { Shield, Upload, MessageSquare, Bell, FileDown, FileUp, Users } from 'lucide-react';
 import { ClubService } from '../services/club.service';
 import { CachedImage } from './common/CachedImage';
 import { TeamInlineEdit } from './team/TeamInlineEdit';
 import { ExportButton } from './export/ExportButton';
 import { NotificationCenter } from './notifications/NotificationCenter';
 import { MessagingPanel } from './communication/MessagingPanel';
+import { TeamImportModal } from './team/TeamImportModal';
+import { PlayerImportModal } from './player/PlayerImportModal';
+import { Team } from '../types/core/team';
+import { Player } from '../types/player';
 
 export function Header() {
   const [clubSettings, setClubSettings] = useState<{ name: string; logo_url: string | null; } | null>(null);
   const [uploading, setUploading] = useState(false);
   const [showMessaging, setShowMessaging] = useState(false);
-  const clubService = new ClubService();
+  const [showTeamImport, setShowTeamImport] = useState(false);
+  const [showPlayerImport, setShowPlayerImport] = useState(false);
+  const clubService = ClubService.getInstance();
 
   useEffect(() => {
     loadClubSettings();
@@ -50,6 +56,16 @@ export function Header() {
       console.error('Failed to update club name:', error);
       throw error;
     }
+  };
+
+  const handleTeamImportSuccess = (teams: Team[]) => {
+    console.log(`Successfully imported ${teams.length} teams`);
+    // You could add a toast notification here
+  };
+
+  const handlePlayerImportSuccess = (players: Player[]) => {
+    console.log(`Successfully imported ${players.length} players`);
+    // You could add a toast notification here
   };
 
   return (
@@ -94,6 +110,24 @@ export function Header() {
           </div>
 
           <div className="flex items-center gap-4">
+            <button
+              onClick={() => setShowTeamImport(true)}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+              title="Teams importieren"
+            >
+              <FileUp className="w-4 h-4" />
+              Team Import
+            </button>
+            
+            <button
+              onClick={() => setShowPlayerImport(true)}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+              title="Spieler importieren"
+            >
+              <Users className="w-4 h-4" />
+              Spieler Import
+            </button>
+            
             <ExportButton />
             
             <div className="relative">
@@ -114,6 +148,21 @@ export function Header() {
           </div>
         </div>
       </div>
+
+      {/* Import Modals */}
+      {showTeamImport && (
+        <TeamImportModal 
+          onClose={() => setShowTeamImport(false)} 
+          onSuccess={handleTeamImportSuccess}
+        />
+      )}
+      
+      {showPlayerImport && (
+        <PlayerImportModal 
+          onClose={() => setShowPlayerImport(false)}
+          onSuccess={handlePlayerImportSuccess}
+        />
+      )}
     </header>
   );
 }
