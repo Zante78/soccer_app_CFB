@@ -226,8 +226,9 @@ export class ExportOrchestrator {
 
   private async handleExportSuccess(jobId: string, result: Blob): Promise<void> {
     try {
-      // Generate a download URL
-      const fileName = `export-${new Date().toISOString().replace(/[:.]/g, '-')}.${this.getFileExtension(result)}`;
+      // Generate a download URL with simple timestamp-based filename
+      const timestamp = new Date().getTime();
+      const fileName = `export-${timestamp}.${this.getFileExtension(result)}`;
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
@@ -322,9 +323,12 @@ export class ExportOrchestrator {
   }
 
   private async updateJobProgress(jobId: string, progress: number): Promise<void> {
+    // Clamp progress value to ensure it's always between 0 and 100
+    const clampedProgress = Math.max(0, Math.min(100, Math.round(progress || 0)));
+    
     const { error } = await supabase
       .from('export_jobs')
-      .update({ progress })
+      .update({ progress: clampedProgress })
       .eq('id', jobId);
 
     if (error) throw error;
