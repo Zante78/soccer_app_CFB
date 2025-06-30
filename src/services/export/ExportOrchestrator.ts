@@ -10,6 +10,7 @@ import { ErrorReporter } from './ErrorReporter';
 import { ExportValidator } from './ExportValidator';
 import { ExportNotifier } from './ExportNotifier';
 import { ExportHealthCheck } from './ExportHealthCheck';
+import { ValidationError, ProcessingError, StorageError, handleExportError, ErrorCodes } from '../../utils/errorUtils';
 
 /**
  * Orchestrator für den Export-Prozess
@@ -19,7 +20,6 @@ export class ExportOrchestrator {
   private static instance: ExportOrchestrator;
   private readonly services: {
     cache: ExportCache;
-    worker: ExportWorker;
     batchProcessor: BatchProcessor;
     concurrencyManager: ConcurrencyManager;
     logger: ExportLogger;
@@ -33,7 +33,6 @@ export class ExportOrchestrator {
   private constructor() {
     this.services = {
       cache: ExportCache.getInstance(),
-      worker: new ExportWorker('csv'),
       batchProcessor: new BatchProcessor(),
       concurrencyManager: ConcurrencyManager.getInstance(),
       logger: ExportLogger.getInstance(),
@@ -157,41 +156,128 @@ export class ExportOrchestrator {
     config: ExportConfig,
     controller: AbortController
   ): Promise<Blob> {
-    // Generate export data directly using supabase
-    const { data, error } = await supabase
-      .from(config.type === 'player' ? 'players' : 'teams')
-      .select('*');
+    try {
+      // Create ExportWorker with the correct format from config
+      const worker = new ExportWorker(config.format);
 
-    if (error) throw error;
-    
-    // Process in batches
-    const processedData = await this.services.batchProcessor.processBatch(
-      data || [],
-      async (item) => {
-        if (controller.signal.aborted) {
-          throw new Error('Export cancelled');
-        }
-        return this.services.worker.processItem(item);
-      },
-      async (processed, total) => {
-        const progress = Math.round((processed / total) * 100);
-        await this.updateJobProgress(jobId, progress);
+      // Generate export data directly using supabase
+      const { data, error } = await supabase
+        .from(config.type === 'player' ? 'players' : 'teams')
+        .select('*');
+
+      if (error) {
+        throw new ProcessingError(
+          `Failed to fetch ${config.type} data: ${error.message}`,
+          error
+        );
       }
-    );
 
-    // Format final result
-    return this.services.worker.formatResult(processedData, config.format);
+      if (!data || data.length === 0) {
+        throw new ValidationError(
+          `No ${config.type} data found to export`,
+          ErrorCodes.VALIDATION.MISSING_FIELDS
+        );
+      }
+      
+      // Process in batches
+      const processedData = await this.services.batchProcessor.processBatch(
+        data || [],
+        async (item) => {
+          if (controller.signal.aborted) {
+            throw new ProcessingError(
+              'Export cancelled by user',
+              ErrorCodes.PROCESSING.BATCH_FAILED
+            );
+          }
+          return worker.processItem(item);
+        },
+        async (processed, total) => {
+          const progress = Math.round((processed / total) * 100);
+          await this.updateJobProgress(jobId, progress);
+        }
+      );
+
+      // Format final result
+      return worker.formatResult(processedData, config.format);
+    } catch (error) {
+      // Convert to appropriate error type if needed
+      if (error instanceof Error) {
+        if (error.message.includes('timeout')) {
+          throw new ProcessingError(
+            'Export processing timed out',
+            ErrorCodes.PROCESSING.TIMEOUT,
+            error
+          );
+        }
+        if (error.message.includes('network') || error.message.includes('Failed to fetch')) {
+          throw new ProcessingError(
+            'Network connection failed during export',
+            ErrorCodes.SYSTEM.NETWORK_ERROR,
+            error
+          );
+        }
+      }
+      throw error; // Re-throw if already a specific error type
+    }
   }
 
   private async handleExportSuccess(jobId: string, result: Blob): Promise<void> {
-    await this.updateJobStatus(jobId, 'completed', { result });
-    
-    this.services.logger.log({
-      jobId,
-      action: 'complete',
-      status: 'success',
-      details: { size: result.size }
-    });
+    try {
+      // Generate a download URL
+      const fileName = `export-${new Date().toISOString().replace(/[:.]/g, '-')}.${this.getFileExtension(result)}`;
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error('No active session');
+      }
+      
+      const userId = session.user.id;
+      const filePath = `${userId}/${fileName}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('exports')
+        .upload(filePath, result);
+      
+      if (uploadError) {
+        throw new StorageError(
+          `Failed to upload export file: ${uploadError.message}`,
+          ErrorCodes.STORAGE.UPLOAD_FAILED,
+          uploadError
+        );
+      }
+      
+      const { data: urlData } = supabase.storage
+        .from('exports')
+        .getPublicUrl(filePath);
+      
+      // Update job status with download URL
+      await this.updateJobStatus(jobId, 'completed', { 
+        result: {
+          url: urlData.publicUrl,
+          fileSize: result.size,
+          fileName: fileName,
+          mimeType: result.type,
+          createdAt: new Date().toISOString()
+        }
+      });
+      
+      this.services.logger.log({
+        jobId,
+        action: 'complete',
+        status: 'success',
+        details: { size: result.size, fileName }
+      });
+    } catch (error) {
+      // If storage fails, convert to a storage error
+      if (!(error instanceof StorageError)) {
+        throw new StorageError(
+          'Failed to store export result',
+          ErrorCodes.STORAGE.UPLOAD_FAILED,
+          error
+        );
+      }
+      throw error;
+    }
   }
 
   private async handleExportError(jobId: string, error: unknown): Promise<void> {
@@ -248,5 +334,18 @@ export class ExportOrchestrator {
       filters: config.filters,
       includeFields: config.includeFields
     });
+  }
+
+  private getFileExtension(blob: Blob): string {
+    switch (blob.type) {
+      case 'text/csv':
+        return 'csv';
+      case 'application/json':
+        return 'json';
+      case 'application/pdf':
+        return 'pdf';
+      default:
+        return 'txt';
+    }
   }
 }

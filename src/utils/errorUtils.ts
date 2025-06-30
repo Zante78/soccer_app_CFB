@@ -11,22 +11,22 @@ export class ExportError extends Error {
 }
 
 export class ValidationError extends ExportError {
-  constructor(message: string, details?: unknown) {
-    super(message, 'VALIDATION_ERROR', details);
+  constructor(message: string, code: string = 'VALIDATION_ERROR', details?: unknown) {
+    super(message, code, details);
     this.name = 'ValidationError';
   }
 }
 
 export class ProcessingError extends ExportError {
-  constructor(message: string, details?: unknown) {
-    super(message, 'PROCESSING_ERROR', details);
+  constructor(message: string, code: string = 'PROCESSING_ERROR', details?: unknown) {
+    super(message, code, details);
     this.name = 'ProcessingError';
   }
 }
 
 export class StorageError extends ExportError {
-  constructor(message: string, details?: unknown) {
-    super(message, 'STORAGE_ERROR', details);
+  constructor(message: string, code: string = 'STORAGE_ERROR', details?: unknown) {
+    super(message, code, details);
     this.name = 'StorageError';
   }
 }
@@ -72,6 +72,7 @@ export function handleExportError(error: unknown): ExportError {
     if (error.message.includes('timeout')) {
       return new ProcessingError(
         'Export processing timed out',
+        ErrorCodes.PROCESSING.TIMEOUT,
         error
       );
     }

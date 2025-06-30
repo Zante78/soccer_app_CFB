@@ -1,11 +1,12 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { X, FileDown, Loader, AlertCircle } from 'lucide-react';
-import { ExportConfig } from '../../types/core/export';
+import { X, FileDown, Loader, AlertCircle, Check } from 'lucide-react';
+import { ExportConfig, ExportJob } from '../../types/core/export';
 import { useExport } from '../../hooks/useExport';
 import { ExportStatus } from './ExportStatus';
 import { DeleteConfirmDialog } from './DeleteConfirmDialog';
 import { formatDate } from '../../utils/dateUtils';
 import { validateExportConfig } from '../../utils/exportValidation';
+import { getExportErrorMessage } from '../../utils/exportErrorMessages';
 
 interface ExportDialogProps {
   onClose: () => void;
@@ -115,7 +116,15 @@ export function ExportDialog({ onClose, onError }: ExportDialogProps) {
           {errorMessage && (
             <div className="mb-6 p-4 bg-red-50 text-red-700 rounded-lg flex items-center gap-2">
               <AlertCircle className="w-5 h-5 flex-shrink-0" />
-              <p className="text-sm">{errorMessage}</p>
+              <div>
+                <h4 className="text-sm font-medium text-red-800">
+                  {getExportErrorMessage(exportError?.message || 'VALIDATION_ERROR').title}
+                </h4>
+                <p className="text-sm">{errorMessage}</p>
+                <p className="mt-2 text-sm text-red-700 font-semibold">
+                  {getExportErrorMessage(exportError?.message || 'VALIDATION_ERROR').action}
+                </p>
+              </div>
             </div>
           )}
 

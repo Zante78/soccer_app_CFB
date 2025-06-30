@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useExport } from '../../hooks/useExport';
-import { Loader, X } from 'lucide-react';
+import { Loader, X, CheckCircle } from 'lucide-react';
+import { getExportErrorMessage } from '../../utils/exportErrorMessages';
 
 interface ExportStatusProps {
   jobId: string;
@@ -26,14 +27,15 @@ export function ExportStatus({ jobId, onComplete, onError }: ExportStatusProps) 
           onComplete?.(job.result.url);
           clearInterval(intervalRef.current);
         } else if (job.status === 'failed') {
+          const errorCode = job.result?.error?.code || 'UNKNOWN_ERROR';
           const message = job.result?.error?.message || 'Export fehlgeschlagen';
-          setErrorMessage(message);
+          setErrorMessage(errorCode);
           onError?.(new Error(message));
           clearInterval(intervalRef.current);
         }
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Statusabfrage fehlgeschlagen';
-        setErrorMessage(message);
+        setErrorMessage('NETWORK_ERROR');
         onError?.(new Error(message));
         clearInterval(intervalRef.current);
       }
@@ -48,17 +50,19 @@ export function ExportStatus({ jobId, onComplete, onError }: ExportStatusProps) 
       await cancelExport(jobId);
       setStatus('failed');
       const message = 'Export wurde abgebrochen';
-      setErrorMessage(message);
+      setErrorMessage('USER_CANCELLED');
       onError?.(new Error(message));
       clearInterval(intervalRef.current);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Abbrechen fehlgeschlagen';
-      setErrorMessage(message);
+      setErrorMessage('CANCEL_FAILED');
       onError?.(new Error(message));
     }
   };
 
   if (errorMessage) {
+    const errorDetails = getExportErrorMessage(errorMessage);
+    
     return (
       <div className="rounded-md bg-red-50 p-4">
         <div className="flex">
@@ -66,7 +70,9 @@ export function ExportStatus({ jobId, onComplete, onError }: ExportStatusProps) 
             <X className="h-5 w-5 text-red-400" />
           </div>
           <div className="ml-3">
-            <p className="text-sm text-red-700">{errorMessage}</p>
+            <h4 className="text-sm font-medium text-red-800">{errorDetails.title}</h4>
+            <p className="mt-1 text-sm text-red-700">{errorDetails.description}</p>
+            <p className="mt-2 text-sm text-red-700 font-semibold">{errorDetails.action}</p>
           </div>
         </div>
       </div>
