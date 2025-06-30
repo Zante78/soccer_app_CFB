@@ -1,6 +1,7 @@
 import { supabase, handleDatabaseError } from './database';
 import { Team, TeamMembership } from '../types/core/team';
 import { EventBus } from './events/EventBus';
+import { uploadFileToSupabaseStorage } from '../utils/storageUtils';
 
 export class TeamService {
   private static instance: TeamService;
@@ -488,16 +489,9 @@ export class TeamService {
         throw new Error('Ungültige Team ID');
       }
 
-      if (!file.type.match(/^image\/(jpeg|png|gif)$/)) {
-        throw new Error('Nur JPEG, PNG und GIF Dateien sind erlaubt');
-      }
-
-      if (file.size > 5 * 1024 * 1024) {
-        throw new Error('Die Datei darf maximal 5MB groß sein');
-      }
-
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
+      // Get current user session
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
         throw new Error('Sie müssen angemeldet sein');
       }
 
@@ -521,30 +515,28 @@ export class TeamService {
         }
       }
 
-      // Upload new photo
-      const { error: uploadError } = await supabase.storage
-        .from('teams')
-        .upload(fileName, file, {
-          upsert: true,
-          contentType: file.type
-        });
-
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data: urlData } = supabase.storage
-        .from('teams')
-        .getPublicUrl(fileName);
+      // Use the centralized storage utility to upload the file
+      const publicUrl = await uploadFileToSupabaseStorage(
+        'teams',
+        session.user.id,
+        file,
+        {
+          fileName,
+          validateFileType: true,
+          allowedTypes: ['image/jpeg', 'image/png', 'image/gif'],
+          maxSizeBytes: 5 * 1024 * 1024 // 5MB
+        }
+      );
 
       // Update team record with new photo URL
       const { error: updateError } = await supabase
         .from('teams')
-        .update({ photo_url: urlData.publicUrl })
+        .update({ photo_url: publicUrl })
         .eq('id', teamId);
 
       if (updateError) throw updateError;
 
-      return urlData.publicUrl;
+      return publicUrl;
     } catch (err) {
       throw this.handleTeamError(err);
     }

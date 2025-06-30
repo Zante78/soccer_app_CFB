@@ -1,14 +1,5 @@
 import { supabase, handleDatabaseError, testDatabaseConnection } from './database';
-
-interface ClubSettings {
-  id: string;
-  name: string;
-  logo_url: string | null;
-  primary_color: string;
-  secondary_color: string;
-  created_at: string;
-  updated_at: string;
-}
+import { uploadFileToSupabaseStorage } from '../utils/storageUtils';
 
 export class ClubService {
   private static instance: ClubService | null = null;
@@ -70,7 +61,7 @@ export class ClubService {
     }
   }
 
-  async getSettings(): Promise<ClubSettings | null> {
+  async getSettings(): Promise<any> {
     try {
       await this.ensureInitialized();
 
@@ -86,7 +77,7 @@ export class ClubService {
     }
   }
 
-  async updateSettings(settings: Partial<Omit<ClubSettings, 'id' | 'created_at' | 'updated_at'>>): Promise<ClubSettings> {
+  async updateSettings(settings: Partial<any>): Promise<any> {
     try {
       await this.ensureInitialized();
 
@@ -117,14 +108,10 @@ export class ClubService {
     try {
       await this.ensureInitialized();
 
-      // Validate file type
-      if (!file.type.match(/^image\/(jpeg|png|gif)$/)) {
-        throw new Error('Nur JPEG, PNG und GIF Dateien sind erlaubt');
-      }
-
-      // Validate file size (5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        throw new Error('Die Datei darf maximal 5MB groß sein');
+      // Get current user session
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('Sie müssen angemeldet sein');
       }
 
       // Generate unique filename
@@ -146,25 +133,23 @@ export class ClubService {
         }
       }
 
-      // Upload new logo
-      const { error: uploadError } = await supabase.storage
-        .from('logos')
-        .upload(fileName, file, {
-          upsert: true,
-          contentType: file.type
-        });
+      // Use the centralized storage utility to upload the file
+      const publicUrl = await uploadFileToSupabaseStorage(
+        'logos',
+        session.user.id,
+        file,
+        {
+          fileName,
+          validateFileType: true,
+          allowedTypes: ['image/jpeg', 'image/png', 'image/gif'],
+          maxSizeBytes: 5 * 1024 * 1024 // 5MB
+        }
+      );
 
-      if (uploadError) throw uploadError;
+      // Update club settings with new logo URL
+      await this.updateSettings({ logo_url: publicUrl });
 
-      // Get public URL
-      const { data } = supabase.storage
-        .from('logos')
-        .getPublicUrl(fileName);
-
-      // Update club settings
-      await this.updateSettings({ logo_url: data.publicUrl });
-
-      return data.publicUrl;
+      return publicUrl;
     } catch (err) {
       throw handleDatabaseError(err);
     }

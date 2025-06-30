@@ -1,5 +1,6 @@
 import { supabase, handleDatabaseError, testDatabaseConnection } from './database';
 import { Player, defaultSkills, PlayerSkill } from '../types/player';
+import { uploadFileToSupabaseStorage } from '../utils/storageUtils';
 
 export class PlayerService {
   private static instance: PlayerService | null = null;
@@ -218,14 +219,10 @@ export class PlayerService {
     try {
       await this.ensureInitialized();
 
-      // Validate file type
-      if (!file.type.match(/^image\/(jpeg|png|gif)$/)) {
-        throw new Error('Nur JPEG, PNG und GIF Dateien sind erlaubt');
-      }
-
-      // Validate file size (5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        throw new Error('Die Datei darf maximal 5MB groß sein');
+      // Get current user session
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('Sie müssen angemeldet sein');
       }
 
       // Generate unique filename with player ID prefix
@@ -248,30 +245,28 @@ export class PlayerService {
         }
       }
 
-      // Upload new photo
-      const { error: uploadError, data } = await supabase.storage
-        .from('players')
-        .upload(fileName, file, {
-          upsert: true,
-          contentType: file.type
-        });
-
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data: urlData } = supabase.storage
-        .from('players')
-        .getPublicUrl(fileName);
+      // Use the centralized storage utility to upload the file
+      const publicUrl = await uploadFileToSupabaseStorage(
+        'players',
+        session.user.id,
+        file,
+        {
+          fileName: `players/${fileName}`,
+          validateFileType: true,
+          allowedTypes: ['image/jpeg', 'image/png', 'image/gif'],
+          maxSizeBytes: 5 * 1024 * 1024 // 5MB
+        }
+      );
 
       // Update player record with new photo URL
       const { error: updateError } = await supabase
         .from('players')
-        .update({ photo_url: urlData.publicUrl })
+        .update({ photo_url: publicUrl })
         .eq('id', playerId);
 
       if (updateError) throw updateError;
 
-      return urlData.publicUrl;
+      return publicUrl;
     } catch (err) {
       throw handleDatabaseError(err);
     }

@@ -11,6 +11,7 @@ import { ExportValidator } from './ExportValidator';
 import { ExportNotifier } from './ExportNotifier';
 import { ExportHealthCheck } from './ExportHealthCheck';
 import { ValidationError, ProcessingError, StorageError, handleExportError, ErrorCodes } from '../../utils/errorUtils';
+import { uploadFileToSupabaseStorage } from '../../utils/storageUtils';
 
 /**
  * Orchestrator für den Export-Prozess
@@ -116,7 +117,7 @@ export class ExportOrchestrator {
       
       if (cachedData) {
         this.services.metrics.recordCacheHit();
-        await this.handleExportSuccess(jobId, cachedData);
+        await this.handleExportSuccess(jobId, cachedData, userId);
         return;
       }
 
@@ -129,7 +130,7 @@ export class ExportOrchestrator {
       await this.services.cache.set(cacheKey, result);
 
       // Handle success
-      await this.handleExportSuccess(jobId, result);
+      await this.handleExportSuccess(jobId, result, userId);
 
       // Notify user
       await this.services.notifier.notifySuccess(userId, jobId);
@@ -170,6 +171,7 @@ export class ExportOrchestrator {
       if (error) {
         throw new ProcessingError(
           `Failed to fetch ${config.type} data: ${error.message}`,
+          ErrorCodes.SYSTEM.DATABASE_ERROR,
           error
         );
       }
@@ -224,40 +226,31 @@ export class ExportOrchestrator {
     }
   }
 
-  private async handleExportSuccess(jobId: string, result: Blob): Promise<void> {
+  private async handleExportSuccess(jobId: string, result: Blob, userId: string): Promise<void> {
     try {
       // Generate a download URL with simple timestamp-based filename
-      const timestamp = new Date().getTime();
-      const fileName = `export-${timestamp}.${this.getFileExtension(result)}`;
-      const { data: { session } } = await supabase.auth.getSession();
+      const timestamp = Date.now();
+      const fileExtension = this.getFileExtension(result);
+      const fileName = `export-${timestamp}.${fileExtension}`;
       
-      if (!session) {
-        throw new Error('No active session');
-      }
+      console.log('Generating export file', { timestamp, fileName, fileType: result.type });
       
-      const userId = session.user.id;
-      const filePath = `${userId}/${fileName}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('exports')
-        .upload(filePath, result);
-      
-      if (uploadError) {
-        throw new StorageError(
-          `Failed to upload export file: ${uploadError.message}`,
-          ErrorCodes.STORAGE.UPLOAD_FAILED,
-          uploadError
-        );
-      }
-      
-      const { data: urlData } = supabase.storage
-        .from('exports')
-        .getPublicUrl(filePath);
+      // Use the centralized storage utility to upload the file
+      const publicUrl = await uploadFileToSupabaseStorage(
+        'exports',
+        userId,
+        result,
+        {
+          fileName,
+          contentType: result.type,
+          validateFileType: false // Skip validation as we're generating the file ourselves
+        }
+      );
       
       // Update job status with download URL
       await this.updateJobStatus(jobId, 'completed', { 
         result: {
-          url: urlData.publicUrl,
+          url: publicUrl,
           fileSize: result.size,
           fileName: fileName,
           mimeType: result.type,
