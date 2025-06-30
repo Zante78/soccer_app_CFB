@@ -21,27 +21,15 @@ export class ExportWorker {
     }
   }
 
-  async processExport(data: any[], cacheKey?: string): Promise<Blob> {
-    // Check cache first
-    if (cacheKey) {
-      const cached = this.cache.get(cacheKey);
-      if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
-        return cached.data;
-      }
+  async processExport(data: any[], format?: string): Promise<Blob> {
+    // If format is provided, use a formatter for that format
+    if (format) {
+      const formatter = this.getFormatter(format as ExportConfig['format']);
+      return await formatter.format(data);
     }
-
-    // Format data
-    const result = await this.formatter.format(data);
-
-    // Cache result if key provided
-    if (cacheKey) {
-      this.cache.set(cacheKey, {
-        data: result,
-        timestamp: Date.now()
-      });
-    }
-
-    return result;
+    
+    // Otherwise use the default formatter
+    return await this.formatter.format(data);
   }
 
   clearCache(): void {
@@ -55,5 +43,10 @@ export class ExportWorker {
         this.cache.delete(key);
       }
     }
+  }
+
+  formatResult(data: any[], format: ExportConfig['format']): Promise<Blob> {
+    const formatter = this.getFormatter(format);
+    return formatter.format(data);
   }
 }

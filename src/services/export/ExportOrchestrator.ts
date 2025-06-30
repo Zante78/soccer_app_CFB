@@ -20,6 +20,7 @@ export class ExportOrchestrator {
   private static instance: ExportOrchestrator;
   private readonly services: {
     cache: ExportCache;
+    worker: ExportWorker;
     batchProcessor: BatchProcessor;
     concurrencyManager: ConcurrencyManager;
     logger: ExportLogger;
@@ -33,6 +34,7 @@ export class ExportOrchestrator {
   private constructor() {
     this.services = {
       cache: ExportCache.getInstance(),
+      worker: new ExportWorker('csv'),
       batchProcessor: new BatchProcessor(),
       concurrencyManager: ConcurrencyManager.getInstance(),
       logger: ExportLogger.getInstance(),
@@ -179,8 +181,8 @@ export class ExportOrchestrator {
         );
       }
       
-      // Process in batches
-      const processedData = await this.services.batchProcessor.processBatch(
+      // Process in batches for progress tracking only
+      await this.services.batchProcessor.processBatch(
         data || [],
         async (item) => {
           if (controller.signal.aborted) {
@@ -189,7 +191,8 @@ export class ExportOrchestrator {
               ErrorCodes.PROCESSING.BATCH_FAILED
             );
           }
-          return worker.processItem(item);
+          // Just return a resolved promise instead of calling a non-existent method
+          return Promise.resolve();
         },
         async (processed, total) => {
           const progress = Math.round((processed / total) * 100);
@@ -197,8 +200,8 @@ export class ExportOrchestrator {
         }
       );
 
-      // Format final result
-      return worker.formatResult(processedData, config.format);
+      // Format the entire dataset at once using the worker
+      return await worker.processExport(data, config.format);
     } catch (error) {
       // Convert to appropriate error type if needed
       if (error instanceof Error) {
