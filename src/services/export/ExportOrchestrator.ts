@@ -195,13 +195,23 @@ export class ExportOrchestrator {
   }
 
   private async handleExportError(jobId: string, error: unknown): Promise<void> {
-    await this.updateJobStatus(jobId, 'failed', { error });
+    // Ensure error is properly structured for frontend consumption
+    const errorResult = {
+      error: {
+        message: error instanceof Error ? error.message : 'Ein unbekannter Fehler ist aufgetreten',
+        code: error instanceof Error && 'code' in error ? (error as any).code : 'UNKNOWN_ERROR',
+        timestamp: new Date().toISOString(),
+        details: error instanceof Error ? error.stack : String(error)
+      }
+    };
+
+    await this.updateJobStatus(jobId, 'failed', errorResult);
     
     this.services.logger.log({
       jobId,
       action: 'complete',
       status: 'failed',
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: errorResult.error.message
     });
   }
 
