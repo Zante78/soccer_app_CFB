@@ -4,6 +4,7 @@ import { Team } from '../../types/core/team';
 import { TeamService } from '../../services/team.service';
 import { parseCSV, validateAndConvertTeamData } from '../../utils/csvUtils';
 import { ValidationError } from '../../utils/errorUtils';
+import { ImportCSVTemplate } from './ImportCSVTemplate';
 
 interface TeamImportModalProps {
   onClose: () => void;
@@ -52,10 +53,12 @@ export function TeamImportModal({ onClose, onSuccess }: TeamImportModalProps) {
       // Import teams
       let successCount = 0;
       let failedCount = 0;
+      const importedTeams: Team[] = [];
       
       for (const team of teams) {
         try {
-          await teamService.createTeam(team);
+          const newTeam = await teamService.createTeam(team);
+          importedTeams.push(newTeam);
           successCount++;
         } catch (error) {
           console.error('Failed to import team:', error);
@@ -72,7 +75,7 @@ export function TeamImportModal({ onClose, onSuccess }: TeamImportModalProps) {
       
       // Call onSuccess callback if provided
       if (onSuccess && successCount > 0) {
-        onSuccess(teams as Team[]);
+        onSuccess(importedTeams);
       }
       
     } catch (error) {
@@ -153,7 +156,10 @@ export function TeamImportModal({ onClose, onSuccess }: TeamImportModalProps) {
             </div>
 
             <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="text-sm font-medium text-gray-700 mb-2">CSV-Format</h3>
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-sm font-medium text-gray-700">CSV-Format</h3>
+                <ImportCSVTemplate type="team" />
+              </div>
               <p className="text-xs text-gray-500 mb-2">
                 Die CSV-Datei sollte folgende Spalten enthalten:
               </p>

@@ -4,6 +4,7 @@ import { Player } from '../../types/player';
 import { PlayerService } from '../../services/player.service';
 import { parseCSV, validateAndConvertPlayerData } from '../../utils/csvUtils';
 import { ValidationError } from '../../utils/errorUtils';
+import { ImportCSVTemplate } from '../team/ImportCSVTemplate';
 
 interface PlayerImportModalProps {
   onClose: () => void;
@@ -155,7 +156,10 @@ export function PlayerImportModal({ onClose, onSuccess }: PlayerImportModalProps
             </div>
 
             <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="text-sm font-medium text-gray-700 mb-2">CSV-Format</h3>
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-sm font-medium text-gray-700">CSV-Format</h3>
+                <ImportCSVTemplate type="player" />
+              </div>
               <p className="text-xs text-gray-500 mb-2">
                 Die CSV-Datei sollte folgende Spalten enthalten:
               </p>
