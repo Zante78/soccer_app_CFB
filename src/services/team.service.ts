@@ -97,8 +97,8 @@ export class TeamService {
           colors: team.colors,
           venue: team.venue?.trim(),
           training_time: team.trainingTime?.trim(),
-          contact_email: team.contactEmail?.trim(),
-          contact_phone: team.contactPhone?.trim(),
+          contact_email: team.contactEmail?.trim() || null,
+          contact_phone: team.contactPhone?.trim() || null,
           user_id: user.id
         }])
         .select()
@@ -148,13 +148,13 @@ export class TeamService {
         if (updates.contactEmail && !this.isValidEmail(updates.contactEmail)) {
           throw new Error('Ungültige Email-Adresse');
         }
-        updateData.contact_email = updates.contactEmail.trim();
+        updateData.contact_email = updates.contactEmail?.trim() || null;
       }
       if (updates.contactPhone !== undefined) {
         if (updates.contactPhone && !this.isValidPhone(updates.contactPhone)) {
           throw new Error('Ungültige Telefonnummer');
         }
-        updateData.contact_phone = updates.contactPhone.trim();
+        updateData.contact_phone = updates.contactPhone?.trim() || null;
       }
 
       const { data: updatedTeam, error } = await supabase
