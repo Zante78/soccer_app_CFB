@@ -160,7 +160,6 @@ export function ExportDialog({ onClose, onError }: ExportDialogProps) {
               >
                 <option value="csv">CSV</option>
                 <option value="json">JSON</option>
-                <option value="pdf">PDF</option>
               </select>
             </div>
 
