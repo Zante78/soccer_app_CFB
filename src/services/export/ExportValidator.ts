@@ -3,7 +3,7 @@ import { ValidationError } from '../../utils/errorUtils';
 
 export class ExportValidator {
   private readonly MAX_FIELDS = 50;
-  private readonly ALLOWED_FORMATS = ['csv', 'json', 'pdf'];
+  private readonly ALLOWED_FORMATS = ['csv', 'json'];
   private readonly ALLOWED_TYPES = ['player', 'team', 'evaluation', 'statistics'];
 
   public async validateConfig(config: ExportConfig): Promise<void> {

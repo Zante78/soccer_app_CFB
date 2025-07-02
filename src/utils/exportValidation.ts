@@ -25,7 +25,7 @@ export function validateExportConfig(config: ExportConfig): ValidationResult {
 
   if (!config.format) {
     errors.push('Bitte wählen Sie ein Export-Format');
-  } else if (!['csv', 'json', 'pdf'].includes(config.format)) {
+  } else if (!['csv', 'json'].includes(config.format)) {
     errors.push('Ungültiges Export-Format');
   }
 
@@ -60,11 +60,6 @@ export function validateExportConfig(config: ExportConfig): ValidationResult {
     if (config.filters.players?.length === 0) {
       errors.push('Bitte wählen Sie mindestens einen Spieler aus');
     }
-  }
-
-  // Format-spezifische Validierung
-  if (config.format === 'pdf' && !config.includeFields.includes('personal')) {
-    errors.push('PDF-Exporte erfordern persönliche Daten');
   }
 
   return {
