@@ -25,7 +25,7 @@ export async function uploadFileToSupabaseStorage(
   try {
     // Set default options
     const {
-      fileName = `file-${Date.now()}.${getFileExtension(file)}`,
+      fileName = `${userId}-${Date.now()}.${getFileExtension(file)}`, // Modified to use userId as prefix
       contentType = file.type,
       validateFileType = true,
       allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'text/csv', 'application/json', 'application/pdf'],
