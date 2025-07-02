@@ -16,8 +16,10 @@ export class ExportWorker {
         return new CSVFormatter();
       case 'json':
         return new JSONFormatter();
+      case 'pdf':
+        throw new Error('PDF export is not yet supported. Please use CSV or JSON format instead.');
       default:
-        throw new Error(`Unsupported format: ${format}`);
+        throw new Error(`Unsupported format: ${format}. Supported formats are: csv, json`);
     }
   }
 
