@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Player, PlayerSkill } from '../../types/player';
 import { X, Save, AlertCircle, Loader, Info, Star, Trophy, Target, Activity, Brain, Users } from 'lucide-react';
 import { Line, Radar } from 'react-chartjs-2';
@@ -35,6 +35,18 @@ export function PlayerSkillsModal({ player, onClose, onSave }: PlayerSkillsModal
   const [activeCategory, setActiveCategory] = useState<string>('technical');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [chartsVisible, setChartsVisible] = useState(true);
+
+  // Force re-render of charts after component mount to fix visibility issues
+  useEffect(() => {
+    // Short delay to ensure DOM is ready
+    const timer = setTimeout(() => {
+      setChartsVisible(false);
+      setTimeout(() => setChartsVisible(true), 50);
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleSkillChange = useCallback((skillName: string, value: number) => {
     setSkills(prev => prev.map(skill => 
@@ -152,6 +164,15 @@ export function PlayerSkillsModal({ player, onClose, onSave }: PlayerSkillsModal
     }]
   };
 
+  // Log chart data for debugging
+  console.log('Chart Data:', { 
+    chartData, 
+    radarData, 
+    categoryRadarData, 
+    skills,
+    chartsVisible
+  });
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg w-full max-w-5xl max-h-[90vh] flex flex-col">
@@ -191,70 +212,72 @@ export function PlayerSkillsModal({ player, onClose, onSave }: PlayerSkillsModal
           )}
 
           {/* Skill Visualization */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <div className="bg-white p-4 rounded-lg shadow-sm">
-              <h4 className="text-sm font-medium text-gray-700 mb-4">Kategorie-Übersicht</h4>
-              <div className="h-64">
-                <Radar 
-                  data={categoryRadarData}
-                  options={{
-                    scales: {
-                      r: {
-                        beginAtZero: true,
-                        max: 20,
-                        ticks: {
-                          stepSize: 5
+          {chartsVisible && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+              <div className="bg-white p-4 rounded-lg shadow-sm">
+                <h4 className="text-sm font-medium text-gray-700 mb-4">Kategorie-Übersicht</h4>
+                <div className="h-64 relative">
+                  <Radar 
+                    data={categoryRadarData}
+                    options={{
+                      scales: {
+                        r: {
+                          beginAtZero: true,
+                          max: 20,
+                          ticks: {
+                            stepSize: 5
+                          }
                         }
-                      }
-                    },
-                    plugins: {
-                      legend: {
-                        display: false
-                      }
-                    },
-                    maintainAspectRatio: false
-                  }}
-                />
+                      },
+                      plugins: {
+                        legend: {
+                          display: false
+                        }
+                      },
+                      maintainAspectRatio: false
+                    }}
+                  />
+                </div>
               </div>
-            </div>
 
-            <div className="bg-white p-4 rounded-lg shadow-sm">
-              <h4 className="text-sm font-medium text-gray-700 mb-4">Fähigkeiten-Übersicht</h4>
-              <div className="space-y-3">
-                {categories.map(category => {
-                  const categorySkills = skills.filter(s => s.category === category.id);
-                  if (categorySkills.length === 0) return null;
-                  
-                  const avgValue = categorySkills.reduce((sum, s) => sum + s.value, 0) / categorySkills.length;
-                  
-                  return (
-                    <div key={category.id} className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <category.icon className="w-4 h-4 text-gray-600" />
-                        <span className="text-sm font-medium text-gray-700">{category.name}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-full bg-gray-200 rounded-full h-2.5 w-32">
-                          <div 
-                            className={`h-2.5 rounded-full ${
-                              avgValue >= 16 ? 'bg-green-500' :
-                              avgValue >= 12 ? 'bg-blue-500' :
-                              avgValue >= 8 ? 'bg-yellow-500' :
-                              'bg-red-500'
-                            }`}
-                            style={{ width: `${(avgValue / 20) * 100}%` }}
-                          ></div>
+              <div className="bg-white p-4 rounded-lg shadow-sm">
+                <h4 className="text-sm font-medium text-gray-700 mb-4">Fähigkeiten-Übersicht</h4>
+                <div className="space-y-3">
+                  {categories.map(category => {
+                    const categorySkills = skills.filter(s => s.category === category.id);
+                    if (categorySkills.length === 0) return null;
+                    
+                    const avgValue = categorySkills.reduce((sum, s) => sum + s.value, 0) / categorySkills.length;
+                    
+                    return (
+                      <div key={category.id} className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <category.icon className="w-4 h-4 text-gray-600" />
+                          <span className="text-sm font-medium text-gray-700">{category.name}</span>
                         </div>
-                        <span className={`text-sm font-medium ${getValueColor(avgValue)}`}>
-                          {avgValue.toFixed(1)}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-full bg-gray-200 rounded-full h-2.5 w-32">
+                            <div 
+                              className={`h-2.5 rounded-full ${
+                                avgValue >= 16 ? 'bg-green-500' :
+                                avgValue >= 12 ? 'bg-blue-500' :
+                                avgValue >= 8 ? 'bg-yellow-500' :
+                                'bg-red-500'
+                              }`}
+                              style={{ width: `${(avgValue / 20) * 100}%` }}
+                            ></div>
+                          </div>
+                          <span className={`text-sm font-medium ${getValueColor(avgValue)}`}>
+                            {avgValue.toFixed(1)}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           <div className="flex gap-2 overflow-x-auto mb-4">
             {categories.map(category => {
@@ -347,6 +370,49 @@ export function PlayerSkillsModal({ player, onClose, onSave }: PlayerSkillsModal
                 </div>
               ))}
           </div>
+
+          {/* Chart Section */}
+          {chartsVisible && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-8">
+              <div className="bg-white p-3 rounded-lg shadow-sm">
+                <h3 className="text-sm font-medium text-gray-900 mb-2">Fähigkeiten-Übersicht</h3>
+                <div className="h-[200px]">
+                  <Line 
+                    data={chartData}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      scales: {
+                        y: {
+                          beginAtZero: true,
+                          max: 20
+                        }
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="bg-white p-3 rounded-lg shadow-sm">
+                <h3 className="text-sm font-medium text-gray-900 mb-2">Fähigkeiten-Profil</h3>
+                <div className="h-[200px]">
+                  <Radar 
+                    data={radarData}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      scales: {
+                        r: {
+                          beginAtZero: true,
+                          max: 20
+                        }
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="p-4 border-t border-gray-200">
