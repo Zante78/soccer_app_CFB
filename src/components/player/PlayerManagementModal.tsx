@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  X, Save, AlertCircle, Check, ChevronDown, Users, Calendar, 
-  MapPin, Clock, Phone, Mail, Trophy, UserPlus, Palette, Settings,
-  ArrowLeft, Star, Shield, Ruler, Weight, Footprints, User, BarChart, Loader
+  X, User, Users, BarChart, Settings, ArrowLeft, Star, Loader, AlertCircle, Check,
+  Calendar, MapPin, Clock, Phone, Mail, Trophy, UserPlus, Palette,
+  Ruler, Weight, Footprints
 } from 'lucide-react';
 import { Player, PlayerSkill, PLAYER_POSITIONS } from '../../types/player';
 import { useStore } from '../../store/store';
@@ -11,8 +11,6 @@ import { TeamService } from '../../services/team.service';
 import { supabase } from '../../services/database';
 import { PlayerSkillsEditor } from './PlayerSkillsEditor';
 import { CachedImage } from '../common/CachedImage';
-import { Radar, Line } from 'react-chartjs-2';
-import './charts/ChartConfig';
 
 interface PlayerManagementModalProps {
   player?: Player;
@@ -40,7 +38,7 @@ export function PlayerManagementModal({ player, onClose, onSave }: PlayerManagem
   const [saving, setIsSaving] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [showManagementModal, setShowManagementModal] = useState(false);
 
   const { teams } = useStore();
   const { updatePlayer } = usePlayerStore();
@@ -85,6 +83,12 @@ export function PlayerManagementModal({ player, onClose, onSave }: PlayerManagem
     window.addEventListener('keydown', handleEsc);
     return () => window.removeEventListener('keydown', handleEsc);
   }, [isDirty, onClose]);
+
+  const handleTabChange = (tab: 'info' | 'skills' | 'team') => {
+    setActiveTab(tab);
+    setError(null);
+    setSuccessMessage(null);
+  };
 
   const handleChange = (field: keyof typeof formData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -226,45 +230,6 @@ export function PlayerManagementModal({ player, onClose, onSave }: PlayerManagem
     return 'bg-red-100';
   };
 
-  // Prepare data for radar chart
-  const getRadarData = () => {
-    // Group skills by category
-    const skillsByCategory: Record<string, PlayerSkill[]> = {};
-    formData.skills.forEach(skill => {
-      if (!skillsByCategory[skill.category]) {
-        skillsByCategory[skill.category] = [];
-      }
-      skillsByCategory[skill.category].push(skill);
-    });
-
-    // Calculate average for each category
-    const categories = Object.keys(skillsByCategory);
-    const categoryAverages = categories.map(category => {
-      const skills = skillsByCategory[category];
-      const sum = skills.reduce((acc, skill) => acc + skill.value, 0);
-      return sum / skills.length;
-    });
-
-    return {
-      labels: categories.map(c => {
-        switch(c) {
-          case 'technical': return 'Technisch';
-          case 'physical': return 'Körperlich';
-          case 'mental': return 'Mental';
-          case 'social': return 'Sozial';
-          default: return c;
-        }
-      }),
-      datasets: [{
-        label: 'Fähigkeiten',
-        data: categoryAverages,
-        backgroundColor: 'rgba(59, 130, 246, 0.2)',
-        borderColor: 'rgb(59, 130, 246)',
-        borderWidth: 2
-      }]
-    };
-  };
-
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={onClose}>
       <div 
@@ -273,8 +238,8 @@ export function PlayerManagementModal({ player, onClose, onSave }: PlayerManagem
       >
         {/* Header */}
         <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-blue-800 text-white">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-4">
+          <div className="flex justify-between items-start">
+            <div className="flex items-start gap-4">
               {player?.photoUrl ? (
                 <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white">
                   <CachedImage
@@ -286,19 +251,45 @@ export function PlayerManagementModal({ player, onClose, onSave }: PlayerManagem
                 </div>
               ) : (
                 <div className="w-16 h-16 rounded-full bg-blue-700 flex items-center justify-center border-2 border-white">
-                  <Users className="w-8 h-8 text-white" />
+                  <User className="w-8 h-8 text-white" />
                 </div>
               )}
               <div>
                 <h2 className="text-2xl font-bold">
                   {player ? `${player.firstName} ${player.lastName}` : 'Neuer Spieler'}
                 </h2>
-                <div className="flex items-center gap-3 text-blue-100">
+                <div className="flex flex-wrap items-center gap-3 text-blue-100 mt-1">
                   {player?.position && <span>{player.position}</span>}
-                  {playerAge > 0 && <span>• {playerAge} Jahre</span>}
+                  
+                  {playerAge > 0 && (
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-3.5 h-3.5" /> {playerAge} Jahre
+                    </span>
+                  )}
+                  
+                  {player?.height && (
+                    <span className="flex items-center gap-1">
+                      <Ruler className="w-3.5 h-3.5" /> {player.height} cm
+                    </span>
+                  )}
+                  
+                  {player?.weight && (
+                    <span className="flex items-center gap-1">
+                      <Weight className="w-3.5 h-3.5" /> {player.weight} kg
+                    </span>
+                  )}
+                  
+                  {player?.strongFoot && (
+                    <span className="flex items-center gap-1">
+                      <Footprints className="w-3.5 h-3.5" /> 
+                      {player.strongFoot === 'left' ? 'Links' : 
+                       player.strongFoot === 'right' ? 'Rechts' : 'Beidfüßig'}
+                    </span>
+                  )}
+                  
                   {player?.teamName && (
                     <span className="flex items-center gap-1">
-                      • <Users className="w-3.5 h-3.5" /> {player.teamName}
+                      <Users className="w-3.5 h-3.5" /> {player.teamName}
                     </span>
                   )}
                 </div>
@@ -323,7 +314,7 @@ export function PlayerManagementModal({ player, onClose, onSave }: PlayerManagem
                   ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
-              onClick={() => setActiveTab('info')}
+              onClick={() => handleTabChange('info')}
             >
               <div className="flex items-center gap-2">
                 <User className="w-4 h-4" />
@@ -336,7 +327,7 @@ export function PlayerManagementModal({ player, onClose, onSave }: PlayerManagem
                   ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
-              onClick={() => setActiveTab('skills')}
+              onClick={() => handleTabChange('skills')}
               disabled={!player}
             >
               <div className="flex items-center gap-2">
@@ -350,7 +341,7 @@ export function PlayerManagementModal({ player, onClose, onSave }: PlayerManagem
                   ? 'border-blue-500 text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
-              onClick={() => setActiveTab('team')}
+              onClick={() => handleTabChange('team')}
               disabled={!player}
             >
               <div className="flex items-center gap-2">
@@ -388,7 +379,7 @@ export function PlayerManagementModal({ player, onClose, onSave }: PlayerManagem
                   <input
                     type="text"
                     value={formData.firstName}
-                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                    onChange={(e) => handleChange('firstName', e.target.value)}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                     required
                   />
@@ -401,7 +392,7 @@ export function PlayerManagementModal({ player, onClose, onSave }: PlayerManagem
                   <input
                     type="text"
                     value={formData.lastName}
-                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                    onChange={(e) => handleChange('lastName', e.target.value)}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                     required
                   />
@@ -415,7 +406,7 @@ export function PlayerManagementModal({ player, onClose, onSave }: PlayerManagem
                   </label>
                   <select
                     value={formData.position}
-                    onChange={(e) => setFormData({ ...formData, position: e.target.value })}
+                    onChange={(e) => handleChange('position', e.target.value)}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   >
                     <option value="">Position auswählen</option>
@@ -429,15 +420,15 @@ export function PlayerManagementModal({ player, onClose, onSave }: PlayerManagem
                   <label className="block text-sm font-medium text-gray-700">
                     Geburtsdatum
                   </label>
-                  <div className="relative">
+                  <div className="relative mt-1">
                     <input
                       type="date"
                       value={formData.dateOfBirth}
-                      onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      onChange={(e) => handleChange('dateOfBirth', e.target.value)}
+                      className="block w-full pr-16 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                     />
                     {playerAge > 0 && (
-                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500">
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-gray-100 px-2 py-0.5 rounded text-sm text-gray-600">
                         {playerAge} Jahre
                       </div>
                     )}
@@ -447,12 +438,13 @@ export function PlayerManagementModal({ player, onClose, onSave }: PlayerManagem
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-700 flex items-center gap-1">
+                    <Footprints className="w-4 h-4" />
                     Starker Fuß
                   </label>
                   <select
                     value={formData.strongFoot}
-                    onChange={(e) => setFormData({ ...formData, strongFoot: e.target.value as 'left' | 'right' | 'both' })}
+                    onChange={(e) => handleChange('strongFoot', e.target.value)}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   >
                     <option value="right">Rechts</option>
@@ -462,13 +454,14 @@ export function PlayerManagementModal({ player, onClose, onSave }: PlayerManagem
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-700 flex items-center gap-1">
+                    <Ruler className="w-4 h-4" />
                     Größe (cm)
                   </label>
                   <input
                     type="number"
                     value={formData.height || ''}
-                    onChange={(e) => setFormData({ ...formData, height: e.target.value ? parseInt(e.target.value) : undefined })}
+                    onChange={(e) => handleChange('height', e.target.value ? parseInt(e.target.value) : undefined)}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                     min="100"
                     max="250"
@@ -476,13 +469,14 @@ export function PlayerManagementModal({ player, onClose, onSave }: PlayerManagem
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-700 flex items-center gap-1">
+                    <Weight className="w-4 h-4" />
                     Gewicht (kg)
                   </label>
                   <input
                     type="number"
                     value={formData.weight || ''}
-                    onChange={(e) => setFormData({ ...formData, weight: e.target.value ? parseInt(e.target.value) : undefined })}
+                    onChange={(e) => handleChange('weight', e.target.value ? parseInt(e.target.value) : undefined)}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                     min="30"
                     max="150"
@@ -492,25 +486,27 @@ export function PlayerManagementModal({ player, onClose, onSave }: PlayerManagem
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-700 flex items-center gap-1">
+                    <Mail className="w-4 h-4" />
                     Email
                   </label>
                   <input
                     type="email"
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onChange={(e) => handleChange('email', e.target.value)}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-gray-700 flex items-center gap-1">
+                    <Phone className="w-4 h-4" />
                     Telefon
                   </label>
                   <input
                     type="tel"
                     value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    onChange={(e) => handleChange('phone', e.target.value)}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   />
                 </div>
@@ -546,83 +542,6 @@ export function PlayerManagementModal({ player, onClose, onSave }: PlayerManagem
           {/* Skills Tab */}
           {activeTab === 'skills' && player && (
             <div className="space-y-6">
-              {/* Overall Rating Display */}
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-semibold text-gray-900">Spielerbewertung</h3>
-                <div className={`flex items-center gap-2 ${getRatingColor(averageRating)} text-2xl font-bold`}>
-                  <div className={`w-12 h-12 rounded-full ${getRatingBgColor(averageRating)} flex items-center justify-center`}>
-                    {averageRating.toFixed(1)}
-                  </div>
-                </div>
-              </div>
-
-              {/* Skill Visualization */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                <div className="bg-white p-4 rounded-lg shadow-sm">
-                  <h4 className="text-sm font-medium text-gray-700 mb-4">Fähigkeitsprofil</h4>
-                  <div className="h-64">
-                    <Radar 
-                      data={getRadarData()}
-                      options={{
-                        scales: {
-                          r: {
-                            beginAtZero: true,
-                            max: 20,
-                            ticks: {
-                              stepSize: 5
-                            }
-                          }
-                        },
-                        plugins: {
-                          legend: {
-                            display: false
-                          }
-                        },
-                        maintainAspectRatio: false
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <div className="bg-white p-4 rounded-lg shadow-sm">
-                  <h4 className="text-sm font-medium text-gray-700 mb-4">Kategorie-Übersicht</h4>
-                  <div className="space-y-3">
-                    {['technical', 'physical', 'mental', 'social'].map(category => {
-                      const categorySkills = formData.skills.filter(s => s.category === category);
-                      if (categorySkills.length === 0) return null;
-                      
-                      const avgValue = categorySkills.reduce((sum, s) => sum + s.value, 0) / categorySkills.length;
-                      
-                      return (
-                        <div key={category} className="flex items-center justify-between">
-                          <span className="text-sm font-medium text-gray-700">
-                            {category === 'technical' ? 'Technisch' : 
-                             category === 'physical' ? 'Körperlich' : 
-                             category === 'mental' ? 'Mental' : 'Sozial'}
-                          </span>
-                          <div className="flex items-center gap-2">
-                            <div className="w-full bg-gray-200 rounded-full h-2.5 w-32">
-                              <div 
-                                className={`h-2.5 rounded-full ${
-                                  avgValue >= 16 ? 'bg-green-500' :
-                                  avgValue >= 12 ? 'bg-blue-500' :
-                                  avgValue >= 8 ? 'bg-yellow-500' :
-                                  'bg-red-500'
-                                }`}
-                                style={{ width: `${(avgValue / 20) * 100}%` }}
-                              ></div>
-                            </div>
-                            <span className={`text-sm font-medium ${getRatingColor(avgValue)}`}>
-                              {avgValue.toFixed(1)}
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-
               <PlayerSkillsEditor
                 skills={formData.skills}
                 onSave={handleSkillsSubmit}
