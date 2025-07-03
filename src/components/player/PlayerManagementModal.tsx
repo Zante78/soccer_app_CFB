@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   X, Save, AlertCircle, Check, ChevronDown, Users, Calendar, 
   MapPin, Clock, Phone, Mail, Trophy, UserPlus, Palette, Settings,
-  ArrowLeft, Star, Shield, Ruler, Weight, Footprints
+  ArrowLeft, Star, Shield, Ruler, Weight, Footprints, User, BarChart, Loader
 } from 'lucide-react';
 import { Player, PlayerSkill, PLAYER_POSITIONS } from '../../types/player';
 import { useStore } from '../../store/store';
@@ -281,7 +281,7 @@ export function PlayerManagementModal({ player, onClose, onSave }: PlayerManagem
                     src={player.photoUrl}
                     alt={`${player.firstName} ${player.lastName}`}
                     className="w-full h-full object-cover"
-                    fallback={<Users className="w-8 h-8 text-white" />}
+                    fallback={<User className="w-8 h-8 text-white" />}
                   />
                 </div>
               ) : (
