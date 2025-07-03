@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  X, User, Users, BarChart, Settings, ArrowLeft, Star, Loader, AlertCircle, Check,
-  Calendar, MapPin, Clock, Phone, Mail, Trophy, UserPlus, Palette,
-  Ruler, Weight, Footprints
+  X, User, Users, BarChart, Settings, Loader, AlertCircle, Check,
+  Calendar, Mail, Phone, Trophy, UserPlus, Palette,
+  Ruler, Weight, Footprints, ArrowLeft, Star
 } from 'lucide-react';
 import { Player, PlayerSkill, PLAYER_POSITIONS } from '../../types/player';
 import { useStore } from '../../store/store';
@@ -38,7 +38,6 @@ export function PlayerManagementModal({ player, onClose, onSave }: PlayerManagem
   const [saving, setIsSaving] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [showManagementModal, setShowManagementModal] = useState(false);
 
   const { teams } = useStore();
   const { updatePlayer } = usePlayerStore();
@@ -239,9 +238,9 @@ export function PlayerManagementModal({ player, onClose, onSave }: PlayerManagem
         {/* Header */}
         <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-blue-800 text-white">
           <div className="flex justify-between items-start">
-            <div className="flex items-start gap-4">
+            <div className="flex items-start gap-4 flex-1 min-w-0">
               {player?.photoUrl ? (
-                <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white">
+                <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white flex-shrink-0">
                   <CachedImage
                     src={player.photoUrl}
                     alt={`${player.firstName} ${player.lastName}`}
@@ -250,12 +249,12 @@ export function PlayerManagementModal({ player, onClose, onSave }: PlayerManagem
                   />
                 </div>
               ) : (
-                <div className="w-16 h-16 rounded-full bg-blue-700 flex items-center justify-center border-2 border-white">
+                <div className="w-16 h-16 rounded-full bg-blue-700 flex items-center justify-center border-2 border-white flex-shrink-0">
                   <User className="w-8 h-8 text-white" />
                 </div>
               )}
-              <div>
-                <h2 className="text-2xl font-bold">
+              <div className="flex-1 min-w-0">
+                <h2 className="text-2xl font-bold truncate">
                   {player ? `${player.firstName} ${player.lastName}` : 'Neuer Spieler'}
                 </h2>
                 <div className="flex flex-wrap items-center gap-3 text-blue-100 mt-1">
@@ -425,7 +424,7 @@ export function PlayerManagementModal({ player, onClose, onSave }: PlayerManagem
                       type="date"
                       value={formData.dateOfBirth}
                       onChange={(e) => handleChange('dateOfBirth', e.target.value)}
-                      className="block w-full pr-16 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      className="block w-full pr-24 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                     />
                     {playerAge > 0 && (
                       <div className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-gray-100 px-2 py-0.5 rounded text-sm text-gray-600">
