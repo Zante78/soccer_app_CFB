@@ -69,7 +69,7 @@ export class ClubService {
         .from('club_settings')
         .select('*')
         .maybeSingle();
-
+      
       if (error) throw error;
       return data;
     } catch (err) {
