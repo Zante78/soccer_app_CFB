@@ -1,6 +1,6 @@
 import React from 'react';
 import { Player } from '../../../types/player';
-import { Users } from 'lucide-react';
+import { Users, Calendar, Ruler, Weight } from 'lucide-react';
 
 interface SplitViewProps {
   player: Player;
@@ -36,10 +36,24 @@ export function SplitView({ player }: SplitViewProps) {
           <p className="mt-2 text-sm text-gray-500 italic">Keinem Team zugewiesen</p>
         )}
         
+        {/* Additional Player Info */}
         {player.dateOfBirth && (
-          <p className="text-sm text-gray-500 mt-2">
-            {new Date(player.dateOfBirth).toLocaleDateString()}
-          </p>
+          <div className="mt-2 flex items-center text-sm text-gray-500">
+            <Calendar className="w-4 h-4 mr-1" />
+            <span>Geboren: {new Date(player.dateOfBirth).toLocaleDateString()}</span>
+          </div>
+        )}
+        {player.height && (
+          <div className="mt-1 flex items-center text-sm text-gray-500">
+            <Ruler className="w-4 h-4 mr-1" />
+            <span>Größe: {player.height} cm</span>
+          </div>
+        )}
+        {player.weight && (
+          <div className="mt-1 flex items-center text-sm text-gray-500">
+            <Weight className="w-4 h-4 mr-1" />
+            <span>Gewicht: {player.weight} kg</span>
+          </div>
         )}
       </div>
       

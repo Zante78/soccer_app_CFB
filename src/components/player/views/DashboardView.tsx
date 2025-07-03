@@ -1,6 +1,6 @@
 import React from 'react';
 import { Player } from '../../../types/player';
-import { Users } from 'lucide-react';
+import { Users, Calendar, Ruler, Weight } from 'lucide-react';
 
 interface DashboardViewProps {
   player: Player;
@@ -36,9 +36,41 @@ export function DashboardView({ player }: DashboardViewProps) {
           ) : (
             <p className="mt-1 text-sm text-gray-500 italic">Keinem Team zugewiesen</p>
           )}
+
+          {/* Additional Player Info */}
+          {player.dateOfBirth && (
+            <div className="mt-1 flex items-center text-sm text-gray-500">
+              <Calendar className="w-4 h-4 mr-1" />
+              <span>Geboren: {new Date(player.dateOfBirth).toLocaleDateString()}</span>
+            </div>
+          )}
+          {player.height && (
+            <div className="mt-1 flex items-center text-sm text-gray-500">
+              <Ruler className="w-4 h-4 mr-1" />
+              <span>Größe: {player.height} cm</span>
+            </div>
+          )}
+          {player.weight && (
+            <div className="mt-1 flex items-center text-sm text-gray-500">
+              <Weight className="w-4 h-4 mr-1" />
+              <span>Gewicht: {player.weight} kg</span>
+            </div>
+          )}
         </div>
         <div className={`text-2xl font-bold ${getValueColor(averageRating)}`}>
           {averageRating.toFixed(1)}
+        </div>
+      </div>
+      
+      {/* Progression System Placeholders */}
+      <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="bg-gray-50 p-3 rounded-lg flex items-center justify-between">
+          <span className="text-sm font-medium text-gray-700">Trainingslevel</span>
+          <span className="text-lg font-bold text-blue-600">N/A</span>
+        </div>
+        <div className="bg-gray-50 p-3 rounded-lg flex items-center justify-between">
+          <span className="text-sm font-medium text-gray-700">Rangaufstieg</span>
+          <span className="text-lg font-bold text-blue-600">N/A</span>
         </div>
       </div>
       

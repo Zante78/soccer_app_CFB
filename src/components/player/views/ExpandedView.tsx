@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Player } from '../../../types/player';
-import { ChevronDown, ChevronUp, Users } from 'lucide-react';
+import { ChevronDown, ChevronUp, Users, Calendar, Ruler, Weight } from 'lucide-react';
 
 interface ExpandedViewProps {
   player: Player;
@@ -33,6 +33,26 @@ export function ExpandedView({ player }: ExpandedViewProps) {
             </div>
           ) : (
             <p className="mt-1 text-sm text-gray-500 italic">Keinem Team zugewiesen</p>
+          )}
+
+          {/* Additional Player Info */}
+          {player.dateOfBirth && (
+            <div className="mt-1 flex items-center text-sm text-gray-500">
+              <Calendar className="w-4 h-4 mr-1" />
+              <span>Geboren: {new Date(player.dateOfBirth).toLocaleDateString()}</span>
+            </div>
+          )}
+          {player.height && (
+            <div className="mt-1 flex items-center text-sm text-gray-500">
+              <Ruler className="w-4 h-4 mr-1" />
+              <span>Größe: {player.height} cm</span>
+            </div>
+          )}
+          {player.weight && (
+            <div className="mt-1 flex items-center text-sm text-gray-500">
+              <Weight className="w-4 h-4 mr-1" />
+              <span>Gewicht: {player.weight} kg</span>
+            </div>
           )}
         </div>
         <button
