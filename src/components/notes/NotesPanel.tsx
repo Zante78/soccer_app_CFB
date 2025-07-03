@@ -14,6 +14,7 @@ import {
   Target, 
   MessageSquare 
 } from 'lucide-react';
+import { supabase } from '../../services/database';
 
 interface NotesPanelProps {
   notes: Note[];
@@ -26,6 +27,27 @@ export default function NotesPanel({ notes, onAddNote, onDeleteNote, onClose }: 
   const [showForm, setShowForm] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentUser, setCurrentUser] = useState<string | null>(null);
+
+  // Get current user session
+  React.useEffect(() => {
+    const getSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setCurrentUser(session.user.id);
+      }
+    };
+    getSession();
+
+    // Subscribe to auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setCurrentUser(session?.user?.id || null);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const categoryIcons = {
     general: <MessageSquare className="w-4 h-4" />,
@@ -65,7 +87,15 @@ export default function NotesPanel({ notes, onAddNote, onDeleteNote, onClose }: 
 
   const handleAddNote = async (note: Omit<Note, 'id' | 'createdAt' | 'updatedAt'>) => {
     try {
-      await onAddNote(note);
+      if (!currentUser) {
+        console.error("No user ID available");
+        return;
+      }
+      
+      await onAddNote({
+        ...note,
+        authorId: currentUser
+      });
       setShowForm(false);
     } catch (error) {
       console.error('Error adding note:', error);

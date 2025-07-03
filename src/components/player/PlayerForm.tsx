@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Player, defaultSkills } from '../../types/player';
-import { X, Loader, AlertCircle, AlertTriangle, ExternalLink, Users } from 'lucide-react';
+import { Player, defaultSkills, PLAYER_POSITIONS } from '../../types/player';
+import { X, Loader, AlertCircle, AlertTriangle, ExternalLink, Users, Ruler, Weight, Footprints } from 'lucide-react';
 import { usePlayerStore } from '../../store/playerStore';
 import { PlayerManagementModal } from './PlayerManagementModal';
 
@@ -19,6 +19,9 @@ export function PlayerForm({ player, onSave, onClose }: PlayerFormProps) {
     email: player?.email || '',
     phone: player?.phone || '',
     dateOfBirth: player?.dateOfBirth || '',
+    height: player?.height || undefined,
+    weight: player?.weight || undefined,
+    strongFoot: player?.strongFoot || 'right',
     skills: player?.skills || defaultSkills
   });
   const [saving, setSaving] = useState(false);
@@ -99,7 +102,6 @@ export function PlayerForm({ player, onSave, onClose }: PlayerFormProps) {
 
   const handleViewExistingPlayer = (player: Player) => {
     // This would typically navigate to the player's details page
-    // For now, we'll just log it and close the form
     console.log('View existing player:', player);
     // In a real implementation, you might use a router to navigate
     // history.push(`/players/${player.id}`);
@@ -253,12 +255,16 @@ export function PlayerForm({ player, onSave, onClose }: PlayerFormProps) {
                 <label className="block text-sm font-medium text-gray-700">
                   Position
                 </label>
-                <input
-                  type="text"
+                <select
                   value={formData.position}
                   onChange={(e) => setFormData({ ...formData, position: e.target.value })}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                />
+                >
+                  <option value="">Position auswählen</option>
+                  {PLAYER_POSITIONS.map(position => (
+                    <option key={position} value={position}>{position}</option>
+                  ))}
+                </select>
               </div>
 
               <div>
@@ -276,6 +282,54 @@ export function PlayerForm({ player, onSave, onClose }: PlayerFormProps) {
                     Spieler muss mindestens 5 Jahre alt sein
                   </p>
                 )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 flex items-center gap-1">
+                  <Footprints className="w-4 h-4" />
+                  Starker Fuß
+                </label>
+                <select
+                  value={formData.strongFoot}
+                  onChange={(e) => setFormData({ ...formData, strongFoot: e.target.value as 'left' | 'right' | 'both' })}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                >
+                  <option value="right">Rechts</option>
+                  <option value="left">Links</option>
+                  <option value="both">Beidfüßig</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 flex items-center gap-1">
+                  <Ruler className="w-4 h-4" />
+                  Größe (cm)
+                </label>
+                <input
+                  type="number"
+                  value={formData.height || ''}
+                  onChange={(e) => setFormData({ ...formData, height: e.target.value ? parseInt(e.target.value) : undefined })}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  min="100"
+                  max="250"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 flex items-center gap-1">
+                  <Weight className="w-4 h-4" />
+                  Gewicht (kg)
+                </label>
+                <input
+                  type="number"
+                  value={formData.weight || ''}
+                  onChange={(e) => setFormData({ ...formData, weight: e.target.value ? parseInt(e.target.value) : undefined })}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  min="30"
+                  max="150"
+                />
               </div>
             </div>
 

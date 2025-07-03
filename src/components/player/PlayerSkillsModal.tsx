@@ -87,6 +87,17 @@ export function PlayerSkillsModal({ player, onClose, onSave }: PlayerSkillsModal
     { id: 'social', name: 'Sozial', icon: Users }
   ];
 
+  // Calculate average rating
+  const averageRating = skills.reduce((sum, skill) => sum + skill.value, 0) / skills.length;
+
+  // Get rating color
+  const ratingColor = 
+    averageRating >= 16 ? 'text-green-600 bg-green-100' :
+    averageRating >= 12 ? 'text-blue-600 bg-blue-100' :
+    averageRating >= 8 ? 'text-yellow-600 bg-yellow-100' :
+    'text-red-600 bg-red-100';
+
+  // Prepare chart data
   const chartData = {
     labels: skills.map(s => s.name),
     datasets: [{
@@ -108,20 +119,65 @@ export function PlayerSkillsModal({ player, onClose, onSave }: PlayerSkillsModal
     }]
   };
 
+  // Group skills by category for radar chart
+  const skillsByCategory = skills.reduce((acc, skill) => {
+    if (!acc[skill.category]) {
+      acc[skill.category] = [];
+    }
+    acc[skill.category].push(skill);
+    return acc;
+  }, {} as Record<string, PlayerSkill[]>);
+
+  const categoryAverages = Object.entries(skillsByCategory).map(([category, skills]) => {
+    const avg = skills.reduce((sum, skill) => sum + skill.value, 0) / skills.length;
+    return { category, value: avg };
+  });
+
+  const categoryRadarData = {
+    labels: categoryAverages.map(c => {
+      switch(c.category) {
+        case 'technical': return 'Technisch';
+        case 'physical': return 'Körperlich';
+        case 'mental': return 'Mental';
+        case 'social': return 'Sozial';
+        default: return c.category;
+      }
+    }),
+    datasets: [{
+      label: 'Kategorien',
+      data: categoryAverages.map(c => c.value),
+      backgroundColor: 'rgba(59, 130, 246, 0.2)',
+      borderColor: 'rgb(59, 130, 246)',
+      borderWidth: 2
+    }]
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg w-full max-w-5xl max-h-[90vh] flex flex-col">
-        <div className="p-4 border-b border-gray-200">
+        <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-blue-800 text-white">
           <div className="flex justify-between items-center">
-            <h2 className="text-lg font-semibold text-gray-900">
-              Fähigkeiten von {player.firstName} {player.lastName}
-            </h2>
+            <div className="flex items-center gap-3">
+              <div className={`w-12 h-12 rounded-full ${ratingColor.split(' ')[1]} flex items-center justify-center`}>
+                <span className={`text-xl font-bold ${ratingColor.split(' ')[0]}`}>
+                  {averageRating.toFixed(1)}
+                </span>
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold">
+                  Fähigkeiten von {player.firstName} {player.lastName}
+                </h2>
+                <p className="text-sm text-blue-100">
+                  {player.position || 'Keine Position'} • {getSkillLevel(averageRating)}
+                </p>
+              </div>
+            </div>
             <button 
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-500"
+              className="text-white hover:text-blue-200"
               disabled={loading}
             >
-              <X className="w-5 h-5" />
+              <X className="w-6 h-6" />
             </button>
           </div>
         </div>
@@ -133,6 +189,72 @@ export function PlayerSkillsModal({ player, onClose, onSave }: PlayerSkillsModal
               {error}
             </div>
           )}
+
+          {/* Skill Visualization */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div className="bg-white p-4 rounded-lg shadow-sm">
+              <h4 className="text-sm font-medium text-gray-700 mb-4">Kategorie-Übersicht</h4>
+              <div className="h-64">
+                <Radar 
+                  data={categoryRadarData}
+                  options={{
+                    scales: {
+                      r: {
+                        beginAtZero: true,
+                        max: 20,
+                        ticks: {
+                          stepSize: 5
+                        }
+                      }
+                    },
+                    plugins: {
+                      legend: {
+                        display: false
+                      }
+                    },
+                    maintainAspectRatio: false
+                  }}
+                />
+              </div>
+            </div>
+
+            <div className="bg-white p-4 rounded-lg shadow-sm">
+              <h4 className="text-sm font-medium text-gray-700 mb-4">Fähigkeiten-Übersicht</h4>
+              <div className="space-y-3">
+                {categories.map(category => {
+                  const categorySkills = skills.filter(s => s.category === category.id);
+                  if (categorySkills.length === 0) return null;
+                  
+                  const avgValue = categorySkills.reduce((sum, s) => sum + s.value, 0) / categorySkills.length;
+                  
+                  return (
+                    <div key={category.id} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <category.icon className="w-4 h-4 text-gray-600" />
+                        <span className="text-sm font-medium text-gray-700">{category.name}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-full bg-gray-200 rounded-full h-2.5 w-32">
+                          <div 
+                            className={`h-2.5 rounded-full ${
+                              avgValue >= 16 ? 'bg-green-500' :
+                              avgValue >= 12 ? 'bg-blue-500' :
+                              avgValue >= 8 ? 'bg-yellow-500' :
+                              'bg-red-500'
+                            }`}
+                            style={{ width: `${(avgValue / 20) * 100}%` }}
+                          ></div>
+                        </div>
+                        <span className={`text-sm font-medium ${getValueColor(avgValue)}`}>
+                          {avgValue.toFixed(1)}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
 
           <div className="flex gap-2 overflow-x-auto mb-4">
             {categories.map(category => {
@@ -224,46 +346,6 @@ export function PlayerSkillsModal({ player, onClose, onSave }: PlayerSkillsModal
                   </div>
                 </div>
               ))}
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
-            <div className="bg-white p-3 rounded-lg shadow-sm">
-              <h3 className="text-sm font-medium text-gray-900 mb-2">Fähigkeiten-Übersicht</h3>
-              <div className="h-[200px]">
-                <Line 
-                  data={chartData}
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                      y: {
-                        beginAtZero: true,
-                        max: 20
-                      }
-                    }
-                  }}
-                />
-              </div>
-            </div>
-
-            <div className="bg-white p-3 rounded-lg shadow-sm">
-              <h3 className="text-sm font-medium text-gray-900 mb-2">Fähigkeiten-Profil</h3>
-              <div className="h-[200px]">
-                <Radar 
-                  data={radarData}
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                      r: {
-                        beginAtZero: true,
-                        max: 20
-                      }
-                    }
-                  }}
-                />
-              </div>
-            </div>
           </div>
         </div>
 
