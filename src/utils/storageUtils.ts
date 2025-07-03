@@ -13,8 +13,8 @@ export async function uploadFileToSupabaseStorage(
   bucketName: string,
   file: Blob | File,
   options: {
-    path?: string;
     fileName?: string;
+    path?: string;
     contentType?: string;
     validateFileType?: boolean;
     allowedTypes?: string[];
@@ -24,8 +24,8 @@ export async function uploadFileToSupabaseStorage(
   try {
     // Set default options
     const {
-      path,
       fileName = `${Date.now()}.${getFileExtension(file)}`,
+      path = fileName, // Default path is just the filename
       contentType = file.type,
       validateFileType = true,
       allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'text/csv', 'application/json', 'application/pdf'],
@@ -48,20 +48,16 @@ export async function uploadFileToSupabaseStorage(
       );
     }
 
-    // Use the provided path or just the fileName
-    const filePath = path || fileName;
-
-    console.log(`Uploading file to ${bucketName}/${filePath}`, { 
+    console.log(`Uploading file to ${bucketName}/${path}`, { 
       fileSize: file.size, 
       fileType: file.type,
-      fileName,
-      path: filePath
+      path
     });
 
     // Upload the file
     const { error: uploadError } = await supabase.storage
       .from(bucketName)
-      .upload(filePath, file, {
+      .upload(path, file, {
         upsert: true,
         contentType
       });
@@ -78,7 +74,7 @@ export async function uploadFileToSupabaseStorage(
     // Get the public URL
     const { data: urlData } = supabase.storage
       .from(bucketName)
-      .getPublicUrl(filePath);
+      .getPublicUrl(path);
 
     return urlData.publicUrl;
   } catch (error) {
