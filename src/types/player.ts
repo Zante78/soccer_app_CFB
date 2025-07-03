@@ -8,8 +8,9 @@ export interface Player {
   photoUrl?: string;
   email?: string;
   phone?: string;
-  height?: number; // Added height in cm
-  weight?: number; // Added weight in kg
+  height?: number; // in cm
+  weight?: number; // in kg
+  strongFoot?: 'left' | 'right' | 'both'; // Added strong foot
   skills: PlayerSkill[];
   teamId?: string;
   teamName?: string; // New property to store the team name
@@ -68,4 +69,23 @@ export const defaultSkills: PlayerSkill[] = [
   { name: 'Teamfähigkeit', value: 10, category: 'social' },
   { name: 'Kommunikation', value: 10, category: 'social' },
   { name: 'Führungsqualität', value: 10, category: 'social' }
+];
+
+// Soccer positions
+export const PLAYER_POSITIONS = [
+  'Torwart',
+  'Innenverteidiger',
+  'Außenverteidiger',
+  'Rechtsverteidiger',
+  'Linksverteidiger',
+  'Defensives Mittelfeld',
+  'Zentrales Mittelfeld',
+  'Offensives Mittelfeld',
+  'Rechtes Mittelfeld',
+  'Linkes Mittelfeld',
+  'Rechtsaußen',
+  'Linksaußen',
+  'Hängende Spitze',
+  'Mittelstürmer',
+  'Stürmer'
 ];

@@ -17,7 +17,6 @@ import { supabase } from '../../services/database';
 import { Loader, Users, AlertTriangle } from 'lucide-react';
 import { DuplicateDetailsModal } from './DuplicateDetailsModal';
 import { TeamAssignmentModal } from './TeamAssignmentModal';
-import { TeamService } from '../../services/team.service';
 import { PlayerManagementModal } from './PlayerManagementModal';
 
 interface PlayerCardProps {
