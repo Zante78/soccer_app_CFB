@@ -136,10 +136,9 @@ export class ClubService {
       // Use the centralized storage utility to upload the file
       const publicUrl = await uploadFileToSupabaseStorage(
         'logos',
-        session.user.id,
         file,
         {
-          fileName,
+          path: fileName,
           validateFileType: true,
           allowedTypes: ['image/jpeg', 'image/png', 'image/gif'],
           maxSizeBytes: 5 * 1024 * 1024 // 5MB

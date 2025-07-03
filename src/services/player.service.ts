@@ -227,7 +227,7 @@ export class PlayerService {
 
       // Generate unique filename with player ID prefix
       const fileExt = file.name.split('.').pop();
-      const fileName = `${playerId}-${Date.now()}.${fileExt}`;
+      const fileName = `players/${playerId}-${Date.now()}.${fileExt}`;
 
       // Delete old photo if exists
       const { data: player } = await supabase
@@ -248,10 +248,9 @@ export class PlayerService {
       // Use the centralized storage utility to upload the file
       const publicUrl = await uploadFileToSupabaseStorage(
         'players',
-        session.user.id,
         file,
         {
-          fileName: `players/${fileName}`,
+          path: fileName,
           validateFileType: true,
           allowedTypes: ['image/jpeg', 'image/png', 'image/gif'],
           maxSizeBytes: 5 * 1024 * 1024 // 5MB

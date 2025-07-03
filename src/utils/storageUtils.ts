@@ -5,16 +5,15 @@ import { StorageError, ErrorCodes } from './errorUtils';
  * Uploads a file to Supabase Storage with proper validation and error handling
  * 
  * @param bucketName The name of the storage bucket
- * @param userId The user ID to use for folder structure
  * @param file The file to upload
  * @param options Additional options for the upload
  * @returns The public URL of the uploaded file
  */
 export async function uploadFileToSupabaseStorage(
   bucketName: string,
-  userId: string,
   file: Blob | File,
   options: {
+    path?: string;
     fileName?: string;
     contentType?: string;
     validateFileType?: boolean;
@@ -25,7 +24,8 @@ export async function uploadFileToSupabaseStorage(
   try {
     // Set default options
     const {
-      fileName = `${userId}-${Date.now()}.${getFileExtension(file)}`, // Modified to use userId as prefix
+      path,
+      fileName = `${Date.now()}.${getFileExtension(file)}`,
       contentType = file.type,
       validateFileType = true,
       allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'text/csv', 'application/json', 'application/pdf'],
@@ -48,14 +48,14 @@ export async function uploadFileToSupabaseStorage(
       );
     }
 
-    // Construct a valid file path that follows Supabase's expected format
-    // Format: userId/fileName
-    const filePath = `${userId}/${fileName}`;
+    // Use the provided path or just the fileName
+    const filePath = path || fileName;
 
     console.log(`Uploading file to ${bucketName}/${filePath}`, { 
       fileSize: file.size, 
       fileType: file.type,
-      fileName
+      fileName,
+      path: filePath
     });
 
     // Upload the file
