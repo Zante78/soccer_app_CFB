@@ -8,6 +8,8 @@ export interface Player {
   photoUrl?: string;
   email?: string;
   phone?: string;
+  height?: number; // Added height in cm
+  weight?: number; // Added weight in kg
   skills: PlayerSkill[];
   teamId?: string;
   teamName?: string; // New property to store the team name

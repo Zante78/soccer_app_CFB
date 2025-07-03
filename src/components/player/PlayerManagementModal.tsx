@@ -22,6 +22,8 @@ export function PlayerManagementModal({ player, onClose, onSave }: PlayerManagem
     email: player?.email || '',
     phone: player?.phone || '',
     dateOfBirth: player?.dateOfBirth || '',
+    height: player?.height || undefined,
+    weight: player?.weight || undefined,
     skills: player?.skills || []
   });
   const [selectedTeamId, setSelectedTeamId] = useState<string>(player?.teamId || '');
@@ -70,6 +72,8 @@ export function PlayerManagementModal({ player, onClose, onSave }: PlayerManagem
         email: formData.email,
         phone: formData.phone,
         dateOfBirth: formData.dateOfBirth,
+        height: formData.height,
+        weight: formData.weight,
         skills: formData.skills
       });
       setSuccessMessage('Spielerdaten erfolgreich gespeichert');
@@ -299,6 +303,35 @@ export function PlayerManagementModal({ player, onClose, onSave }: PlayerManagem
                     value={formData.dateOfBirth}
                     onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Größe (cm)
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.height || ''}
+                    onChange={(e) => setFormData({ ...formData, height: e.target.value ? parseInt(e.target.value) : undefined })}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    min="100"
+                    max="250"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Gewicht (kg)
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.weight || ''}
+                    onChange={(e) => setFormData({ ...formData, weight: e.target.value ? parseInt(e.target.value) : undefined })}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    min="30"
+                    max="150"
                   />
                 </div>
               </div>
