@@ -14,6 +14,7 @@ import { useNotes } from '../../hooks/useNotes';
 import NotesPanel from '../notes/NotesPanel';
 import { usePlayerStore } from '../../store/playerStore';
 import { supabase } from '../../services/database';
+import { TeamService } from '../../services/team.service';
 import { Loader, Users, AlertTriangle } from 'lucide-react';
 import { DuplicateDetailsModal } from './DuplicateDetailsModal';
 import { TeamAssignmentModal } from './TeamAssignmentModal';
