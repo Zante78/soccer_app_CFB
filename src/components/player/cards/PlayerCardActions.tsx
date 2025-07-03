@@ -1,11 +1,12 @@
 import React, { memo } from 'react';
-import { Edit, Upload, Trash2, FileText, Settings } from 'lucide-react';
+import { Edit, Upload, Trash2, FileText, Settings, Star } from 'lucide-react';
 
 interface PlayerCardActionsProps {
   onEdit: () => void;
   onDelete: () => void;
   onNotes: () => void;
   onManagePlayer: () => void;
+  onViewSkills?: () => void; // New prop for viewing skills
   onPhotoUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   fileInputRef: React.RefObject<HTMLInputElement>;
   disabled?: boolean;
@@ -16,6 +17,7 @@ export const PlayerCardActions = memo(function PlayerCardActions({
   onDelete, 
   onNotes,
   onManagePlayer,
+  onViewSkills,
   onPhotoUpload,
   fileInputRef,
   disabled = false
@@ -48,6 +50,23 @@ export const PlayerCardActions = memo(function PlayerCardActions({
           <FileText className="w-4 h-4" aria-hidden="true" />
           <span className="sr-only">Notizen</span>
         </button>
+
+        {onViewSkills && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onViewSkills();
+            }}
+            onKeyDown={(e) => handleKeyDown(e, onViewSkills)}
+            className="p-2 bg-white text-yellow-600 rounded-full hover:bg-yellow-50 shadow-lg transform hover:scale-110 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 disabled:opacity-50"
+            title="Fähigkeiten anzeigen"
+            aria-label="Fähigkeiten anzeigen"
+            disabled={disabled}
+          >
+            <Star className="w-4 h-4" aria-hidden="true" />
+            <span className="sr-only">Fähigkeiten</span>
+          </button>
+        )}
 
         <button
           onClick={(e) => {

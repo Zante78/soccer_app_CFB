@@ -230,6 +230,7 @@ export function PlayerCard({
       document.body.appendChild(toast);
       setTimeout(() => toast.remove(), 3000);
       
+      setShowTeamAssignmentModal(false);
     } catch (error) {
       console.error('Failed to assign team:', error);
       throw error;
@@ -327,6 +328,7 @@ export function PlayerCard({
           onDelete={handleDelete}
           onNotes={() => setShowNotesModal(true)}
           onManagePlayer={() => setShowManagementModal(true)}
+          onViewSkills={toggleSkillsModal} // Add this prop to open skills modal
           onPhotoUpload={handlePhotoUpload}
           fileInputRef={fileInputRef}
           disabled={uploading}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Player } from '../../../types/player';
-import { ChevronDown, ChevronUp, Users, Calendar, Ruler, Weight } from 'lucide-react';
+import { ChevronDown, ChevronUp, Users, Calendar, Ruler, Weight, Footprints } from 'lucide-react';
 
 interface ExpandedViewProps {
   player: Player;
@@ -16,6 +16,37 @@ export function ExpandedView({ player }: ExpandedViewProps) {
     return 'text-red-600';
   };
 
+  // Calculate age from date of birth
+  const calculateAge = (dateOfBirth?: string): number | null => {
+    if (!dateOfBirth) return null;
+    
+    const birthDate = new Date(dateOfBirth);
+    const today = new Date();
+    
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDifference = today.getMonth() - birthDate.getMonth();
+    
+    // If birthday hasn't occurred yet this year, subtract one year
+    if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    
+    return age;
+  };
+
+  const playerAge = calculateAge(player.dateOfBirth);
+
+  // Get strong foot display text
+  const getStrongFootText = (foot?: 'left' | 'right' | 'both'): string => {
+    if (!foot) return 'Nicht angegeben';
+    switch (foot) {
+      case 'left': return 'Links';
+      case 'right': return 'Rechts';
+      case 'both': return 'Beidfüßig';
+      default: return 'Nicht angegeben';
+    }
+  };
+
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-4">
@@ -27,19 +58,19 @@ export function ExpandedView({ player }: ExpandedViewProps) {
           
           {/* Team information */}
           {player.teamName ? (
-            <div className="mt-1 flex items-center text-sm text-blue-600">
+            <div className="mt-2 flex items-center text-sm text-blue-600">
               <Users className="w-4 h-4 mr-1" />
               <span>Team: {player.teamName}</span>
             </div>
           ) : (
-            <p className="mt-1 text-sm text-gray-500 italic">Keinem Team zugewiesen</p>
+            <p className="mt-2 text-sm text-gray-500 italic">Keinem Team zugewiesen</p>
           )}
-
+          
           {/* Additional Player Info */}
-          {player.dateOfBirth && (
-            <div className="mt-1 flex items-center text-sm text-gray-500">
+          {player.dateOfBirth && playerAge !== null && (
+            <div className="mt-2 flex items-center text-sm text-gray-500">
               <Calendar className="w-4 h-4 mr-1" />
-              <span>Geboren: {new Date(player.dateOfBirth).toLocaleDateString()}</span>
+              <span>Alter: {playerAge} Jahre</span>
             </div>
           )}
           {player.height && (
@@ -52,6 +83,12 @@ export function ExpandedView({ player }: ExpandedViewProps) {
             <div className="mt-1 flex items-center text-sm text-gray-500">
               <Weight className="w-4 h-4 mr-1" />
               <span>Gewicht: {player.weight} kg</span>
+            </div>
+          )}
+          {player.strongFoot && (
+            <div className="mt-1 flex items-center text-sm text-gray-500">
+              <Footprints className="w-4 h-4 mr-1" />
+              <span>Starker Fuß: {getStrongFootText(player.strongFoot)}</span>
             </div>
           )}
         </div>
