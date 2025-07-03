@@ -328,7 +328,6 @@ export function PlayerCard({
           onDelete={handleDelete}
           onNotes={() => setShowNotesModal(true)}
           onManagePlayer={() => setShowManagementModal(true)}
-          onViewSkills={toggleSkillsModal} // Add this prop to open skills modal
           onPhotoUpload={handlePhotoUpload}
           fileInputRef={fileInputRef}
           disabled={uploading}

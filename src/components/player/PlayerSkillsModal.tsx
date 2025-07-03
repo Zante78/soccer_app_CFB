@@ -164,15 +164,6 @@ export function PlayerSkillsModal({ player, onClose, onSave }: PlayerSkillsModal
     }]
   };
 
-  // Log chart data for debugging
-  console.log('Chart Data:', { 
-    chartData, 
-    radarData, 
-    categoryRadarData, 
-    skills,
-    chartsVisible
-  });
-
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg w-full max-w-5xl max-h-[90vh] flex flex-col">
