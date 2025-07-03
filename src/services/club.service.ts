@@ -114,9 +114,9 @@ export class ClubService {
         throw new Error('Sie müssen angemeldet sein');
       }
 
-      // Generate unique filename
+      // Generate unique filename with subdirectory
       const fileExt = file.name.split('.').pop();
-      const fileName = `club-logo-${Date.now()}.${fileExt}`;
+      const fileName = `club_logos/club-logo-${Date.now()}.${fileExt}`;
 
       // Delete old logo if exists
       const { data: settings } = await supabase
@@ -125,11 +125,18 @@ export class ClubService {
         .single();
 
       if (settings?.logo_url) {
-        const oldFileName = settings.logo_url.split('/').pop();
-        if (oldFileName) {
-          await supabase.storage
-            .from('logos')
-            .remove([oldFileName]);
+        // Extract the file path from the full URL
+        // URL format: https://[project].supabase.co/storage/v1/object/public/logos/club_logos/filename.ext
+        const urlParts = settings.logo_url.split('/');
+        const bucketIndex = urlParts.findIndex(part => part === 'logos');
+        if (bucketIndex !== -1 && bucketIndex < urlParts.length - 1) {
+          // Get everything after 'logos/' in the URL
+          const filePath = urlParts.slice(bucketIndex + 1).join('/');
+          if (filePath) {
+            await supabase.storage
+              .from('logos')
+              .remove([filePath]);
+          }
         }
       }
 
