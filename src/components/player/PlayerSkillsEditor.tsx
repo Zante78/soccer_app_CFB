@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PlayerSkill } from '../../types/player';
-import { Save, Loader, AlertCircle, ChartBar, BarChart, Radar as RadarIcon } from 'lucide-react';
+import { Save, Loader, AlertCircle, BarChart as ChartBar, BarChart, Radar as RadarIcon } from 'lucide-react';
 import { Radar } from 'react-chartjs-2';
 import '../player/charts/ChartConfig';
 
