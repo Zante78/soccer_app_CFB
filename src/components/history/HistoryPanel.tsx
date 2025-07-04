@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useHistory } from '../../hooks/useHistory';
 import { Line } from 'react-chartjs-2';
 import { DatabaseConnectionError } from '../common/DatabaseConnectionError';
-import { Loader, Calendar } from 'lucide-react';
+import { Loader, Calendar, BarChart2, List } from 'lucide-react';
+import { ProgressionTable } from './ProgressionTable';
 
 interface HistoryPanelProps {
   playerId: string;
@@ -14,6 +15,7 @@ export function HistoryPanel({ playerId }: HistoryPanelProps) {
     startDate: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     endDate: new Date().toISOString().split('T')[0]
   });
+  const [viewMode, setViewMode] = useState<'chart' | 'table'>('chart');
 
   const { history, loading, error, loadHistory } = useHistory(playerId);
 
@@ -23,7 +25,7 @@ export function HistoryPanel({ playerId }: HistoryPanelProps) {
       startDate: dateRange.startDate,
       endDate: dateRange.endDate
     });
-  }, [playerId, selectedType, dateRange]);
+  }, [playerId, selectedType, dateRange, loadHistory]);
 
   if (error?.includes('Failed to fetch')) {
     return <DatabaseConnectionError />;
@@ -83,13 +85,31 @@ export function HistoryPanel({ playerId }: HistoryPanelProps) {
             />
           </div>
         </div>
+
+        {/* View mode toggle */}
+        <div className="flex bg-gray-100 rounded-md p-1">
+          <button
+            onClick={() => setViewMode('chart')}
+            className={`p-2 rounded-md ${viewMode === 'chart' ? 'bg-white shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+            title="Diagramm-Ansicht"
+          >
+            <BarChart2 className="w-5 h-5" />
+          </button>
+          <button
+            onClick={() => setViewMode('table')}
+            className={`p-2 rounded-md ${viewMode === 'table' ? 'bg-white shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+            title="Tabellen-Ansicht"
+          >
+            <List className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
       {history.length === 0 ? (
         <div className="text-center text-gray-500 py-12">
           Keine Verlaufsdaten für den ausgewählten Zeitraum verfügbar
         </div>
-      ) : (
+      ) : viewMode === 'chart' ? (
         <div className="bg-white p-6 rounded-lg shadow">
           <Line 
             data={chartData}
@@ -111,6 +131,10 @@ export function HistoryPanel({ playerId }: HistoryPanelProps) {
               }
             }}
           />
+        </div>
+      ) : (
+        <div className="bg-white p-6 rounded-lg shadow overflow-x-auto">
+          <ProgressionTable history={history} type={selectedType} />
         </div>
       )}
     </div>

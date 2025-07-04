@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PlayerSkill } from '../../types/player';
 import { Save, Loader, AlertCircle } from 'lucide-react';
 import { Radar } from 'react-chartjs-2';
 import '../player/charts/ChartConfig';
+import { CircularProgress } from './CircularProgress';
 
 interface PlayerSkillsEditorProps {
   skills: PlayerSkill[];
@@ -14,6 +15,11 @@ export function PlayerSkillsEditor({ skills, onSave, saving = false }: PlayerSki
   const [editedSkills, setEditedSkills] = useState<PlayerSkill[]>(skills);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  // Add useEffect to ensure reactivity when skills prop changes
+  useEffect(() => {
+    setEditedSkills(skills);
+  }, [skills]);
 
   const handleSkillChange = (index: number, value: number) => {
     setEditedSkills(prev => {
@@ -64,13 +70,6 @@ export function PlayerSkillsEditor({ skills, onSave, saving = false }: PlayerSki
     return 'text-red-600';
   };
 
-  const getValueBgColor = (value: number) => {
-    if (value >= 16) return 'bg-green-100 border-green-300';
-    if (value >= 12) return 'bg-blue-100 border-blue-300';
-    if (value >= 8) return 'bg-yellow-100 border-yellow-300';
-    return 'bg-red-100 border-red-300';
-  };
-
   const categories = ['technical', 'physical', 'mental', 'social'];
 
   // Calculate category averages for summary and radar chart
@@ -92,22 +91,6 @@ export function PlayerSkillsEditor({ skills, onSave, saving = false }: PlayerSki
     datasets: [{
       label: 'Fähigkeiten',
       data: editedSkills.map(skill => skill.value),
-      backgroundColor: 'rgba(59, 130, 246, 0.2)',
-      borderColor: 'rgb(59, 130, 246)',
-      borderWidth: 2,
-      pointBackgroundColor: 'rgb(59, 130, 246)',
-      pointBorderColor: '#fff',
-      pointHoverBackgroundColor: '#fff',
-      pointHoverBorderColor: 'rgb(59, 130, 246)'
-    }]
-  };
-
-  // Prepare category radar chart data
-  const categoryRadarData = {
-    labels: categoryAverages.map(cat => cat.name),
-    datasets: [{
-      label: 'Kategorien',
-      data: categoryAverages.map(cat => cat.average),
       backgroundColor: 'rgba(59, 130, 246, 0.2)',
       borderColor: 'rgb(59, 130, 246)',
       borderWidth: 2,
@@ -140,14 +123,13 @@ export function PlayerSkillsEditor({ skills, onSave, saving = false }: PlayerSki
 
       {/* Overall Rating Circle */}
       <div className="flex justify-center mb-6">
-        <div className={`w-32 h-32 rounded-full ${getValueBgColor(overallAverage)} border-4 flex items-center justify-center shadow-lg`}>
-          <div className="text-center">
-            <div className={`text-4xl font-bold ${getValueColor(overallAverage)}`}>
-              {overallAverage.toFixed(1)}
-            </div>
-            <div className="text-xs text-gray-600">GESAMT</div>
-          </div>
-        </div>
+        <CircularProgress 
+          value={overallAverage} 
+          maxValue={20} 
+          size={160} 
+          strokeWidth={10}
+          label="GESAMT"
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
