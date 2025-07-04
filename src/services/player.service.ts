@@ -170,6 +170,18 @@ export class PlayerService {
         updateData.photo_url = updates.photoUrl;
       }
 
+      if (updates.height !== undefined) {
+        updateData.height = updates.height;
+      }
+
+      if (updates.weight !== undefined) {
+        updateData.weight = updates.weight;
+      }
+
+      if (updates.strongFoot !== undefined) {
+        updateData.strong_foot = updates.strongFoot;
+      }
+
       const { data, error } = await supabase
         .from('players')
         .update(updateData)
@@ -436,6 +448,9 @@ export class PlayerService {
       photoUrl: data.photo_url || null,
       email: data.email || null,
       phone: data.phone || null,
+      height: data.height || null,
+      weight: data.weight || null,
+      strongFoot: data.strong_foot || null,
       skills,
       teamMemberships,
       teamId,
