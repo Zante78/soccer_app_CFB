@@ -122,16 +122,41 @@ export function PlayerSkillsEditor({ skills, onSave, saving = false }: PlayerSki
       )}
 
       {/* Overall Rating Circle */}
-      <div className="flex justify-center mb-6">
-        <CircularProgress 
-          value={overallAverage} 
-          maxValue={20} 
-          size={160} 
-          strokeWidth={10}
-          label="GESAMT"
-        />
+      <div className="flex flex-col md:flex-row items-center justify-center gap-8 mb-6">
+        <div className="flex-shrink-0">
+          <CircularProgress 
+            value={overallAverage} 
+            maxValue={20} 
+            size={180} 
+            strokeWidth={12}
+            label="GESAMT"
+          />
+        </div>
+        
+        {/* Category Summary as Legend */}
+        <div className="bg-white rounded-lg shadow-sm p-4 max-w-md">
+          <h3 className="text-lg font-medium text-gray-900 mb-3">Kategorien Übersicht</h3>
+          <div className="space-y-3">
+            {categoryAverages.map(category => (
+              <div key={category.category} className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className={`w-3 h-3 rounded-full ${
+                    category.average >= 16 ? 'bg-green-600' :
+                    category.average >= 12 ? 'bg-blue-600' :
+                    category.average >= 8 ? 'bg-yellow-500' :
+                    'bg-red-600'
+                  }`}></div>
+                  <span className="text-sm font-medium text-gray-700">{category.name}</span>
+                </div>
+                <span className={`text-sm font-bold ${getValueColor(category.average)}`}>
+                  {category.average.toFixed(1)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
-
+      
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Radar Charts Section */}
         <div className="bg-white rounded-lg shadow-sm p-6">
@@ -173,42 +198,6 @@ export function PlayerSkillsEditor({ skills, onSave, saving = false }: PlayerSki
                 }
               }}
             />
-          </div>
-        </div>
-
-        {/* Category Summary Section */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Kategorien Übersicht</h3>
-          <div className="space-y-4">
-            {categoryAverages.map(category => (
-              <div key={category.category} className="border-b border-gray-200 pb-4 last:border-0 last:pb-0">
-                <div className="flex justify-between items-center mb-2">
-                  <h4 className="font-medium text-gray-800">{category.name}</h4>
-                  <span className={`font-bold ${getValueColor(category.average)}`}>
-                    {category.average.toFixed(1)}
-                  </span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
-                  <div 
-                    className={`h-2.5 rounded-full ${
-                      category.average >= 16 ? 'bg-green-600' :
-                      category.average >= 12 ? 'bg-blue-600' :
-                      category.average >= 8 ? 'bg-yellow-500' :
-                      'bg-red-600'
-                    }`}
-                    style={{ width: `${(category.average / 20) * 100}%` }}
-                  ></div>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  {category.skills.map(skill => (
-                    <div key={skill.name} className="flex justify-between items-center text-sm">
-                      <span className="text-gray-600">{skill.name}</span>
-                      <span className={getValueColor(skill.value)}>{skill.value.toFixed(1)}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
           </div>
         </div>
 
