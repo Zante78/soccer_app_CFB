@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PlayerSkill } from '../../types/player';
-import { Save, Loader, AlertCircle, BarChart as ChartBar, BarChart, Radar as RadarIcon } from 'lucide-react';
+import { Save, Loader, AlertCircle } from 'lucide-react';
 import { Radar } from 'react-chartjs-2';
 import '../player/charts/ChartConfig';
 
@@ -14,7 +14,6 @@ export function PlayerSkillsEditor({ skills, onSave, saving = false }: PlayerSki
   const [editedSkills, setEditedSkills] = useState<PlayerSkill[]>(skills);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [viewMode, setViewMode] = useState<'edit' | 'radar' | 'summary'>('edit');
 
   const handleSkillChange = (index: number, value: number) => {
     setEditedSkills(prev => {
@@ -65,6 +64,13 @@ export function PlayerSkillsEditor({ skills, onSave, saving = false }: PlayerSki
     return 'text-red-600';
   };
 
+  const getValueBgColor = (value: number) => {
+    if (value >= 16) return 'bg-green-100 border-green-300';
+    if (value >= 12) return 'bg-blue-100 border-blue-300';
+    if (value >= 8) return 'bg-yellow-100 border-yellow-300';
+    return 'bg-red-100 border-red-300';
+  };
+
   const categories = ['technical', 'physical', 'mental', 'social'];
 
   // Calculate category averages for summary and radar chart
@@ -80,11 +86,27 @@ export function PlayerSkillsEditor({ skills, onSave, saving = false }: PlayerSki
     };
   });
 
-  // Prepare radar chart data
-  const radarData = {
+  // Prepare detailed radar chart data using individual skills
+  const detailedRadarData = {
+    labels: editedSkills.map(skill => skill.name),
+    datasets: [{
+      label: 'Fähigkeiten',
+      data: editedSkills.map(skill => skill.value),
+      backgroundColor: 'rgba(59, 130, 246, 0.2)',
+      borderColor: 'rgb(59, 130, 246)',
+      borderWidth: 2,
+      pointBackgroundColor: 'rgb(59, 130, 246)',
+      pointBorderColor: '#fff',
+      pointHoverBackgroundColor: '#fff',
+      pointHoverBorderColor: 'rgb(59, 130, 246)'
+    }]
+  };
+
+  // Prepare category radar chart data
+  const categoryRadarData = {
     labels: categoryAverages.map(cat => cat.name),
     datasets: [{
-      label: 'Fähigkeiten nach Kategorie',
+      label: 'Kategorien',
       data: categoryAverages.map(cat => cat.average),
       backgroundColor: 'rgba(59, 130, 246, 0.2)',
       borderColor: 'rgb(59, 130, 246)',
@@ -116,91 +138,25 @@ export function PlayerSkillsEditor({ skills, onSave, saving = false }: PlayerSki
         </div>
       )}
 
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <div className={`text-lg font-semibold ${getValueColor(overallAverage)}`}>
-            Ø {overallAverage.toFixed(1)}
+      {/* Overall Rating Circle */}
+      <div className="flex justify-center mb-6">
+        <div className={`w-32 h-32 rounded-full ${getValueBgColor(overallAverage)} border-4 flex items-center justify-center shadow-lg`}>
+          <div className="text-center">
+            <div className={`text-4xl font-bold ${getValueColor(overallAverage)}`}>
+              {overallAverage.toFixed(1)}
+            </div>
+            <div className="text-xs text-gray-600">GESAMT</div>
           </div>
-          <span className="text-sm text-gray-500">Gesamtdurchschnitt</span>
-        </div>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => setViewMode('edit')}
-            className={`p-2 rounded-md ${viewMode === 'edit' ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-100'}`}
-            title="Bearbeiten"
-          >
-            <BarChart className="w-5 h-5" />
-          </button>
-          <button
-            type="button"
-            onClick={() => setViewMode('radar')}
-            className={`p-2 rounded-md ${viewMode === 'radar' ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-100'}`}
-            title="Radar-Diagramm"
-          >
-            <RadarIcon className="w-5 h-5" />
-          </button>
-          <button
-            type="button"
-            onClick={() => setViewMode('summary')}
-            className={`p-2 rounded-md ${viewMode === 'summary' ? 'bg-blue-100 text-blue-600' : 'text-gray-600 hover:bg-gray-100'}`}
-            title="Zusammenfassung"
-          >
-            <ChartBar className="w-5 h-5" />
-          </button>
         </div>
       </div>
 
-      {viewMode === 'edit' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {categories.map(category => {
-            const categorySkills = getSkillsByCategory(category);
-            if (categorySkills.length === 0) return null;
-
-            return (
-              <div key={category} className="bg-white rounded-lg shadow-sm p-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">
-                  {getCategoryName(category)}
-                </h3>
-                <div className="space-y-4">
-                  {categorySkills.map((skill, idx) => (
-                    <div key={skill.name} className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <label className="text-sm font-medium text-gray-700">
-                          {skill.name}
-                        </label>
-                        <span className={`text-sm font-medium ${getValueColor(skill.value)}`}>
-                          {skill.value.toFixed(1)}
-                        </span>
-                      </div>
-                      <input
-                        type="range"
-                        min="0"
-                        max="20"
-                        step="0.5"
-                        value={skill.value}
-                        onChange={(e) => handleSkillChange(
-                          editedSkills.findIndex(s => s.name === skill.name && s.category === skill.category),
-                          parseFloat(e.target.value)
-                        )}
-                        className="w-full"
-                        disabled={saving}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {viewMode === 'radar' && (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Radar Charts Section */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Fähigkeitsprofil</h3>
           <div className="h-[400px] w-full">
             <Radar 
-              data={radarData} 
+              data={detailedRadarData} 
               options={{
                 responsive: true,
                 maintainAspectRatio: false,
@@ -209,11 +165,14 @@ export function PlayerSkillsEditor({ skills, onSave, saving = false }: PlayerSki
                     beginAtZero: true,
                     max: 20,
                     ticks: {
-                      stepSize: 5
+                      stepSize: 5,
+                      font: {
+                        size: 10
+                      }
                     },
                     pointLabels: {
                       font: {
-                        size: 12
+                        size: 10
                       }
                     }
                   }
@@ -234,11 +193,10 @@ export function PlayerSkillsEditor({ skills, onSave, saving = false }: PlayerSki
             />
           </div>
         </div>
-      )}
 
-      {viewMode === 'summary' && (
+        {/* Category Summary Section */}
         <div className="bg-white rounded-lg shadow-sm p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Fähigkeiten Zusammenfassung</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Kategorien Übersicht</h3>
           <div className="space-y-4">
             {categoryAverages.map(category => (
               <div key={category.category} className="border-b border-gray-200 pb-4 last:border-0 last:pb-0">
@@ -271,7 +229,48 @@ export function PlayerSkillsEditor({ skills, onSave, saving = false }: PlayerSki
             ))}
           </div>
         </div>
-      )}
+
+        {/* Skills Editor Section */}
+        {categories.map(category => {
+          const categorySkills = getSkillsByCategory(category);
+          if (categorySkills.length === 0) return null;
+
+          return (
+            <div key={category} className="bg-white rounded-lg shadow-sm p-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                {getCategoryName(category)}
+              </h3>
+              <div className="space-y-4">
+                {categorySkills.map((skill, idx) => (
+                  <div key={skill.name} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium text-gray-700">
+                        {skill.name}
+                      </label>
+                      <span className={`text-sm font-medium ${getValueColor(skill.value)}`}>
+                        {skill.value.toFixed(1)}
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="20"
+                      step="0.5"
+                      value={skill.value}
+                      onChange={(e) => handleSkillChange(
+                        editedSkills.findIndex(s => s.name === skill.name && s.category === skill.category),
+                        parseFloat(e.target.value)
+                      )}
+                      className="w-full"
+                      disabled={saving}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
 
       <div className="flex justify-end">
         <button
