@@ -258,7 +258,19 @@ export function PlayerManagementModal({ player, onClose, onSave }: PlayerManagem
                   {player ? `${player.firstName} ${player.lastName}` : 'Neuer Spieler'}
                 </h2>
                 <div className="flex flex-wrap items-center gap-3 text-blue-100 mt-1">
-                  {player?.position && <span>{player.position}</span>}
+                  {player?.position && (
+                    <span className="flex items-center gap-1">
+                      <Trophy className="w-3.5 h-3.5" /> {player.position}
+                    </span>
+                  )}
+                  
+                  {player?.strongFoot && (
+                    <span className="flex items-center gap-1">
+                      <Footprints className="w-3.5 h-3.5" /> 
+                      {player.strongFoot === 'left' ? 'Links' : 
+                       player.strongFoot === 'right' ? 'Rechts' : 'Beidfüßig'}
+                    </span>
+                  )}
                   
                   {playerAge > 0 && (
                     <span className="flex items-center gap-1">
@@ -275,14 +287,6 @@ export function PlayerManagementModal({ player, onClose, onSave }: PlayerManagem
                   {player?.weight && (
                     <span className="flex items-center gap-1">
                       <Weight className="w-3.5 h-3.5" /> {player.weight} kg
-                    </span>
-                  )}
-                  
-                  {player?.strongFoot && (
-                    <span className="flex items-center gap-1">
-                      <Footprints className="w-3.5 h-3.5" /> 
-                      {player.strongFoot === 'left' ? 'Links' : 
-                       player.strongFoot === 'right' ? 'Rechts' : 'Beidfüßig'}
                     </span>
                   )}
                   
