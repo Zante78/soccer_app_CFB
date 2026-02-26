@@ -17,10 +17,6 @@ function App() {
   const [authChecked, setAuthChecked] = React.useState(false);
 
   useEffect(() => {
-    // DEVELOPMENT MODE: Bypass authentication for testing
-    setSession(true);
-    setAuthChecked(true);
-    
     const authService = AuthService.getInstance();
 
     authService.onSessionChange((hasSession) => {
@@ -40,7 +36,7 @@ function App() {
       }
     };
 
-    // checkAuth(); // Disabled for development
+    checkAuth();
 
     return () => {
       authService.destroy();
@@ -68,10 +64,9 @@ function App() {
     );
   }
 
-  // DEVELOPMENT MODE: Bypass authentication
-  // if (!session) {
-  //   return <SignInForm />;
-  // }
+  if (!session) {
+    return <SignInForm />;
+  }
 
   return (
     <ErrorBoundary>
