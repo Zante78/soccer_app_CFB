@@ -1,9 +1,12 @@
 import { createBrowserClient } from '@supabase/ssr';
 import type { Database } from '@packages/shared-types';
 
-export function createClient() {
+export function createSupabaseBrowserClient() {
   return createBrowserClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 }
+
+// Legacy alias for backwards compatibility
+export const createClient = createSupabaseBrowserClient;

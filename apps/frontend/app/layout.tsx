@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { AppProviders } from "@/components/providers/app-providers";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -20,7 +21,7 @@ export default function RootLayout({
   return (
     <html lang="de">
       <body className={`${inter.variable} font-sans antialiased bg-gray-50`}>
-        {children}
+        <AppProviders>{children}</AppProviders>
       </body>
     </html>
   );

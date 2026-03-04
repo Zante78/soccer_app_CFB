@@ -2,7 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import type { Database } from '@packages/shared-types';
 
-export async function createClient() {
+export async function createSupabaseServerClient() {
   const cookieStore = await cookies();
 
   return createServerClient<Database>(
@@ -28,3 +28,6 @@ export async function createClient() {
     }
   );
 }
+
+// Legacy alias for backwards compatibility
+export const createClient = createSupabaseServerClient;
