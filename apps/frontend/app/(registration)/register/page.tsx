@@ -3,6 +3,12 @@
 import { useMultiStepForm } from '@/lib/hooks/useMultiStepForm';
 import { Step1Welcome } from '@/components/guided-story/step-1-welcome';
 import { Step2PlayerSelection } from '@/components/guided-story/step-2-player-selection';
+import { Step3PlayerData } from '@/components/guided-story/step-3-player-data';
+import { Step4Upload } from '@/components/guided-story/step-4-upload';
+import { Step5Eligibility } from '@/components/guided-story/step-5-eligibility';
+import { Step6Consent } from '@/components/guided-story/step-6-consent';
+import { Step7Payment } from '@/components/guided-story/step-7-payment';
+import { Step8Completion } from '@/components/guided-story/step-8-completion';
 
 export default function RegisterPage() {
   const {
@@ -27,10 +33,14 @@ export default function RegisterPage() {
     nextStep();
   };
 
+  // Generate demo magic link (in production: from Supabase)
+  const registrationId = formData.registration_id || 'REG-' + Date.now();
+  const magicLink = `${typeof window !== 'undefined' ? window.location.origin : ''}/status/${registrationId}`;
+
   return (
     <div className="min-h-screen py-12 px-4">
       {/* Progress Bar */}
-      {!isFirstStep && (
+      {!isFirstStep && currentStep < 8 && (
         <div className="max-w-2xl mx-auto mb-8">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-gray-700">
@@ -61,40 +71,69 @@ export default function RegisterPage() {
         )}
 
         {currentStep === 3 && (
-          <div className="card text-center">
-            <h2 className="text-2xl font-bold mb-4">Step 3: Data Input</h2>
-            <p className="text-gray-600 mb-6">Coming soon...</p>
-            <div className="flex gap-4">
-              <button onClick={prevStep} className="btn-secondary flex-1">
-                Zurück
-              </button>
-              <button onClick={() => handleStepData({})} className="btn-primary flex-1">
-                Weiter
-              </button>
-            </div>
-          </div>
+          <Step3PlayerData
+            onNext={handleStepData}
+            onBack={prevStep}
+            initialData={formData}
+          />
         )}
 
-        {currentStep > 3 && (
-          <div className="card text-center">
-            <h2 className="text-2xl font-bold mb-4">Step {currentStep}</h2>
-            <p className="text-gray-600 mb-6">
-              Weitere Steps werden in Phase 2 implementiert
-            </p>
-            <div className="flex gap-4">
-              <button onClick={prevStep} className="btn-secondary flex-1">
-                Zurück
-              </button>
-              <button onClick={nextStep} className="btn-primary flex-1">
-                Weiter
-              </button>
-            </div>
-          </div>
+        {currentStep === 4 && (
+          <Step4Upload
+            onNext={handleStepData}
+            onBack={prevStep}
+          />
+        )}
+
+        {currentStep === 5 && (
+          <Step5Eligibility
+            onNext={handleStepData}
+            onBack={prevStep}
+            playerData={{
+              birth_date: formData.birth_date || '2000-01-01',
+              team_id: formData.team_id || 'team-1-herren',
+              previous_club: formData.previous_club,
+              previous_team_deregistration_date: formData.previous_team_deregistration_date,
+              previous_team_last_game: formData.previous_team_last_game,
+            }}
+          />
+        )}
+
+        {currentStep === 6 && (
+          <Step6Consent
+            onNext={handleStepData}
+            onBack={prevStep}
+            playerData={{
+              first_name: formData.first_name || '',
+              last_name: formData.last_name || '',
+              birth_date: formData.birth_date || '',
+              team_id: formData.team_id || '',
+            }}
+          />
+        )}
+
+        {currentStep === 7 && (
+          <Step7Payment
+            onNext={(data) => {
+              updateFormData({ ...data, registration_id: registrationId });
+              nextStep();
+            }}
+            onBack={prevStep}
+            registrationId={registrationId}
+          />
+        )}
+
+        {currentStep === 8 && (
+          <Step8Completion
+            magicLink={magicLink}
+            registrationId={registrationId}
+            playerName={`${formData.first_name || ''} ${formData.last_name || ''}`.trim() || 'Spieler'}
+          />
         )}
       </div>
 
       {/* Debug Info (nur Development) */}
-      {process.env.NODE_ENV === 'development' && (
+      {process.env.NODE_ENV === 'development' && currentStep < 8 && (
         <div className="fixed bottom-4 right-4 bg-white p-4 rounded-lg shadow-lg border border-gray-200 max-w-sm">
           <p className="text-xs font-mono text-gray-600">
             <strong>Debug:</strong> Step {currentStep}/{totalSteps}
