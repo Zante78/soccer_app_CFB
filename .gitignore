@@ -1,0 +1,36 @@
+.env
+.env.local
+.env.*.local
+node_modules/
+dist/
+build/
+.next/
+.turbo/
+*.log
+*.tsbuildinfo
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+coverage/
+.nyc_output/
+
+# Supabase
+.branches/
+.temp/
+
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/
+
+# RPA Screenshots (gitignore actual screenshots, keep baselines tracked)
+apps/rpa-bot/screenshots/*.png
+!apps/rpa-bot/screenshots/.gitkeep
+
+# Credentials
+*.pem
+*.key
+secrets/

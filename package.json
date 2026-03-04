@@ -1,0 +1,37 @@
+{
+  "name": "cfb-pass-automation",
+  "version": "1.0.0",
+  "description": "RPA-gestütztes Spielerpass-Automation System für CfB Ford Niehl",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:frontend": "npm run dev --workspace=apps/frontend",
+    "dev:bot": "npm run dev --workspace=apps/rpa-bot",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "rpa",
+    "dfbnet",
+    "automation",
+    "football",
+    "pass-management"
+  ],
+  "author": "CfB Ford Niehl e.V.",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.2",
+    "prettier": "^3.4.2",
+    "eslint": "^9.18.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}

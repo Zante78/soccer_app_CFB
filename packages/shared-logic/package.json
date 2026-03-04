@@ -1,0 +1,20 @@
+{
+  "name": "@packages/shared-logic",
+  "version": "1.0.0",
+  "description": "Shared business logic for CFB Pass-Automation (Sperrfristen-Engine, Validators)",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@packages/shared-types": "*"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8",
+    "@vitest/coverage-v8": "^2.1.8"
+  }
+}
