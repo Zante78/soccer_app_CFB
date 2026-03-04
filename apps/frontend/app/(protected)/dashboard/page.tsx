@@ -1,8 +1,21 @@
 import { requireRole } from "@/lib/auth-guard";
+import { getDashboardMetrics } from "./actions";
+import { MetricCard } from "@/components/admin/metric-card";
+import { StatusChart } from "@/components/admin/status-chart";
+import { ActivityFeed } from "@/components/admin/activity-feed";
+import {
+  Users,
+  CreditCard,
+  Bot,
+  Clock,
+} from "lucide-react";
 
 export default async function DashboardPage() {
   // Auth Guard: Nur SUPER_ADMIN und PASSWART dürfen zugreifen
   const user = await requireRole(["SUPER_ADMIN", "PASSWART"]);
+
+  // Dashboard Metrics laden
+  const metrics = await getDashboardMetrics();
 
   return (
     <div className="space-y-8">
@@ -13,49 +26,49 @@ export default async function DashboardPage() {
         </p>
       </header>
 
+      {/* Metric Cards Grid */}
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {/* Placeholder Metric Cards */}
-        <div className="card bg-white p-6">
-          <h3 className="text-sm font-medium text-gray-600">Gesamt Registrierungen</h3>
-          <p className="text-3xl font-bold text-gray-900 mt-2">0</p>
-          <p className="text-sm text-gray-500 mt-1">Coming soon...</p>
-        </div>
+        <MetricCard
+          title="Gesamt Registrierungen"
+          value={metrics.totalRegistrations}
+          icon={Users}
+          iconColor="text-blue-600"
+          iconBgColor="bg-blue-50"
+        />
 
-        <div className="card bg-white p-6">
-          <h3 className="text-sm font-medium text-gray-600">Bezahlt</h3>
-          <p className="text-3xl font-bold text-green-600 mt-2">0</p>
-          <p className="text-sm text-gray-500 mt-1">Coming soon...</p>
-        </div>
+        <MetricCard
+          title="Zahlungen"
+          value={`${metrics.paymentStats.paymentRate}%`}
+          subtitle={`${metrics.paymentStats.paid} von ${metrics.paymentStats.total} bezahlt`}
+          icon={CreditCard}
+          iconColor="text-green-600"
+          iconBgColor="bg-green-50"
+        />
 
-        <div className="card bg-white p-6">
-          <h3 className="text-sm font-medium text-gray-600">Bot Erfolgsrate</h3>
-          <p className="text-3xl font-bold text-[#0055A4] mt-2">0%</p>
-          <p className="text-sm text-gray-500 mt-1">Coming soon...</p>
-        </div>
+        <MetricCard
+          title="Bot Erfolgsrate"
+          value={`${metrics.botStats.successRate}%`}
+          subtitle={`${metrics.botStats.success} von ${metrics.botStats.total} erfolgreich`}
+          icon={Bot}
+          iconColor="text-[#0055A4]"
+          iconBgColor="bg-blue-50"
+        />
 
-        <div className="card bg-white p-6">
-          <h3 className="text-sm font-medium text-gray-600">Offen</h3>
-          <p className="text-3xl font-bold text-orange-600 mt-2">0</p>
-          <p className="text-sm text-gray-500 mt-1">Coming soon...</p>
-        </div>
+        <MetricCard
+          title="Bereit für Bot"
+          value={metrics.statusBreakdown.READY_FOR_BOT || 0}
+          subtitle="Wartend auf Automatisierung"
+          icon={Clock}
+          iconColor="text-purple-600"
+          iconBgColor="bg-purple-50"
+        />
       </section>
 
-      <div className="card bg-white p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
-          Phase 3.1: Auth & Layout Foundation ✅
-        </h2>
-        <p className="text-gray-600">
-          Die Authentifizierung und das Admin-Layout sind erfolgreich eingerichtet.
-          In den nächsten Phasen werden wir:
-        </p>
-        <ul className="list-disc list-inside mt-4 space-y-2 text-gray-700">
-          <li>Phase 3.2: Dashboard Metriken implementieren</li>
-          <li>Phase 3.3: Registrierungen Liste mit Filtern</li>
-          <li>Phase 3.4: Detailansicht mit Audit Logs</li>
-          <li>Phase 3.5: Visual Diff Viewer (RPA Traces)</li>
-          <li>Phase 3.6: PDF Export & Polish</li>
-        </ul>
-      </div>
+      {/* Status Chart & Activity Feed */}
+      <section className="grid gap-6 lg:grid-cols-2">
+        <StatusChart data={metrics.statusBreakdown} />
+        <ActivityFeed items={metrics.recentActivity} />
+      </section>
     </div>
   );
 }
