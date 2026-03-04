@@ -1,0 +1,100 @@
+@import "tailwindcss";
+
+:root {
+  /* CfB Brand Colors */
+  --color-primary: #0055a4;
+  --color-success: #34c759;
+  --color-warning: #ff9500;
+  --color-error: #ff3b30;
+
+  /* Neutrals */
+  --color-gray-50: #f5f5f7;
+  --color-gray-100: #e5e5ea;
+  --color-gray-200: #d1d1d6;
+  --color-gray-300: #c7c7cc;
+  --color-gray-400: #aeaeb2;
+  --color-gray-500: #8e8e93;
+  --color-gray-600: #636366;
+  --color-gray-700: #48484a;
+  --color-gray-800: #3a3a3c;
+  --color-gray-900: #1c1c1e;
+
+  --background: #f5f5f7;
+  --foreground: #1c1c1e;
+}
+
+@theme inline {
+  /* Custom Colors */
+  --color-primary: var(--color-primary);
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-error: var(--color-error);
+
+  /* Typography */
+  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+
+  /* Shadows */
+  --shadow-card: 0 2px 20px rgba(0, 0, 0, 0.06);
+  --shadow-button: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+* {
+  @apply border-gray-200;
+}
+
+body {
+  @apply bg-gray-50 text-gray-900 font-sans;
+}
+
+/* Card styles */
+.card {
+  @apply bg-white rounded-[20px] shadow-[0_2px_20px_rgba(0,0,0,0.06)] p-10;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+/* Button styles */
+.btn-primary {
+  @apply bg-[var(--color-primary)] text-white font-medium px-6 py-3 rounded-xl
+         hover:bg-[#004080] transition-colors duration-200
+         disabled:opacity-50 disabled:cursor-not-allowed
+         shadow-[0_1px_3px_rgba(0,0,0,0.1)];
+}
+
+.btn-secondary {
+  @apply bg-blue-50 text-[var(--color-primary)] font-medium px-6 py-3 rounded-xl
+         hover:bg-blue-100 transition-colors duration-200
+         disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+/* Form inputs */
+.input {
+  @apply w-full px-4 py-3 rounded-xl border border-gray-300
+         focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent
+         disabled:bg-gray-100 disabled:cursor-not-allowed;
+}
+
+/* Progress bar */
+.progress-bar {
+  @apply h-1 bg-gray-200 rounded-full overflow-hidden;
+}
+
+.progress-bar-fill {
+  @apply h-full bg-[var(--color-primary)] transition-all duration-300;
+}
+
+/* Status badges */
+.badge-success {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+         bg-green-50 text-green-700;
+}
+
+.badge-warning {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+         bg-orange-50 text-orange-700;
+}
+
+.badge-error {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+         bg-red-50 text-red-700;
+}
