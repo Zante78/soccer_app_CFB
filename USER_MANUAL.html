@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CFB Pass-Automation - Benutzerhandbuch</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto IKEA', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #111;
+            background: #fff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        header {
+            background: #0051BA;
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        /* Table of Contents */
+        .toc {
+            background: #F5F5F5;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 40px;
+        }
+
+        .toc h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+        }
+
+        .toc ul {
+            list-style: none;
+        }
+
+        .toc li {
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .toc li:last-child {
+            border-bottom: none;
+        }
+
+        .toc a {
+            color: #0051BA;
+            text-decoration: none;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toc a:hover {
+            text-decoration: underline;
+        }
+
+        .toc-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: #0051BA;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+        }
+
+        /* Section */
+        section {
+            margin-bottom: 60px;
+            page-break-inside: avoid;
+        }
+
+        section h2 {
+            font-size: 2.5rem;
+            color: #0051BA;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        section h3 {
+            font-size: 1.8rem;
+            margin: 30px 0 15px 0;
+            color: #111;
+        }
+
+        section h4 {
+            font-size: 1.4rem;
+            margin: 20px 0 10px 0;
+            color: #333;
+        }
+
+        /* Info Boxes */
+        .info-box {
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: flex;
+            gap: 15px;
+        }
+
+        .info-box.blue {
+            background: #E8F4FD;
+            border-left: 4px solid #0051BA;
+        }
+
+        .info-box.yellow {
+            background: #FFF9E6;
+            border-left: 4px solid #FFDA1A;
+        }
+
+        .info-box.red {
+            background: #FFE8E8;
+            border-left: 4px solid #E00751;
+        }
+
+        .info-box .icon {
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+
+        .info-box .content {
+            flex: 1;
+        }
+
+        .info-box h4 {
+            margin: 0 0 10px 0;
+            font-size: 1.2rem;
+        }
+
+        /* Steps */
+        .steps {
+            counter-reset: step-counter;
+            list-style: none;
+            margin: 30px 0;
+        }
+
+        .steps li {
+            counter-increment: step-counter;
+            margin-bottom: 30px;
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .steps li::before {
+            content: counter(step-counter);
+            display: block;
+            width: 50px;
+            height: 50px;
+            background: #0051BA;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 50px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex: 1;
+            padding-top: 10px;
+        }
+
+        .step-content h4 {
+            margin: 0 0 10px 0;
+        }
+
+        /* Checklist */
+        .checklist {
+            list-style: none;
+            margin: 20px 0;
+        }
+
+        .checklist li {
+            padding: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .checklist li::before {
+            content: '☐';
+            font-size: 1.5rem;
+            color: #0051BA;
+        }
+
+        /* Requirements Box */
+        .requirements {
+            background: #F5F5F5;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .requirements h4 {
+            margin: 0 0 15px 0;
+            font-size: 1.3rem;
+        }
+
+        .requirements ul {
+            list-style: none;
+        }
+
+        .requirements li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .requirements li::before {
+            content: '●';
+            position: absolute;
+            left: 0;
+            color: #0051BA;
+        }
+
+        /* Screenshot Placeholder */
+        .screenshot {
+            background: #F5F5F5;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 60px 20px;
+            text-align: center;
+            margin: 20px 0;
+            color: #666;
+        }
+
+        .screenshot::before {
+            content: '📸';
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #F5F5F5;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background: #F9F9F9;
+        }
+
+        /* Footer */
+        footer {
+            background: #F5F5F5;
+            padding: 40px 20px;
+            text-align: center;
+            margin-top: 60px;
+        }
+
+        footer p {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        /* Print Styles */
+        @media print {
+            header {
+                background: #0051BA;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .info-box {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            section {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>CFB PASS-AUTOMATION</h1>
+        <p>Spielerpass-System für den CFB Niehl e.V.</p>
+        <p style="font-size: 0.9rem; margin-top: 10px;">Version 1.0 | Stand: März 2026</p>
+    </header>
+
+    <div class="container">
+        <!-- Table of Contents -->
+        <div class="toc">
+            <h2>📋 Inhaltsverzeichnis</h2>
+            <ul>
+                <li>
+                    <a href="#einfuehrung">
+                        <span class="toc-number">1</span>
+                        <span>Einführung</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#erste-schritte">
+                        <span class="toc-number">2</span>
+                        <span>Erste Schritte</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#antrag-erstellen">
+                        <span class="toc-number">3</span>
+                        <span>Spielerpass-Antrag erstellen</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#admin-dashboard">
+                        <span class="toc-number">4</span>
+                        <span>Admin Dashboard (Passwart)</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#rpa-bot">
+                        <span class="toc-number">5</span>
+                        <span>RPA Bot Überwachung</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#troubleshooting">
+                        <span class="toc-number">6</span>
+                        <span>Problemlösung</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Section 1: Einführung -->
+        <section id="einfuehrung">
+            <h2>
+                <span>1️⃣</span>
+                Einführung
+            </h2>
+
+            <p style="font-size: 1.2rem; margin-bottom: 20px;">
+                Willkommen beim CFB Pass-Automation System! Dieses Handbuch erklärt Ihnen Schritt für Schritt,
+                wie Sie Spielerpass-Anträge erstellen und verwalten können.
+            </p>
+
+            <div class="info-box blue">
+                <div class="icon">💡</div>
+                <div class="content">
+                    <h4>Was ist CFB Pass-Automation?</h4>
+                    <p>
+                        Ein System zur automatischen Erstellung von DFBnet Spielerpass-Anträgen.
+                        Es spart <strong>97% der Zeit</strong> (von 45 Minuten auf 90 Sekunden) und
+                        berechnet Sperrfristen automatisch nach §16 und §20 SpO.
+                    </p>
+                </div>
+            </div>
+
+            <h3>Für wen ist dieses System?</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Rolle</th>
+                        <th>Zugriff</th>
+                        <th>Aufgaben</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Antragsteller</strong></td>
+                        <td>Eigene Anträge</td>
+                        <td>Spielerpass-Antrag erstellen, Status prüfen</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Trainer</strong></td>
+                        <td>Team-Anträge</td>
+                        <td>Anträge des eigenen Teams einsehen, Zahlung bestätigen</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Passwart</strong></td>
+                        <td>Alle Anträge</td>
+                        <td>Alle Anträge verwalten, Bot überwachen, PDF Export</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Super Admin</strong></td>
+                        <td>Vollzugriff</td>
+                        <td>System-Administration, Einstellungen</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Section 2: Erste Schritte -->
+        <section id="erste-schritte">
+            <h2>
+                <span>2️⃣</span>
+                Erste Schritte
+            </h2>
+
+            <h3>Anmelden im System</h3>
+
+            <ol class="steps">
+                <li>
+                    <div class="step-content">
+                        <h4>System öffnen</h4>
+                        <p>Öffnen Sie die Webseite im Browser:</p>
+                        <code style="background: #f5f5f5; padding: 10px; display: block; border-radius: 4px; margin-top: 10px;">
+                            https://cfb-pass-automation.vercel.app
+                        </code>
+                    </div>
+                </li>
+                <li>
+                    <div class="step-content">
+                        <h4>Login-Daten eingeben</h4>
+                        <p>Geben Sie Ihre E-Mail-Adresse und Ihr Passwort ein.</p>
+                        <div class="screenshot">Login-Seite Screenshot</div>
+                    </div>
+                </li>
+                <li>
+                    <div class="step-content">
+                        <h4>Dashboard öffnet sich</h4>
+                        <p>Nach erfolgreichem Login gelangen Sie zur Übersichtsseite.</p>
+                    </div>
+                </li>
+            </ol>
+
+            <div class="info-box yellow">
+                <div class="icon">⚠️</div>
+                <div class="content">
+                    <h4>Passwort vergessen?</h4>
+                    <p>
+                        Klicken Sie auf "Passwort vergessen?" auf der Login-Seite.
+                        Sie erhalten eine E-Mail mit einem Zurücksetzungs-Link.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Antrag erstellen -->
+        <section id="antrag-erstellen">
+            <h2>
+                <span>3️⃣</span>
+                Spielerpass-Antrag erstellen
+            </h2>
+
+            <div class="requirements">
+                <h4>📦 Was Sie brauchen:</h4>
+                <ul>
+                    <li>Geburtsurkunde oder Personalausweis (Kopie)</li>
+                    <li>Passfoto (digital, max. 5 MB)</li>
+                    <li>Bei Vereinswechsel: Abmeldung vom Vorverein</li>
+                    <li>Ca. 10 Minuten Zeit</li>
+                </ul>
+            </div>
+
+            <h3>Der 8-Schritte Prozess</h3>
+
+            <ol class="steps">
+                <li>
+                    <div class="step-content">
+                        <h4>Spieler-Daten</h4>
+                        <p>Geben Sie Name, Geburtsdatum und Kontaktdaten des Spielers ein.</p>
+                        <div class="info-box blue">
+                            <div class="icon">💡</div>
+                            <div class="content">
+                                <strong>Tipp:</strong> Geburtsdatum im Format TT.MM.JJJJ eingeben (z.B. 15.03.2010)
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="step-content">
+                        <h4>Registrierungsgrund</h4>
+                        <p>Wählen Sie den Grund der Anmeldung:</p>
+                        <ul style="margin-top: 10px;">
+                            <li><strong>Neuer Spieler</strong> – Erste Anmeldung im Verein</li>
+                            <li><strong>Vereinswechsel</strong> – Wechsel von anderem Verein</li>
+                            <li><strong>Wiederanmeldung</strong> – Rückkehr nach Pause</li>
+                        </ul>
+                    </div>
+                </li>
+                <li>
+                    <div class="step-content">
+                        <h4>Team auswählen</h4>
+                        <p>Wählen Sie das Team aus der Dropdown-Liste (z.B. "E-Junioren U11").</p>
+                    </div>
+                </li>
+                <li>
+                    <div class="step-content">
+                        <h4>Vorverein (nur bei Wechsel)</h4>
+                        <p>Falls Vereinswechsel: Geben Sie Name des Vorvereins, Abmeldedatum und letztes Spieldatum ein.</p>
+                        <div class="info-box yellow">
+                            <div class="icon">⚠️</div>
+                            <div class="content">
+                                <strong>Wichtig:</strong> Diese Daten beeinflussen die Sperrfrist! Bitte korrekt ausfüllen.
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="step-content">
+                        <h4>Passfoto hochladen</h4>
+                        <p>Laden Sie ein biometrisches Passfoto hoch (JPG/PNG, max. 5 MB).</p>
+                        <ul class="checklist" style="margin-top: 10px;">
+                            <li>Heller Hintergrund</li>
+                            <li>Frontalansicht</li>
+                            <li>Keine Kopfbedeckung</li>
+                            <li>Aktuelles Foto</li>
+                        </ul>
+                    </div>
+                </li>
+                <li>
+                    <div class="step-content">
+                        <h4>Dokumente hochladen</h4>
+                        <p>Laden Sie erforderliche Dokumente hoch (Geburtsurkunde, Abmeldung, etc.).</p>
+                    </div>
+                </li>
+                <li>
+                    <div class="step-content">
+                        <h4>Einwilligungen</h4>
+                        <p>Bestätigen Sie die Datenschutzerklärung und Nutzungsbedingungen.</p>
+                    </div>
+                </li>
+                <li>
+                    <div class="step-content">
+                        <h4>Zusammenfassung & Absenden</h4>
+                        <p>Prüfen Sie alle Angaben und klicken Sie auf "Antrag einreichen".</p>
+                        <div class="info-box blue">
+                            <div class="icon">✅</div>
+                            <div class="content">
+                                <strong>Geschafft!</strong> Ihr Antrag wird nun vom Passwart geprüft und automatisch im DFBnet eingereicht.
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            </ol>
+
+            <h3>Status-Übersicht</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>Bedeutung</th>
+                        <th>Was passiert als nächstes?</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Entwurf</strong></td>
+                        <td>Antrag noch nicht eingereicht</td>
+                        <td>Sie können den Antrag jederzeit bearbeiten</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Eingereicht</strong></td>
+                        <td>Antrag wurde eingereicht</td>
+                        <td>Passwart prüft den Antrag</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Bereit</strong></td>
+                        <td>Antrag ist freigegeben</td>
+                        <td>Bot reicht Antrag im DFBnet ein</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Bot läuft</strong></td>
+                        <td>Automatische Einreichung läuft</td>
+                        <td>Bitte warten (ca. 90 Sekunden)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Abgeschlossen</strong></td>
+                        <td>Spielerpass wurde beantragt</td>
+                        <td>DFBnet bearbeitet den Antrag</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Section 4: Admin Dashboard -->
+        <section id="admin-dashboard">
+            <h2>
+                <span>4️⃣</span>
+                Admin Dashboard (Passwart)
+            </h2>
+
+            <div class="info-box blue">
+                <div class="icon">🔐</div>
+                <div class="content">
+                    <p>
+                        <strong>Nur für Passwarte:</strong> Dieser Bereich ist nur für Passwarte und Super Admins zugänglich.
+                    </p>
+                </div>
+            </div>
+
+            <h3>Dashboard-Übersicht</h3>
+            <p>Nach dem Login sehen Sie die Übersicht mit wichtigen Kennzahlen:</p>
+
+            <div class="screenshot">Dashboard Screenshot mit Metriken</div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Kachel</th>
+                        <th>Anzeige</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Gesamt</strong></td>
+                        <td>Gesamtzahl aller Registrierungen</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Bezahlt</strong></td>
+                        <td>Prozentsatz der bezahlten Anträge</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Bot Erfolgsrate</strong></td>
+                        <td>Erfolgsquote der Bot-Ausführungen</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Offen</strong></td>
+                        <td>Anzahl der offenen Anträge</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Registrierungen verwalten</h3>
+
+            <ol class="steps">
+                <li>
+                    <div class="step-content">
+                        <h4>Registrierungen-Seite öffnen</h4>
+                        <p>Klicken Sie in der Sidebar auf "Registrierungen".</p>
+                    </div>
+                </li>
+                <li>
+                    <div class="step-content">
+                        <h4>Filter verwenden</h4>
+                        <p>Nutzen Sie die Filter-Optionen:</p>
+                        <ul style="margin-top: 10px;">
+                            <li><strong>Status</strong> – Filtern nach Bearbeitungsstatus</li>
+                            <li><strong>Team</strong> – Nur ein Team anzeigen</li>
+                            <li><strong>Suche</strong> – Nach Name oder DFB-ID suchen</li>
+                        </ul>
+                    </div>
+                </li>
+                <li>
+                    <div class="step-content">
+                        <h4>Antrag öffnen</h4>
+                        <p>Klicken Sie auf "Aktionen" → "Details ansehen".</p>
+                    </div>
+                </li>
+                <li>
+                    <div class="step-content">
+                        <h4>Antrag prüfen</h4>
+                        <p>Überprüfen Sie alle Daten:</p>
+                        <ul class="checklist">
+                            <li>Spieler-Informationen vollständig?</li>
+                            <li>Passfoto hochgeladen?</li>
+                            <li>Dokumente vorhanden?</li>
+                            <li>Sperrfrist korrekt berechnet?</li>
+                        </ul>
+                    </div>
+                </li>
+                <li>
+                    <div class="step-content">
+                        <h4>Status ändern</h4>
+                        <p>Setzen Sie den Status auf "Bereit für Bot", wenn alles korrekt ist.</p>
+                        <div class="info-box blue">
+                            <div class="icon">🤖</div>
+                            <div class="content">
+                                Der Bot wird den Antrag automatisch im DFBnet einreichen (ca. 90 Sekunden).
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            </ol>
+
+            <h3>PDF Export (Notfall)</h3>
+            <p>Bei DFBnet-Ausfall können Sie einen PDF-Export erstellen:</p>
+            <ol class="steps">
+                <li>
+                    <div class="step-content">
+                        <h4>Detail-Seite öffnen</h4>
+                        <p>Öffnen Sie die Registrierung.</p>
+                    </div>
+                </li>
+                <li>
+                    <div class="step-content">
+                        <h4>PDF Export klicken</h4>
+                        <p>Rechte Sidebar → "Aktionen" → "PDF Export"</p>
+                    </div>
+                </li>
+                <li>
+                    <div class="step-content">
+                        <h4>PDF öffnet sich</h4>
+                        <p>Das PDF wird automatisch heruntergeladen und kann gedruckt werden.</p>
+                    </div>
+                </li>
+            </ol>
+        </section>
+
+        <!-- Section 5: RPA Bot -->
+        <section id="rpa-bot">
+            <h2>
+                <span>5️⃣</span>
+                RPA Bot Überwachung
+            </h2>
+
+            <div class="info-box blue">
+                <div class="icon">🤖</div>
+                <div class="content">
+                    <h4>Was ist der RPA Bot?</h4>
+                    <p>
+                        Der RPA (Robotic Process Automation) Bot ist ein automatisches Programm,
+                        das Spielerpass-Anträge im DFBnet einreicht. Er arbeitet 24/7 und spart 97% der Zeit.
+                    </p>
+                </div>
+            </div>
+
+            <h3>Visual Regression Monitoring</h3>
+            <p>Der Bot überwacht Änderungen an der DFBnet-Oberfläche:</p>
+
+            <ol class="steps">
+                <li>
+                    <div class="step-content">
+                        <h4>RPA Traces öffnen</h4>
+                        <p>Klicken Sie in der Sidebar auf "RPA Traces".</p>
+                    </div>
+                </li>
+                <li>
+                    <div class="step-content">
+                        <h4>Screenshot-Vergleich ansehen</h4>
+                        <p>Falls Unterschiede erkannt wurden, sehen Sie einen Side-by-Side Vergleich:</p>
+                        <ul style="margin-top: 10px;">
+                            <li><strong>Links:</strong> Baseline (erwartet)</li>
+                            <li><strong>Rechts:</strong> Aktuell (vom Bot)</li>
+                            <li><strong>Slider:</strong> Ziehen zum Vergleichen</li>
+                        </ul>
+                        <div class="screenshot">Screenshot-Vergleich Placeholder</div>
+                    </div>
+                </li>
+                <li>
+                    <div class="step-content">
+                        <h4>Entscheidung treffen</h4>
+                        <p>Zwei Optionen:</p>
+                        <ul style="margin-top: 10px;">
+                            <li>
+                                <strong>"Neue Baseline akzeptieren"</strong> –
+                                DFBnet hat sich geändert, neue Version ist OK
+                            </li>
+                            <li>
+                                <strong>"Bot erneut ausführen"</strong> –
+                                Es war ein temporärer Fehler, nochmal versuchen
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+            </ol>
+
+            <div class="info-box yellow">
+                <div class="icon">⚠️</div>
+                <div class="content">
+                    <h4>Wann ist eine Visual Regression kritisch?</h4>
+                    <p>
+                        Wenn der Diff-Score <strong>&gt; 0.2%</strong> ist, hat sich das DFBnet-Formular geändert.
+                        Der Bot muss möglicherweise angepasst werden. Kontaktieren Sie in diesem Fall den Support.
+                    </p>
+                </div>
+            </div>
+
+            <h3>Bot Status-Codes</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>Bedeutung</th>
+                        <th>Aktion erforderlich?</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>SUCCESS</strong></td>
+                        <td>Erfolgreich eingereicht</td>
+                        <td>❌ Keine</td>
+                    </tr>
+                    <tr>
+                        <td><strong>VISUAL_REGRESSION_ERROR</strong></td>
+                        <td>DFBnet hat sich geändert</td>
+                        <td>✅ Baseline prüfen</td>
+                    </tr>
+                    <tr>
+                        <td><strong>FAILED</strong></td>
+                        <td>Bot-Fehler (Timeout, etc.)</td>
+                        <td>✅ Erneut versuchen</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Section 6: Troubleshooting -->
+        <section id="troubleshooting">
+            <h2>
+                <span>6️⃣</span>
+                Problemlösung
+            </h2>
+
+            <h3>Häufige Probleme</h3>
+
+            <div class="info-box yellow">
+                <div class="icon">❓</div>
+                <div class="content">
+                    <h4>Ich kann mich nicht einloggen</h4>
+                    <p><strong>Lösung:</strong></p>
+                    <ul style="margin-top: 10px;">
+                        <li>Prüfen Sie Ihre E-Mail-Adresse und Passwort</li>
+                        <li>Nutzen Sie "Passwort vergessen?" Link</li>
+                        <li>Cache leeren: Strg + Shift + R (Windows) oder Cmd + Shift + R (Mac)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="info-box yellow">
+                <div class="icon">❓</div>
+                <div class="content">
+                    <h4>Datei-Upload funktioniert nicht</h4>
+                    <p><strong>Lösung:</strong></p>
+                    <ul style="margin-top: 10px;">
+                        <li>Maximale Dateigröße: 5 MB</li>
+                        <li>Erlaubte Formate: JPG, PNG, PDF</li>
+                        <li>Dateinamen ohne Sonderzeichen verwenden</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="info-box yellow">
+                <div class="icon">❓</div>
+                <div class="content">
+                    <h4>Sperrfrist wird falsch berechnet</h4>
+                    <p><strong>Lösung:</strong></p>
+                    <ul style="margin-top: 10px;">
+                        <li>Prüfen Sie das Abmeldedatum vom Vorverein</li>
+                        <li>Prüfen Sie das letzte Spieldatum</li>
+                        <li>Bei Unsicherheit: Passwart kontaktieren</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="info-box yellow">
+                <div class="icon">❓</div>
+                <div class="content">
+                    <h4>Bot bleibt bei "Bot läuft" hängen</h4>
+                    <p><strong>Lösung:</strong></p>
+                    <ul style="margin-top: 10px;">
+                        <li>Warten Sie 5 Minuten</li>
+                        <li>Seite neu laden (F5)</li>
+                        <li>Falls immer noch hängend: Passwart informieren</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>Kontakt & Support</h3>
+            <div class="info-box blue">
+                <div class="icon">📧</div>
+                <div class="content">
+                    <h4>Hilfe benötigt?</h4>
+                    <p><strong>Passwart des CFB Niehl e.V.:</strong></p>
+                    <ul style="margin-top: 10px;">
+                        <li>📧 E-Mail: passwart@cfb-niehl.de</li>
+                        <li>📞 Telefon: (Trainingszeiten)</li>
+                        <li>🕐 Verfügbar: Di/Do 18:00-20:00 Uhr</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="info-box red">
+                <div class="icon">🚨</div>
+                <div class="content">
+                    <h4>Notfall-Kontakt</h4>
+                    <p>
+                        Bei dringenden Problemen (z.B. System-Ausfall kurz vor Deadline):
+                    </p>
+                    <ul style="margin-top: 10px;">
+                        <li>📱 Notfall-Handy: [Nummer hier einfügen]</li>
+                        <li>📧 Support: support@cfb-niehl.de</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Checklist -->
+        <section>
+            <h2>✅ Checkliste: Antrag erfolgreich eingereicht</h2>
+            <ul class="checklist">
+                <li>Alle Spieler-Daten vollständig ausgefüllt</li>
+                <li>Passfoto hochgeladen (biometrisch)</li>
+                <li>Dokumente hochgeladen (Geburtsurkunde, Abmeldung)</li>
+                <li>Einwilligungen bestätigt</li>
+                <li>Antrag eingereicht (Status: "Eingereicht")</li>
+                <li>Bestätigungs-E-Mail erhalten</li>
+                <li>Sperrfrist-Datum notiert (falls relevant)</li>
+            </ul>
+        </section>
+    </div>
+
+    <footer>
+        <p><strong>CFB Pass-Automation System</strong></p>
+        <p>Version 1.0 | © 2026 CFB Niehl e.V.</p>
+        <p style="margin-top: 20px; font-size: 0.9rem;">
+            Entwickelt mit ❤️ für effiziente Vereinsarbeit
+        </p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,266 @@
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                          RPA TRACES PAGE LAYOUT                          ┃
+┃                      http://localhost:3000/rpa-traces                    ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                                                                           │
+│   HEADER SECTION                                                         │
+│   ━━━━━━━━━━━━━━                                                        │
+│                                                                           │
+│   RPA Visual Regression                                                  │
+│   (Large, bold, dark gray text)                                          │
+│                                                                           │
+│   1 Screenshot-Unterschied gefunden                                      │
+│   (Smaller, gray text)                                                   │
+│                                                                           │
+└─────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                                                                           │
+│   ERROR CARD: Max Spieler                                                │
+│   ━━━━━━━━━━━━━━━━━━━━━━━                                              │
+│                                                                           │
+│   ┌───────────────────────────────────────────────────────────────────┐ │
+│   │                                                                     │ │
+│   │  Max Spieler  🔺 Diff: 0.35%                     Execution ID     │ │
+│   │  (Clickable)   (Red Badge)                      (Small, gray)     │ │
+│   │                                                                     │ │
+│   │  DFB-ID: 12345678 | Team: U17 | Ausgeführt: 06.03.2026 15:30     │ │
+│   │  (Small gray text)                                                 │ │
+│   │                                                                     │ │
+│   └───────────────────────────────────────────────────────────────────┘ │
+│                                                                           │
+│   ┌───────────────────────────────────────────────────────────────────┐ │
+│   │  ⚠️ ERROR MESSAGE (Red background, dark red text)                 │ │
+│   │                                                                     │ │
+│   │  DFBnet Formular hat sich geändert: Neues Feld "Datenschutz"     │ │
+│   │  wurde hinzugefügt                                                 │ │
+│   │                                                                     │ │
+│   └───────────────────────────────────────────────────────────────────┘ │
+│                                                                           │
+│   ┌───────────────────────────────────────────────────────────────────┐ │
+│   │                                                                     │ │
+│   │                 INTERACTIVE COMPARISON SLIDER                      │ │
+│   │                 (Height: 600px)                                    │ │
+│   │                                                                     │ │
+│   │  ┌─────────────────┬─────────────────┐                           │ │
+│   │  │                 │                 │                           │ │
+│   │  │   BASELINE      │     ACTUAL      │                           │ │
+│   │  │   Screenshot    │   Screenshot    │                           │ │
+│   │  │                 │                 │                           │ │
+│   │  │   (Expected     │   (Current      │                           │ │
+│   │  │    form layout) │    form layout) │                           │ │
+│   │  │                 │                 │                           │ │
+│   │  │                 ┊                 │  ← Draggable divider     │ │
+│   │  │                 ┊                 │                           │ │
+│   │  │                 ┊                 │                           │ │
+│   │  └─────────────────┴─────────────────┘                           │ │
+│   │                                                                     │ │
+│   │  User can drag the divider left/right to compare screenshots      │ │
+│   │                                                                     │ │
+│   └───────────────────────────────────────────────────────────────────┘ │
+│                                                                           │
+│   ┌───────────────────────────────────────────────────────────────────┐ │
+│   │                      ACTION BUTTONS                                │ │
+│   │                                                                     │ │
+│   │   ┌─────────────────────────────────┐  ┌─────────────────────────┐│ │
+│   │   │ ✓ Neue Baseline akzeptieren     │  │ ↻ Bot erneut ausführen  ││ │
+│   │   │ (Blue button, full width)       │  │ (Outlined, full width)  ││ │
+│   │   └─────────────────────────────────┘  └─────────────────────────┘│ │
+│   │                                                                     │ │
+│   └───────────────────────────────────────────────────────────────────┘ │
+│                                                                           │
+└─────────────────────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+VISUAL ELEMENTS BREAKDOWN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. HEADER
+   ├── Title: "RPA Visual Regression"
+   │   └── Font: text-3xl font-bold text-gray-900
+   └── Subtitle: "1 Screenshot-Unterschied gefunden"
+       └── Font: text-gray-600 mt-2
+
+2. ERROR CARD
+   ├── Player Info Header
+   │   ├── Name: "Max Spieler" (clickable, text-xl font-semibold)
+   │   │   └── Link: /registrations/{id}
+   │   ├── Badge: "🔺 Diff: 0.35%"
+   │   │   └── Color: Red (destructive) because 0.35% > 0.2%
+   │   └── Execution ID (top-right, small monospace)
+   │
+   ├── Metadata Row
+   │   ├── DFB-ID
+   │   ├── Team Name
+   │   └── Timestamp (German format: dd.MM.yyyy HH:mm)
+   │
+   ├── Error Message Box (if exists)
+   │   └── Background: bg-red-50 border-red-200
+   │       └── Text: text-red-800
+   │
+   ├── Comparison Slider
+   │   ├── Left: Baseline screenshot
+   │   ├── Divider: Draggable
+   │   └── Right: Actual screenshot
+   │
+   └── Action Buttons
+       ├── Accept Baseline (primary button)
+       └── Retry Bot (outlined button)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+COLOR SCHEME
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Background Colors:
+  - Page: bg-gray-50
+  - Cards: bg-white
+  - Error Box: bg-red-50
+
+Text Colors:
+  - Headers: text-gray-900 (very dark)
+  - Body: text-gray-600 (medium gray)
+  - Error Text: text-red-800 (dark red)
+
+Badge Colors:
+  - High Diff (>0.2%): Red/Destructive
+  - Low Diff (≤0.2%): Gray/Secondary
+
+Borders:
+  - Cards: border-gray-200
+  - Error Box: border-red-200
+  - Slider: border-gray-200
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+INTERACTIVE ELEMENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Player Name Link
+   - Default: text-gray-900
+   - Hover: text-[#0055A4] (blue)
+   - Cursor: pointer
+
+2. Comparison Slider
+   - Default: Shows both images split
+   - Interaction: Drag divider left/right
+   - Visual: Smooth transition
+
+3. Accept Baseline Button
+   - Default: Blue background, white text
+   - Hover: Darker blue
+   - Disabled: Gray with opacity
+   - Loading: "Wird akzeptiert..."
+
+4. Retry Bot Button
+   - Default: White background, outlined
+   - Hover: Light gray background
+   - Disabled: Gray with opacity
+   - Loading: "Startet..."
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EXPECTED BEHAVIOR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ON PAGE LOAD:
+  1. Show skeleton loaders (3 pulsing cards)
+  2. Fetch RPA traces from server
+  3. Generate signed URLs for screenshots
+  4. Render error cards
+  5. Auto-refresh every 30 seconds
+
+CLICKING "NEUE BASELINE AKZEPTIEREN":
+  1. Button text → "Wird akzeptiert..."
+  2. Button becomes disabled
+  3. Server Action: acceptNewBaseline(traceId)
+  4. Update trace status to SUCCESS
+  5. Toast appears: "Baseline akzeptiert"
+  6. Card disappears from list
+  7. If no more errors, show success state
+
+CLICKING "BOT ERNEUT AUSFÜHREN":
+  1. Button text → "Startet..."
+  2. Button becomes disabled
+  3. Server Action: retryBotExecution(registrationId)
+  4. Update registration status to READY_FOR_BOT
+  5. Toast appears: "Bot wird erneut ausgeführt"
+  6. Page refreshes to show updated state
+
+DRAGGING COMPARISON SLIDER:
+  1. Divider follows mouse/touch
+  2. Left side shows more/less of baseline
+  3. Right side shows more/less of actual
+  4. Smooth transition
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EMPTY STATE (No Errors)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                                                                           │
+│   RPA Visual Regression                                                  │
+│   Screenshot-Vergleich von Bot-Ausführungen                              │
+│                                                                           │
+│   ┌───────────────────────────────────────────────────────────────────┐ │
+│   │                                                                     │ │
+│   │                           ✓ (Large green checkmark)                │ │
+│   │                                                                     │ │
+│   │               Keine Visual Regression Errors                       │ │
+│   │                                                                     │ │
+│   │           Alle Bot-Ausführungen waren erfolgreich! 🎉            │ │
+│   │                                                                     │ │
+│   └───────────────────────────────────────────────────────────────────┘ │
+│                                                                           │
+└─────────────────────────────────────────────────────────────────────────┘
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+LOADING STATE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                                                                           │
+│   RPA Visual Regression                                                  │
+│   Screenshot-Vergleich von Bot-Ausführungen                              │
+│                                                                           │
+│   ┌───────────────────────────────────────────────────────────────────┐ │
+│   │ ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ │ │
+│   │ ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ │ │
+│   │ ░░░░░░░░░░░░░░░░░░░░░░ (Skeleton Loader) ░░░░░░░░░░░░░░░░░░░░░░ │ │
+│   │ ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ │ │
+│   └───────────────────────────────────────────────────────────────────┘ │
+│                                                                           │
+└─────────────────────────────────────────────────────────────────────────┘
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+RESPONSIVE BEHAVIOR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Desktop (lg+):
+  - Full sidebar visible
+  - Wide comparison slider
+  - Buttons side-by-side
+
+Mobile (<lg):
+  - Sidebar hidden (hamburger menu)
+  - Narrower comparison slider
+  - Buttons stack vertically
+  - Touch-friendly targets (44px min)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ACCESSIBILITY FEATURES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✓ Semantic HTML (header, main, section)
+✓ ARIA labels on interactive elements
+✓ Keyboard navigation support
+✓ Focus visible states
+✓ Color contrast meets WCAG AA
+✓ Touch targets >= 44px
+✓ Screen reader friendly
+✓ Alt text on images
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+This is what you should see when you visit:
+http://localhost:3000/rpa-traces (logged in as PASSWART)
