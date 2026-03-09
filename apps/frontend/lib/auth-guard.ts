@@ -2,17 +2,7 @@
 
 import { cache } from "react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-
-// CFB-spezifische Rollen aus der Datenbank
-export type RoleType = "SUPER_ADMIN" | "PASSWART" | "TRAINER" | "ANTRAGSTELLER";
-
-type AuthenticatedUser = {
-  id: string;
-  email: string;
-  role: RoleType;
-  full_name: string | null;
-  team_id: string | null;
-};
+import type { RoleType, AuthenticatedUser } from "./auth-types";
 
 /**
  * Stellt sicher, dass ein Benutzer authentifiziert ist.
@@ -64,26 +54,3 @@ export async function requireRole(
 
   return user;
 }
-
-/** Rollen die alle Registrierungen sehen dürfen */
-export const ADMIN_ROLES: RoleType[] = ["SUPER_ADMIN", "PASSWART"];
-
-/** Rollen die Team-Registrierungen sehen dürfen */
-export const TEAM_ACCESS_ROLES: RoleType[] = [
-  "SUPER_ADMIN",
-  "PASSWART",
-  "TRAINER",
-];
-
-/** Rollen die RPA Traces verwalten dürfen */
-export const RPA_ADMIN_ROLES: RoleType[] = ["SUPER_ADMIN", "PASSWART"];
-
-/** Rollen die Registrierungsstatus ändern dürfen */
-export const STATUS_CHANGE_ROLES: RoleType[] = ["SUPER_ADMIN", "PASSWART"];
-
-/** Rollen die Zahlungen verifizieren dürfen (Cash/QR) */
-export const PAYMENT_VERIFY_ROLES: RoleType[] = [
-  "SUPER_ADMIN",
-  "PASSWART",
-  "TRAINER",
-];

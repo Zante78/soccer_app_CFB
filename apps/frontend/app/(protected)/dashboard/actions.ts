@@ -4,89 +4,76 @@ import { cache } from "react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth-guard";
 import type { RegistrationStatus, RPATraceStatus } from "@packages/shared-types";
-
-// Helper Types
-type StatusBreakdown = Record<RegistrationStatus, number>;
-type PaymentStats = {
-  total: number;
-  paid: number;
-  unpaid: number;
-  paymentRate: number;
-};
-type BotStats = {
-  total: number;
-  success: number;
-  failed: number;
-  successRate: number;
-};
-
-export type DashboardMetrics = {
-  totalRegistrations: number;
-  statusBreakdown: StatusBreakdown;
-  paymentStats: PaymentStats;
-  botStats: BotStats;
-  recentActivity: AuditLogEntry[];
-};
-
-type AuditLogEntry = {
-  id: string;
-  action: string;
-  timestamp: string;
-  user_name: string | null;
-  registration_player_name: string | null;
-};
+import type {
+  DashboardMetrics,
+  StatusBreakdown,
+  PaymentStats,
+  BotStats,
+  AuditLogEntry,
+} from "./types";
 
 /**
  * Aggregiert Dashboard-Metriken (gecached für Request-Deduplication)
+ * RLS filtert automatisch die Daten je nach Rolle
  */
 export const getDashboardMetrics = cache(async (): Promise<DashboardMetrics> => {
-  // Auth Guard: Nur SUPER_ADMIN und PASSWART
-  await requireRole(["SUPER_ADMIN", "PASSWART"]);
+  // Auth Guard: Alle authentifizierten Rollen (RLS filtert Daten)
+  await requireRole(["SUPER_ADMIN", "PASSWART", "TRAINER", "ANTRAGSTELLER"]);
 
   const supabase = await createSupabaseServerClient();
 
   // Parallel Queries für Performance
+  // WICHTIG: Alle Queries müssen über registrations gehen, damit RLS greift!
   const [
     registrationsResult,
     financeResult,
     rpaTracesResult,
-    auditLogsResult,
   ] = await Promise.all([
     // 1. Alle Registrierungen (Status Breakdown)
-    supabase.from("registrations").select("status"),
+    supabase.from("registrations").select("status, id"),
 
-    // 2. Finance Status (Payment Stats)
-    supabase.from("finance_status").select("is_paid"),
-
-    // 3. RPA Traces (Bot Success Rate)
-    supabase.from("rpa_traces").select("status"),
-
-    // 4. Recent Activity (Last 10 Audit Logs mit User Info)
+    // 2. Finance Status (Payment Stats) - via registrations Join
     supabase
-      .from("audit_logs")
-      .select(`
-        id,
-        action,
-        timestamp,
-        users(full_name),
-        registrations(player_name)
-      `)
-      .order("timestamp", { ascending: false })
-      .limit(10),
+      .from("registrations")
+      .select("finance_status!inner(is_paid)"),
+
+    // 3. RPA Traces (Bot Success Rate) - via registrations Join
+    supabase
+      .from("registrations")
+      .select("rpa_traces(status)"),
   ]);
+
+  // 4. Recent Activity (Audit Logs) - Load directly with RLS
+  // RLS policies on audit_logs will filter based on role
+  const auditLogsResult = await supabase
+    .from("audit_logs")
+    .select(`
+      id,
+      action,
+      timestamp,
+      users(full_name),
+      registrations(player_name)
+    `)
+    .order("timestamp", { ascending: false })
+    .limit(10);
 
   // Status Breakdown berechnen
   const statusBreakdown = calculateStatusBreakdown(
     registrationsResult.data || []
   );
 
-  // Payment Stats berechnen
-  const paymentStats = calculatePaymentStats(financeResult.data || []);
+  // Payment Stats berechnen (finance_status ist nested)
+  const paymentStats = calculatePaymentStats(
+    (financeResult.data || []).map(reg => (reg as any).finance_status).filter(Boolean)
+  );
 
-  // Bot Stats berechnen
-  const botStats = calculateBotStats(rpaTracesResult.data || []);
+  // Bot Stats berechnen (rpa_traces ist nested array)
+  const allTraces = (rpaTracesResult.data || [])
+    .flatMap(reg => (reg as any).rpa_traces || [])
+    .filter(Boolean);
+  const botStats = calculateBotStats(allTraces);
 
-  // Recent Activity formatieren
+  // Recent Activity formatieren - Direct query, RLS filtered
   const recentActivity = formatAuditLogs(auditLogsResult.data || []);
 
   return {

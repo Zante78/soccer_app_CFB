@@ -100,12 +100,18 @@ export function AuditLogTimeline({ logs }: AuditLogTimelineProps) {
                     <div className="mt-2 text-xs">
                       {log.old_value && (
                         <p className="text-gray-500">
-                          <span className="font-medium">Alt:</span> {log.old_value}
+                          <span className="font-medium">Alt:</span>{" "}
+                          {typeof log.old_value === 'string'
+                            ? log.old_value
+                            : JSON.stringify(log.old_value)}
                         </p>
                       )}
                       {log.new_value && (
                         <p className="text-gray-700">
-                          <span className="font-medium">Neu:</span> {log.new_value}
+                          <span className="font-medium">Neu:</span>{" "}
+                          {typeof log.new_value === 'string'
+                            ? log.new_value
+                            : JSON.stringify(log.new_value)}
                         </p>
                       )}
                     </div>

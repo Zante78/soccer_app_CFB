@@ -17,17 +17,22 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Eye, FileText, Trash2, CheckCircle, XCircle } from "lucide-react";
-import type { RegistrationListItem } from "@/app/(protected)/registrations/actions";
+import { MoreHorizontal, Eye, FileText, Trash2, CheckCircle, XCircle, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import type { RegistrationListItem } from "../app/(protected)/registrations/types";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
+
+type SortColumn = "created_at" | "player_name" | "eligibility_date" | "status";
 
 type RegistrationsTableProps = {
   data: RegistrationListItem[] | undefined;
   isLoading: boolean;
+  sortBy?: SortColumn;
+  sortOrder?: "asc" | "desc";
+  onSort?: (column: SortColumn) => void;
 };
 
-export function RegistrationsTable({ data, isLoading }: RegistrationsTableProps) {
+export function RegistrationsTable({ data, isLoading, sortBy, sortOrder, onSort }: RegistrationsTableProps) {
   if (isLoading) {
     return (
       <div className="bg-white rounded-lg border border-gray-200">
@@ -55,17 +60,38 @@ export function RegistrationsTable({ data, isLoading }: RegistrationsTableProps)
     );
   }
 
+  const SortButton = ({ column, children }: { column: SortColumn; children: React.ReactNode }) => {
+    const isActive = sortBy === column;
+    const Icon = isActive ? (sortOrder === "asc" ? ArrowUp : ArrowDown) : ArrowUpDown;
+
+    return (
+      <button
+        onClick={() => onSort?.(column)}
+        className="flex items-center gap-1 hover:text-gray-900 transition-colors"
+      >
+        {children}
+        <Icon className={`h-4 w-4 ${isActive ? "text-[#0055A4]" : "text-gray-400"}`} />
+      </button>
+    );
+  };
+
   return (
     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Spieler</TableHead>
+            <TableHead>
+              <SortButton column="player_name">Spieler</SortButton>
+            </TableHead>
             <TableHead>Geburtsdatum</TableHead>
             <TableHead>Team</TableHead>
-            <TableHead>Status</TableHead>
+            <TableHead>
+              <SortButton column="status">Status</SortButton>
+            </TableHead>
             <TableHead>Zahlung</TableHead>
-            <TableHead>Erstellt</TableHead>
+            <TableHead>
+              <SortButton column="created_at">Erstellt</SortButton>
+            </TableHead>
             <TableHead className="text-right">Aktionen</TableHead>
           </TableRow>
         </TableHeader>

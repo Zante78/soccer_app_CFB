@@ -11,6 +11,7 @@ import { ArrowLeft, FileDown } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, XCircle } from "lucide-react";
+import { PDFExportButton } from "./pdf-export-button";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -98,10 +99,7 @@ export default async function RegistrationDetailPage({ params }: PageProps) {
               Aktionen
             </h3>
             <div className="space-y-2">
-              <Button variant="outline" className="w-full justify-start">
-                <FileDown className="h-4 w-4 mr-2" />
-                PDF Export
-              </Button>
+              <PDFExportButton registration={registration} />
               {/* Weitere Actions hier später */}
             </div>
           </Card>
@@ -120,7 +118,9 @@ export default async function RegistrationDetailPage({ params }: PageProps) {
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-medium text-gray-900">
-                        {trace.status}
+                        {typeof trace.status === 'string'
+                          ? trace.status
+                          : (trace.status as any)?.status || 'UNKNOWN'}
                       </span>
                       {trace.visual_diff_score !== null && (
                         <span className="text-xs text-gray-500">

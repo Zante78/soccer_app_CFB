@@ -11,8 +11,8 @@ import {
 } from "lucide-react";
 
 export default async function DashboardPage() {
-  // Auth Guard: Nur SUPER_ADMIN und PASSWART dürfen zugreifen
-  const user = await requireRole(["SUPER_ADMIN", "PASSWART"]);
+  // Auth Guard: Alle authentifizierten Rollen dürfen zugreifen (RLS filtert Daten)
+  const user = await requireRole(["SUPER_ADMIN", "PASSWART", "TRAINER", "ANTRAGSTELLER"]);
 
   // Dashboard Metrics laden
   const metrics = await getDashboardMetrics();

@@ -145,7 +145,10 @@ export function calculateJuniorEligibility(input: JuniorCalculatorInput): Eligib
 /**
  * Parse ein Datum-String (YYYY-MM-DD) als lokales Datum (ohne Timezone-Probleme)
  */
-function parseDate(dateStr: string): Date {
+function parseDate(dateStr: string | null | undefined): Date {
+  if (!dateStr) {
+    throw new Error('Datum fehlt: parseDate() erwartet einen gültigen Datum-String (YYYY-MM-DD)');
+  }
   const [year, month, day] = dateStr.split('-').map(Number);
   return new Date(year, month - 1, day);
 }

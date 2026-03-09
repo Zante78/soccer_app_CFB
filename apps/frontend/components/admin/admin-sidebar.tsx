@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -8,7 +9,9 @@ import {
   Bot,
   Settings,
   LogOut,
-  User
+  User,
+  Menu,
+  X
 } from "lucide-react";
 import { useAuth } from "@/components/providers/auth-provider";
 import { Button } from "@/components/ui/button";
@@ -43,6 +46,7 @@ export function AdminSidebar() {
   const pathname = usePathname();
   const { profile } = useAuth();
   const supabase = useSupabase();
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -55,16 +59,60 @@ export function AdminSidebar() {
     return profile && item.roles.includes(profile.role);
   });
 
+  // Keyboard Handler: Escape schließt Sidebar
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isOpen) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen]);
+
   return (
-    <aside className="w-64 bg-white border-r border-gray-200 flex flex-col h-screen">
+    <>
+      {/* Mobile Hamburger Button */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="lg:hidden fixed top-4 left-4 z-50 p-3 bg-white rounded-lg shadow-lg border border-gray-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+        aria-label="Navigation öffnen/schließen"
+        aria-expanded={isOpen}
+      >
+        {isOpen ? (
+          <X className="h-6 w-6 text-gray-700" />
+        ) : (
+          <Menu className="h-6 w-6 text-gray-700" />
+        )}
+      </button>
+
+      {/* Backdrop for mobile */}
+      {isOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
+        className={`
+          fixed lg:static inset-y-0 left-0 z-40
+          w-64 bg-white border-r border-gray-200 flex flex-col h-screen
+          transform transition-transform duration-300 ease-in-out
+          ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        `}
+        aria-label="Hauptnavigation"
+      >
       {/* Logo/Header */}
-      <div className="p-6 border-b border-gray-200">
+      <div className="p-6 border-b border-gray-200" tabIndex={!isOpen ? -1 : undefined}>
         <h2 className="text-xl font-bold text-[#0055A4]">CfB Pass-Admin</h2>
         <p className="text-sm text-gray-600 mt-1">Verwaltung</p>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-2">
+      <nav className="flex-1 p-4 space-y-2" aria-label="Hauptnavigation">
         {visibleNavItems.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
@@ -73,6 +121,9 @@ export function AdminSidebar() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={() => setIsOpen(false)} // Close sidebar on mobile after click
+              tabIndex={!isOpen ? -1 : undefined}
+              aria-current={isActive ? "page" : undefined}
               className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                 isActive
                   ? "bg-[#0055A4] text-white"
@@ -89,7 +140,7 @@ export function AdminSidebar() {
       {/* User Info & Sign Out */}
       {profile && (
         <div className="p-4 border-t border-gray-200 space-y-3">
-          <div className="flex items-center gap-3 px-4 py-2 bg-gray-50 rounded-lg">
+          <div className="flex items-center gap-3 px-4 py-2 bg-gray-50 rounded-lg" tabIndex={!isOpen ? -1 : undefined}>
             <div className="h-8 w-8 rounded-full bg-[#0055A4] flex items-center justify-center text-white font-semibold">
               {profile.full_name?.[0] || profile.email[0].toUpperCase()}
             </div>
@@ -109,6 +160,7 @@ export function AdminSidebar() {
             variant="secondary"
             className="w-full justify-start"
             onClick={handleSignOut}
+            tabIndex={!isOpen ? -1 : undefined}
           >
             <LogOut className="h-4 w-4 mr-2" />
             Abmelden
@@ -116,5 +168,6 @@ export function AdminSidebar() {
         </div>
       )}
     </aside>
+    </>
   );
 }

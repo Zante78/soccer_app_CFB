@@ -13,6 +13,8 @@ export default function RegistrationsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [status, setStatus] = useState<RegistrationStatus | null>(null);
   const [teamId, setTeamId] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<"created_at" | "player_name" | "eligibility_date" | "status">("created_at");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   // Debounce search query
   const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
@@ -34,15 +36,28 @@ export default function RegistrationsPage() {
 
   // Load Registrations
   const { data, isLoading, error } = useQuery({
-    queryKey: ["registrations", { page, status, teamId, search: debouncedSearch }],
+    queryKey: ["registrations", { page, status, teamId, search: debouncedSearch, sortBy, sortOrder }],
     queryFn: () =>
       getRegistrations({
         page,
         status,
         teamId,
         searchQuery: debouncedSearch,
+        sortBy,
+        sortOrder,
       }),
   });
+
+  const handleSort = (column: typeof sortBy) => {
+    if (sortBy === column) {
+      // Toggle order if same column
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      // New column, default to descending
+      setSortBy(column);
+      setSortOrder("desc");
+    }
+  };
 
   const handleReset = () => {
     setSearchQuery("");
@@ -83,7 +98,13 @@ export default function RegistrationsPage() {
         </div>
       ) : (
         <>
-          <RegistrationsTable data={data?.registrations} isLoading={isLoading} />
+          <RegistrationsTable
+            data={data?.registrations}
+            isLoading={isLoading}
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            onSort={handleSort}
+          />
 
           {data && data.totalCount > 0 && (
             <PaginationControls
