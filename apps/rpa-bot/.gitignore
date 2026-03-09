@@ -1,0 +1,38 @@
+# Environment
+.env
+.env.local
+.env.production
+
+# Build
+dist/
+build/
+
+# Node
+node_modules/
+
+# Logs
+logs/
+*.log
+
+# Screenshots & Baselines
+screenshots/
+baselines/
+temp/
+
+# Videos (Playwright recordings)
+videos/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/

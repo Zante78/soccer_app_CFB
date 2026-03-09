@@ -1,0 +1,40 @@
+{
+  "name": "@apps/rpa-bot",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "description": "DFBnet RPA Bot for Spielerpass Automation",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "dev:server": "tsx watch src/server.ts",
+    "start": "node --loader ts-node/esm src/index.ts",
+    "start:server": "node --loader ts-node/esm src/server.ts",
+    "start:mock": "BOT_MODE=mock node --loader ts-node/esm src/server.ts",
+    "build": "tsc",
+    "test": "vitest",
+    "test:headed": "HEADLESS=false npm run dev"
+  },
+  "dependencies": {
+    "@packages/shared-logic": "*",
+    "@packages/shared-types": "*",
+    "@supabase/supabase-js": "^2.47.10",
+    "cors": "^2.8.6",
+    "dotenv": "^16.4.7",
+    "express": "^4.22.1",
+    "helmet": "^8.1.0",
+    "pixelmatch": "^6.0.0",
+    "playwright": "^1.49.1",
+    "pngjs": "^7.0.0",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.10.2",
+    "@types/pixelmatch": "^5.2.6",
+    "@types/pngjs": "^6.0.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}
