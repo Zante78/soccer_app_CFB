@@ -26,6 +26,13 @@ export const config = {
   DFBNET_BASE_URL:
     process.env.DFBNET_BASE_URL || "https://www.dfbnet.org",
 
+  // IMAP for 2FA OTP retrieval (optional — only needed if DFBnet uses 2FA)
+  IMAP_HOST: process.env.IMAP_HOST || "",
+  IMAP_PORT: parseInt(process.env.IMAP_PORT || "993", 10),
+  IMAP_USERNAME: process.env.IMAP_USERNAME || "",
+  IMAP_PASSWORD: process.env.IMAP_PASSWORD || "",
+  IMAP_OTP_SENDER: process.env.IMAP_OTP_SENDER || "noreply@dfbnet.org",
+
   // Bot
   BOT_HEADLESS: process.env.BOT_HEADLESS !== "false", // Default: true
   BOT_SCREENSHOT_DIR: process.env.BOT_SCREENSHOT_DIR || "./screenshots",

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Spielerpass beantragen (Test Fixture)</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f5f5f5; }
+    .header { background: #003366; color: white; padding: 16px 24px; }
+    .header h1 { font-size: 18px; margin: 0; }
+    .content { max-width: 800px; margin: 24px auto; padding: 0 24px; }
+    .card { background: white; border-radius: 8px; padding: 32px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+    h2 { color: #003366; margin-top: 0; }
+    label { display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px; color: #333; }
+    input, select { width: 100%; padding: 10px; margin-bottom: 16px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
+    select { background: white; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .upload-section { border: 2px dashed #ccc; border-radius: 8px; padding: 24px; text-align: center; margin-bottom: 16px; background: #fafafa; }
+    .upload-section input[type="file"] { margin-top: 8px; }
+    .button-row { display: flex; gap: 12px; margin-top: 24px; }
+    button { padding: 12px 24px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+    #entwurf-speichern { background: #4CAF50; color: white; }
+    #entwurf-speichern:hover { background: #45a049; }
+    #antrag-absenden { background: #003366; color: white; }
+    #antrag-absenden:hover { background: #004080; }
+    .success-message { display: none; background: #e8f5e9; border: 1px solid #4CAF50; color: #2e7d32; padding: 16px; border-radius: 4px; margin-top: 16px; }
+    .success-message a { color: #1b5e20; font-weight: bold; }
+    .dashboard-welcome { display: none; } /* Hidden marker for selector tests */
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>DFBnet — Spielerpass beantragen</h1>
+  </div>
+
+  <div class="content">
+    <div class="card">
+      <div id="spielerpass-form">
+        <h2>Neuer Spielerpass-Antrag</h2>
+
+        <div class="form-row">
+          <div>
+            <label for="vorname">Vorname</label>
+            <input type="text" id="vorname" name="vorname" placeholder="Vorname">
+          </div>
+          <div>
+            <label for="nachname">Nachname</label>
+            <input type="text" id="nachname" name="nachname" placeholder="Nachname">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div>
+            <label for="geburtsdatum">Geburtsdatum</label>
+            <input type="text" id="geburtsdatum" name="geburtsdatum" placeholder="TT.MM.JJJJ">
+          </div>
+          <div>
+            <label for="spielernummer">Spielernummer (optional)</label>
+            <input type="text" id="spielernummer" name="spielernummer" placeholder="DFB-ID">
+          </div>
+        </div>
+
+        <label for="mannschaft">Mannschaft</label>
+        <select id="mannschaft" name="mannschaft">
+          <option value="">-- Bitte waehlen --</option>
+          <option value="senioren-1">1. Senioren</option>
+          <option value="senioren-2">2. Senioren</option>
+          <option value="a-jugend">A-Jugend (U19)</option>
+          <option value="b-jugend">B-Jugend (U17)</option>
+          <option value="c-jugend">C-Jugend (U15)</option>
+          <option value="d-jugend">D-Jugend (U13)</option>
+          <option value="e-jugend">E-Jugend (U11)</option>
+          <option value="f-jugend">F-Jugend (U9)</option>
+          <option value="CfB Ford Niehl Senioren 1">CfB Ford Niehl Senioren 1</option>
+        </select>
+
+        <label for="antragsgrund">Antragsgrund</label>
+        <select id="antragsgrund" name="antragsgrund">
+          <option value="">-- Bitte waehlen --</option>
+          <option value="Erstanmeldung">Erstanmeldung</option>
+          <option value="Vereinswechsel">Vereinswechsel</option>
+          <option value="Wiederanmeldung">Wiederanmeldung</option>
+          <option value="Internationaler Transfer">Internationaler Transfer</option>
+        </select>
+
+        <label for="vorheriger-verein">Vorheriger Verein (bei Wechsel)</label>
+        <input type="text" id="vorheriger-verein" name="vorheriger_verein" placeholder="Name des vorherigen Vereins">
+
+        <label for="abmeldedatum">Abmeldedatum (bei Wechsel)</label>
+        <input type="text" id="abmeldedatum" name="abmeldedatum" placeholder="TT.MM.JJJJ">
+
+        <!-- File Uploads -->
+        <div class="upload-section">
+          <label>Passfoto</label>
+          <p>Foto im Format JPG/PNG (min. 600x800px)</p>
+          <input type="file" name="foto" accept="image/*">
+        </div>
+
+        <div class="upload-section">
+          <label>Dokumente</label>
+          <p>Ausweiskopie, Abmeldebestaetigung, etc.</p>
+          <input type="file" name="dokument" accept=".pdf,.jpg,.png" multiple>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="button-row">
+          <button type="button" id="entwurf-speichern">Als Entwurf speichern</button>
+          <button type="button" id="antrag-absenden">Antrag absenden</button>
+        </div>
+
+        <!-- Success Message (hidden by default) -->
+        <div class="success-message" id="success-msg">
+          Entwurf erfolgreich gespeichert!
+          <br>
+          <a href="https://www.dfbnet.org/draft/test-draft-12345" class="draft-url">
+            Entwurf ansehen: https://www.dfbnet.org/draft/test-draft-12345
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Save as draft
+    document.getElementById('entwurf-speichern').addEventListener('click', function() {
+      document.getElementById('success-msg').style.display = 'block';
+      this.disabled = true;
+      this.textContent = 'Gespeichert';
+    });
+
+    // Submit (should NEVER be clicked by the bot)
+    document.getElementById('antrag-absenden').addEventListener('click', function() {
+      alert('WARNUNG: Antrag absenden wurde geklickt! Der Bot sollte dies NIEMALS tun.');
+    });
+  </script>
+</body>
+</html>

@@ -1,12 +1,43 @@
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
-import { config } from "./config/env.js";
+import { config, validateConfig } from "./config/env.js";
 import { logger } from "./utils/logger.js";
 import { MockBot } from "./bot/mock-bot.js";
+import { DFBnetBot } from "./bot/dfbnet-bot.js";
+import { SupabaseClient } from "./services/supabase-client.js";
 
 const app = express();
 const mockBot = new MockBot();
+
+// ===== Live Mode Setup =====
+let dfbnetBot: DFBnetBot | null = null;
+let isProcessing = false;
+
+if (config.BOT_MODE === "live") {
+  try {
+    validateConfig();
+    const supabase = new SupabaseClient(
+      config.SUPABASE_URL,
+      config.SUPABASE_SERVICE_ROLE_KEY
+    );
+    dfbnetBot = new DFBnetBot(
+      {
+        headless: config.BOT_HEADLESS,
+        timeout: config.BOT_TIMEOUT_MS,
+        screenshotDir: config.BOT_SCREENSHOT_DIR,
+        baselineDir: config.BOT_BASELINE_DIR,
+        maxRetries: config.BOT_MAX_RETRIES,
+      },
+      supabase
+    );
+    logger.info("Live mode initialized — DFBnetBot ready");
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error);
+    logger.error(`Failed to initialize live mode: ${msg}`);
+    process.exit(1);
+  }
+}
 
 // ===== Middleware =====
 app.use(helmet());
@@ -43,9 +74,10 @@ function requireAuth(
 app.get("/", (_req, res) => {
   res.json({
     service: "CFB Bot Runner",
-    version: "1.1.0",
+    version: "2.0.0",
     mode: config.BOT_MODE,
     status: "running",
+    is_processing: isProcessing,
     uptime: process.uptime(),
   });
 });
@@ -80,15 +112,38 @@ app.post("/execute", requireAuth, async (req, res) => {
       return;
     }
 
-    // Live mode: use DFBnetBot (TODO: implement when DFBnet credentials available)
-    res.status(501).json({
-      error: "Live mode not yet implemented. Use BOT_MODE=mock.",
-    });
-  } catch (error: any) {
-    logger.error(`[API] /execute error: ${error.message}`);
+    // Live mode
+    if (!dfbnetBot) {
+      res.status(503).json({ error: "Live mode bot not initialized" });
+      return;
+    }
+
+    if (isProcessing) {
+      res.status(429).json({
+        error: "Bot is busy processing another registration",
+        retry_after_seconds: 60,
+      });
+      return;
+    }
+
+    isProcessing = true;
+    try {
+      const result = await dfbnetBot.execute({
+        registration_id,
+        trace_id,
+        player_name,
+        team_name,
+      });
+      res.json(result);
+    } finally {
+      isProcessing = false;
+    }
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? (error as Error).message : String(error);
+    logger.error(`[API] /execute error: ${msg}`);
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: msg,
       duration_ms: 0,
     });
   }
@@ -101,7 +156,7 @@ app.post("/execute", requireAuth, async (req, res) => {
  * Response: { success, duration_ms, dfbnet_version }
  */
 app.post("/health-check", requireAuth, async (req, res) => {
-  const { check_id, mode } = req.body;
+  const { check_id } = req.body;
 
   logger.info(
     `[API] /health-check received: check_id=${check_id || "none"}, mode=${config.BOT_MODE}`
@@ -114,15 +169,20 @@ app.post("/health-check", requireAuth, async (req, res) => {
       return;
     }
 
-    // Live mode: actual DFBnet login test
-    res.status(501).json({
-      error: "Live mode not yet implemented. Use BOT_MODE=mock.",
-    });
-  } catch (error: any) {
-    logger.error(`[API] /health-check error: ${error.message}`);
+    // Live mode
+    if (!dfbnetBot) {
+      res.status(503).json({ error: "Live mode bot not initialized" });
+      return;
+    }
+
+    const result = await dfbnetBot.healthCheck();
+    res.json({ ...result, check_id });
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? (error as Error).message : String(error);
+    logger.error(`[API] /health-check error: ${msg}`);
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: msg,
       duration_ms: 0,
     });
   }
@@ -134,9 +194,10 @@ app.post("/health-check", requireAuth, async (req, res) => {
 app.get("/status", requireAuth, (_req, res) => {
   res.json({
     service: "CFB Bot Runner",
-    version: "1.1.0",
+    version: "2.0.0",
     mode: config.BOT_MODE,
     status: "running",
+    is_processing: isProcessing,
     config: {
       success_rate: config.BOT_MODE === "mock" ? config.MOCK_SUCCESS_RATE : "N/A",
       delay_ms: config.BOT_MODE === "mock" ? config.MOCK_DELAY_MS : "N/A",
@@ -153,7 +214,7 @@ app.get("/status", requireAuth, (_req, res) => {
 // ===== Start Server =====
 app.listen(config.SERVER_PORT, () => {
   logger.info("=".repeat(50));
-  logger.info(`CFB Bot Runner v1.1.0`);
+  logger.info(`CFB Bot Runner v2.0.0`);
   logger.info(`Mode: ${config.BOT_MODE.toUpperCase()}`);
   logger.info(`Port: ${config.SERVER_PORT}`);
   logger.info(`Auth: Bearer token required`);
@@ -170,6 +231,16 @@ app.listen(config.SERVER_PORT, () => {
     logger.info(`Mock Config:`);
     logger.info(`  Success Rate: ${(config.MOCK_SUCCESS_RATE * 100).toFixed(0)}%`);
     logger.info(`  Base Delay: ${config.MOCK_DELAY_MS}ms`);
+    logger.info("");
+  }
+
+  if (config.BOT_MODE === "live") {
+    logger.info(`Live Config:`);
+    logger.info(`  DFBnet URL: ${config.DFBNET_BASE_URL}`);
+    logger.info(`  Headless: ${config.BOT_HEADLESS}`);
+    logger.info(`  Max Retries: ${config.BOT_MAX_RETRIES}`);
+    logger.info(`  Timeout: ${config.BOT_TIMEOUT_MS}ms`);
+    logger.info(`  Visual Diff Threshold: ${(config.VISUAL_DIFF_THRESHOLD * 100).toFixed(1)}%`);
     logger.info("");
   }
 });

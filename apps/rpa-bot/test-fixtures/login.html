@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>DFBnet Login (Test Fixture)</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f5f5f5; display: flex; justify-content: center; padding-top: 100px; }
+    .login-box { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); width: 400px; }
+    h1 { color: #003366; font-size: 20px; margin-bottom: 24px; }
+    label { display: block; margin-bottom: 4px; font-weight: bold; font-size: 14px; }
+    input { width: 100%; padding: 10px; margin-bottom: 16px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    button { background: #003366; color: white; padding: 12px 24px; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-size: 16px; }
+    button:hover { background: #004080; }
+    .login-error { color: #cc0000; background: #ffe0e0; padding: 10px; border-radius: 4px; margin-bottom: 16px; display: none; }
+    #cookie-banner { position: fixed; bottom: 0; left: 0; right: 0; background: #333; color: white; padding: 16px; text-align: center; }
+    #cookie-accept { background: #4CAF50; color: white; border: none; padding: 8px 16px; margin-left: 12px; cursor: pointer; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <!-- Cookie Banner -->
+  <div id="cookie-banner">
+    Diese Seite verwendet Cookies.
+    <button id="cookie-accept">Akzeptieren</button>
+  </div>
+
+  <div class="login-box">
+    <h1>DFBnet Anmeldung</h1>
+
+    <div class="login-error" id="login-error"></div>
+
+    <form id="login-form">
+      <label for="kennung">Kennung</label>
+      <input type="text" id="kennung" name="kennung" placeholder="Benutzername" required>
+
+      <label for="passwort">Passwort</label>
+      <input type="password" id="passwort" name="passwort" placeholder="Passwort" required>
+
+      <button type="submit" id="loginButton">Anmelden</button>
+    </form>
+  </div>
+
+  <script>
+    // Cookie banner dismiss
+    document.getElementById('cookie-accept').addEventListener('click', function() {
+      document.getElementById('cookie-banner').style.display = 'none';
+    });
+
+    // Login form
+    document.getElementById('login-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var username = document.getElementById('kennung').value;
+      var password = document.getElementById('passwort').value;
+
+      // Test credentials: testuser / testpass
+      if (username === 'testuser' && password === 'testpass') {
+        window.location.href = 'dashboard.html';
+      } else {
+        var errorEl = document.getElementById('login-error');
+        errorEl.textContent = 'Kennung oder Passwort falsch.';
+        errorEl.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>

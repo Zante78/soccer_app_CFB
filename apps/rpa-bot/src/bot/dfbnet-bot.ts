@@ -1,213 +1,462 @@
-import { chromium, Browser, BrowserContext, Page } from "playwright";
-import { logger, createRegistrationLogger } from "../utils/logger.js";
-import { config } from "../config/env.js";
-import { randomUUID } from "crypto";
+/**
+ * DFBnet RPA Bot — Real Playwright Automation
+ *
+ * Orchestrates: Login → Navigate → Fill Form → Upload Docs → Visual Check → Save Draft
+ *
+ * IMPORTANT: This bot operates in DRAFT-ONLY mode.
+ * It will NEVER submit/absenden a form — only save as draft.
+ */
 
-type BotConfig = {
+import { chromium, Browser, BrowserContext, Page } from 'playwright';
+import { readFileSync, existsSync, mkdirSync } from 'fs';
+import { randomUUID } from 'crypto';
+import { logger, createRegistrationLogger } from '../utils/logger.js';
+import { config } from '../config/env.js';
+import { BotError, ErrorCategory, categorizePlaywrightError } from '../utils/errors.js';
+import { withRetry } from '../utils/retry.js';
+import { compareScreenshots } from '../utils/visual-regression.js';
+import { loginToDFBnet, type LoginConfig, type IMAPConfig } from '../flows/login.js';
+import {
+  navigateToSpielerpassForm,
+  fillSpielerpassForm,
+  uploadDocumentsToForm,
+  downloadToTemp,
+  cleanupTempFile,
+  saveDraft,
+  type RegistrationData,
+} from '../flows/create-draft.js';
+import { SELECTORS } from '../config/selectors.js';
+import type { SupabaseClient } from '../services/supabase-client.js';
+
+// ===== Types =====
+
+export type BotConfig = {
   headless: boolean;
   timeout: number;
   screenshotDir: string;
   baselineDir: string;
+  maxRetries: number;
 };
 
-type Registration = {
-  id: string;
-  player_name: string;
-  player_birth_date: string;
-  player_dfb_id: string | null;
-  registration_reason: string;
-  player_data: Record<string, any>;
-  team: {
-    id: string;
-    name: string;
-    dfbnet_id: string | null;
-  };
+export type ExecuteRequest = {
+  registration_id: string;
+  trace_id: string;
+  player_name?: string;
+  team_name?: string;
 };
 
-/**
- * DFBnet RPA Bot
- *
- * Automatisiert Spielerpass-Anträge in DFBnet
- */
+export type ExecuteResult = {
+  success: boolean;
+  visual_regression_error?: boolean;
+  draft_url?: string | null;
+  screenshot_actual?: string | null;
+  screenshot_baseline?: string | null;
+  visual_diff_score?: number | null;
+  duration_ms: number;
+  error?: string;
+  dfbnet_version?: string;
+  mock: false;
+};
+
+export type HealthCheckResult = {
+  success: boolean;
+  duration_ms: number;
+  dfbnet_version?: string;
+  mock: false;
+  error?: string;
+};
+
+// ===== Bot Class =====
+
 export class DFBnetBot {
-  private browser: Browser | null = null;
-  private context: BrowserContext | null = null;
-  private page: Page | null = null;
-  private config: BotConfig;
+  private botConfig: BotConfig;
+  private supabase: SupabaseClient | null;
 
-  constructor(config: BotConfig) {
-    this.config = config;
-  }
+  constructor(botConfig: BotConfig, supabase?: SupabaseClient) {
+    this.botConfig = botConfig;
+    this.supabase = supabase ?? null;
 
-  /**
-   * Initialisiert Browser & Context
-   */
-  async initialize() {
-    logger.info("🌐 Launching browser...");
-
-    this.browser = await chromium.launch({
-      headless: this.config.headless,
-      slowMo: this.config.headless ? 0 : 100, // Slow down for debugging
-    });
-
-    this.context = await this.browser.newContext({
-      viewport: { width: 1920, height: 1080 },
-      userAgent:
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-      locale: "de-DE",
-      timezoneId: "Europe/Berlin",
-    });
-
-    this.page = await this.context.newPage();
-
-    // Set default timeout
-    this.page.setDefaultTimeout(this.config.timeout);
-
-    logger.info("✅ Browser initialized");
-  }
-
-  /**
-   * Schließt Browser
-   */
-  async close() {
-    if (this.browser) {
-      await this.browser.close();
-      logger.info("🔒 Browser closed");
+    // Ensure screenshot directories exist
+    if (!existsSync(botConfig.screenshotDir)) {
+      mkdirSync(botConfig.screenshotDir, { recursive: true });
+    }
+    if (!existsSync(botConfig.baselineDir)) {
+      mkdirSync(botConfig.baselineDir, { recursive: true });
     }
   }
 
   /**
-   * Hauptprozess: Verarbeitet eine Registration
+   * Execute bot for a single registration.
+   * Always returns a structured result — never throws.
+   * This is the API contract for server.ts (/execute endpoint).
    */
-  async processRegistration(registration: Registration) {
+  async execute(request: ExecuteRequest): Promise<ExecuteResult> {
+    const startTime = Date.now();
+    const regLogger = createRegistrationLogger(request.registration_id);
+
+    regLogger.info(`Starting execution (live mode) for: ${request.player_name ?? 'unknown'}`);
+
+    try {
+      // Fetch full registration data from Supabase
+      let registration: RegistrationData;
+      if (this.supabase) {
+        const regs = await this.supabase.getPendingRegistrations();
+        const found = regs.find((r) => r.id === request.registration_id);
+        if (!found) {
+          return {
+            success: false,
+            error: `Registration ${request.registration_id} not found or not in READY_FOR_BOT status`,
+            duration_ms: Date.now() - startTime,
+            mock: false,
+          };
+        }
+        registration = found;
+      } else {
+        // Fallback: construct minimal registration from request data
+        registration = {
+          id: request.registration_id,
+          player_name: request.player_name ?? 'Unknown',
+          player_birth_date: '',
+          player_dfb_id: null,
+          registration_reason: 'NEW_PLAYER',
+          player_data: {},
+          team: { id: '', name: request.team_name ?? '', dfbnet_id: null },
+        };
+      }
+
+      // Run with retry
+      const result = await withRetry(
+        () => this.processRegistration(registration),
+        {
+          maxRetries: this.botConfig.maxRetries,
+          baseDelayMs: 5000,
+          maxDelayMs: 60_000,
+          onRetry: (error, attempt) => {
+            regLogger.warn(`Retry ${attempt}: ${error instanceof Error ? error.message : error}`);
+          },
+        }
+      );
+
+      return {
+        ...result,
+        duration_ms: Date.now() - startTime,
+        mock: false,
+      };
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      const isVisualRegression =
+        error instanceof BotError && error.category === ErrorCategory.VISUAL_REGRESSION;
+
+      regLogger.error(`Execution failed: ${errorMsg}`);
+
+      return {
+        success: false,
+        visual_regression_error: isVisualRegression,
+        screenshot_actual: error instanceof BotError ? error.screenshotPath : undefined,
+        visual_diff_score: isVisualRegression ? undefined : null,
+        error: errorMsg,
+        duration_ms: Date.now() - startTime,
+        mock: false,
+      };
+    }
+  }
+
+  /**
+   * Health check: test DFBnet login without filling any forms.
+   */
+  async healthCheck(): Promise<HealthCheckResult> {
+    const startTime = Date.now();
+
+    let browser: Browser | null = null;
+    try {
+      browser = await chromium.launch({ headless: this.botConfig.headless });
+      const context = await browser.newContext({
+        viewport: { width: 1920, height: 1080 },
+        locale: 'de-DE',
+        timezoneId: 'Europe/Berlin',
+      });
+      const page = await context.newPage();
+      page.setDefaultTimeout(this.botConfig.timeout);
+
+      const loginResult = await loginToDFBnet(page, this.getLoginConfig('health-check'));
+
+      if (!loginResult.success) {
+        return {
+          success: false,
+          duration_ms: Date.now() - startTime,
+          error: loginResult.error ?? 'Login failed',
+          mock: false,
+        };
+      }
+
+      // Try to detect DFBnet version from the page
+      let dfbnetVersion: string | undefined;
+      try {
+        const versionEl = await page.$('.version, .footer-version, #version');
+        if (versionEl) {
+          dfbnetVersion = (await versionEl.textContent())?.trim();
+        }
+      } catch { /* version detection is optional */ }
+
+      return {
+        success: true,
+        duration_ms: Date.now() - startTime,
+        dfbnet_version: dfbnetVersion,
+        mock: false,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        duration_ms: Date.now() - startTime,
+        error: error instanceof Error ? error.message : String(error),
+        mock: false,
+      };
+    } finally {
+      if (browser) await browser.close();
+    }
+  }
+
+  /**
+   * Full registration processing pipeline.
+   * Called by execute() with retry wrapper.
+   */
+  private async processRegistration(
+    registration: RegistrationData
+  ): Promise<Omit<ExecuteResult, 'duration_ms' | 'mock'>> {
     const regLogger = createRegistrationLogger(registration.id);
     const executionId = randomUUID();
 
-    regLogger.info(`Starting execution: ${executionId}`);
+    let browser: Browser | null = null;
+    const tempFiles: string[] = [];
 
     try {
-      // 1. Initialize Browser
-      await this.initialize();
+      // 1. Launch browser
+      regLogger.info('Launching browser...');
+      browser = await chromium.launch({
+        headless: this.botConfig.headless,
+        slowMo: this.botConfig.headless ? 0 : 100,
+      });
 
-      // 2. Login to DFBnet
-      regLogger.info("Logging in to DFBnet...");
-      await this.login();
+      const context = await browser.newContext({
+        viewport: { width: 1920, height: 1080 },
+        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        locale: 'de-DE',
+        timezoneId: 'Europe/Berlin',
+      });
 
-      // 3. Navigate to Spielerpass Form
-      regLogger.info("Navigating to Spielerpass form...");
-      await this.navigateToSpielerpassForm();
+      const page = await context.newPage();
+      page.setDefaultTimeout(this.botConfig.timeout);
 
-      // 4. Fill Form with Registration Data
-      regLogger.info("Filling form...");
-      await this.fillForm(registration);
-
-      // 5. Take Screenshot (Before Submit)
-      regLogger.info("Taking screenshot...");
-      const screenshotPath = await this.takeScreenshot(
-        `${registration.id}_${executionId}`
-      );
-
-      // 6. Visual Regression Check
-      regLogger.info("Running visual regression check...");
-      const diffScore = await this.compareWithBaseline(
-        screenshotPath,
-        registration.id
-      );
-
-      if (diffScore > config.VISUAL_DIFF_THRESHOLD) {
-        throw new Error(
-          `Visual regression detected: ${(diffScore * 100).toFixed(2)}% diff`
+      // 2. Login
+      regLogger.info('Logging in to DFBnet...');
+      const loginResult = await loginToDFBnet(page, this.getLoginConfig(registration.id));
+      if (!loginResult.success) {
+        throw new BotError(
+          loginResult.error ?? 'Login failed',
+          ErrorCategory.CREDENTIALS
         );
       }
 
-      // 7. DRAFT MODE: Do NOT submit!
-      regLogger.info("✅ Draft completed (not submitted)");
+      // 3. Navigate to Spielerpass form
+      regLogger.info('Navigating to Spielerpass form...');
+      await navigateToSpielerpassForm(page, {
+        baseUrl: config.DFBNET_BASE_URL,
+        screenshotDir: this.botConfig.screenshotDir,
+        registrationId: registration.id,
+      });
 
-      // 8. Update Status
-      // TODO: Update Supabase (status: COMPLETED)
+      // 4. Fill form
+      regLogger.info('Filling form...');
+      const fillResult = await fillSpielerpassForm(page, registration, {
+        screenshotDir: this.botConfig.screenshotDir,
+      });
 
-      regLogger.info("✅ Registration processed successfully");
-    } catch (error: any) {
-      regLogger.error("❌ Processing failed:", error);
-      throw error;
+      if (fillResult.warnings.length > 0) {
+        regLogger.warn(`Form warnings: ${fillResult.warnings.join('; ')}`);
+      }
+
+      // 5. Upload documents (if Supabase is available)
+      if (this.supabase && registration.player_data) {
+        regLogger.info('Uploading documents...');
+        const uploadFiles = await this.prepareUploads(registration, tempFiles);
+        if (uploadFiles.length > 0) {
+          const uploadResult = await uploadDocumentsToForm(page, uploadFiles);
+          if (uploadResult.errors.length > 0) {
+            regLogger.warn(`Upload warnings: ${uploadResult.errors.join('; ')}`);
+          }
+        }
+      }
+
+      // 6. Take pre-save screenshot
+      const screenshotPath = `${this.botConfig.screenshotDir}/${registration.id}_${executionId}_pre-save.png`;
+      await page.screenshot({ path: screenshotPath, fullPage: true });
+      regLogger.info(`Screenshot: ${screenshotPath}`);
+
+      // 7. Visual regression check
+      const baselinePath = `${this.botConfig.baselineDir}/spielerpass-form.png`;
+      const diffResult = await compareScreenshots(screenshotPath, baselinePath, {
+        diffThreshold: config.VISUAL_DIFF_THRESHOLD,
+        outputDiffPath: `${this.botConfig.screenshotDir}/${registration.id}_${executionId}_diff.png`,
+      });
+
+      if (diffResult.threshold_exceeded) {
+        // Upload screenshots to Supabase Storage before throwing
+        let uploadedActual: string | undefined;
+        let uploadedBaseline: string | undefined;
+        if (this.supabase) {
+          try {
+            uploadedActual = await this.uploadScreenshotToStorage(
+              screenshotPath,
+              `${registration.id}/${executionId}/actual.png`
+            );
+            uploadedBaseline = await this.uploadScreenshotToStorage(
+              baselinePath,
+              `${registration.id}/${executionId}/baseline.png`
+            );
+          } catch { /* non-critical */ }
+        }
+
+        throw new BotError(
+          `Visual regression: ${(diffResult.diff_score * 100).toFixed(3)}% diff exceeds ${(config.VISUAL_DIFF_THRESHOLD * 100).toFixed(1)}% threshold`,
+          ErrorCategory.VISUAL_REGRESSION,
+          { screenshotPath }
+        );
+      }
+
+      // 8. Save as draft (NEVER submit!)
+      regLogger.info('Saving as draft...');
+      const draftResult = await saveDraft(page, {
+        screenshotDir: this.botConfig.screenshotDir,
+        registrationId: registration.id,
+      });
+
+      // 9. Upload screenshots to Supabase Storage
+      let screenshotActualPath: string | undefined;
+      let screenshotBaselinePath: string | undefined;
+      if (this.supabase) {
+        try {
+          screenshotActualPath = await this.uploadScreenshotToStorage(
+            screenshotPath,
+            `${registration.id}/${executionId}/actual.png`
+          );
+          if (existsSync(baselinePath)) {
+            screenshotBaselinePath = await this.uploadScreenshotToStorage(
+              baselinePath,
+              `${registration.id}/${executionId}/baseline.png`
+            );
+          }
+        } catch (err) {
+          regLogger.warn(`Screenshot upload failed: ${err}`);
+        }
+      }
+
+      regLogger.info('Draft completed successfully');
+
+      return {
+        success: true,
+        draft_url: draftResult.draftUrl,
+        screenshot_actual: screenshotActualPath ?? screenshotPath,
+        screenshot_baseline: screenshotBaselinePath ?? baselinePath,
+        visual_diff_score: diffResult.diff_score,
+        dfbnet_version: undefined,
+      };
     } finally {
-      await this.close();
+      // Cleanup
+      if (browser) await browser.close();
+      for (const tempFile of tempFiles) cleanupTempFile(tempFile);
     }
   }
 
   /**
-   * Login zu DFBnet
+   * Prepare document uploads: download from Supabase Storage → temp files.
    */
-  private async login() {
-    if (!this.page) throw new Error("Browser not initialized");
+  private async prepareUploads(
+    registration: RegistrationData,
+    tempFiles: string[]
+  ): Promise<{ localPath: string; inputSelector: string }[]> {
+    const uploads: { localPath: string; inputSelector: string }[] = [];
 
-    await this.page.goto(config.DFBNET_BASE_URL);
+    // Photo
+    const photoPath = registration.player_data?.photo_path as string | undefined;
+    if (photoPath) {
+      try {
+        const tempPath = await downloadToTemp(
+          config.SUPABASE_URL,
+          config.SUPABASE_SERVICE_ROLE_KEY,
+          'player-photos',
+          photoPath
+        );
+        tempFiles.push(tempPath);
+        uploads.push({
+          localPath: tempPath,
+          inputSelector: SELECTORS.spielerpassForm.photoUpload,
+        });
+      } catch (err) {
+        logger.warn(`Photo download failed: ${err}`);
+      }
+    }
 
-    // TODO: Implement login flow
-    // 1. Find username field
-    // 2. Find password field
-    // 3. Submit
-    // 4. Wait for dashboard
+    // Documents
+    const docPaths = registration.player_data?.document_paths as string[] | undefined;
+    if (docPaths) {
+      for (const docPath of docPaths) {
+        if (!docPath) continue;
+        try {
+          const tempPath = await downloadToTemp(
+            config.SUPABASE_URL,
+            config.SUPABASE_SERVICE_ROLE_KEY,
+            'player-documents',
+            docPath
+          );
+          tempFiles.push(tempPath);
+          uploads.push({
+            localPath: tempPath,
+            inputSelector: SELECTORS.spielerpassForm.documentUpload,
+          });
+        } catch (err) {
+          logger.warn(`Document download failed (${docPath}): ${err}`);
+        }
+      }
+    }
 
-    logger.info("✅ Login successful");
+    return uploads;
   }
 
   /**
-   * Navigiert zum Spielerpass-Formular
+   * Upload a local screenshot file to Supabase Storage.
    */
-  private async navigateToSpielerpassForm() {
-    if (!this.page) throw new Error("Browser not initialized");
-
-    // TODO: Implement navigation
-    // 1. Click "Spielerverwaltung"
-    // 2. Click "Spielerpass beantragen"
-    // 3. Wait for form
-
-    logger.info("✅ Navigation successful");
+  private async uploadScreenshotToStorage(
+    localPath: string,
+    storagePath: string
+  ): Promise<string> {
+    if (!this.supabase) throw new Error('Supabase client not available');
+    const buffer = readFileSync(localPath);
+    return this.supabase.uploadScreenshot('rpa-screenshots', storagePath, buffer);
   }
 
   /**
-   * Füllt Formular mit Registrierungsdaten
+   * Build login config from environment.
    */
-  private async fillForm(registration: Registration) {
-    if (!this.page) throw new Error("Browser not initialized");
+  private getLoginConfig(registrationId: string): LoginConfig {
+    const imapConfig: IMAPConfig | undefined =
+      config.IMAP_HOST
+        ? {
+            host: config.IMAP_HOST,
+            port: config.IMAP_PORT,
+            username: config.IMAP_USERNAME,
+            password: config.IMAP_PASSWORD,
+            otpSender: config.IMAP_OTP_SENDER,
+          }
+        : undefined;
 
-    // TODO: Implement form filling
-    // 1. Map registration data to DFBnet fields
-    // 2. Fill each field
-    // 3. Handle dropdowns/selects
-    // 4. Upload files (photo, documents)
-
-    logger.info("✅ Form filled");
-  }
-
-  /**
-   * Erstellt Screenshot
-   */
-  private async takeScreenshot(filename: string): Promise<string> {
-    if (!this.page) throw new Error("Browser not initialized");
-
-    const path = `${this.config.screenshotDir}/${filename}.png`;
-    await this.page.screenshot({ path, fullPage: true });
-
-    logger.info(`📸 Screenshot saved: ${path}`);
-    return path;
-  }
-
-  /**
-   * Vergleicht Screenshot mit Baseline
-   */
-  private async compareWithBaseline(
-    actualPath: string,
-    registrationId: string
-  ): Promise<number> {
-    // TODO: Implement pixelmatch comparison
-    // 1. Load baseline image
-    // 2. Load actual image
-    // 3. Compare with pixelmatch
-    // 4. Return diff score (0.0 - 1.0)
-
-    logger.info("✅ Visual regression check passed");
-    return 0.0; // Placeholder
+    return {
+      baseUrl: config.DFBNET_BASE_URL,
+      username: config.DFBNET_USERNAME,
+      password: config.DFBNET_PASSWORD,
+      screenshotDir: this.botConfig.screenshotDir,
+      registrationId,
+      headless: this.botConfig.headless,
+      imapConfig,
+    };
   }
 }

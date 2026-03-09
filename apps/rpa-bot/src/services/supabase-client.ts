@@ -1,5 +1,4 @@
 import { createClient, SupabaseClient as SupabaseClientType } from "@supabase/supabase-js";
-import type { Database } from "@packages/shared-types";
 import { logger } from "../utils/logger.js";
 
 /**
@@ -7,10 +6,10 @@ import { logger } from "../utils/logger.js";
  * Verwendet Service Role Key für Admin-Zugriff (bypasses RLS)
  */
 export class SupabaseClient {
-  private client: SupabaseClientType<Database>;
+  private client: SupabaseClientType;
 
   constructor(url: string, serviceRoleKey: string) {
-    this.client = createClient<Database>(url, serviceRoleKey, {
+    this.client = createClient(url, serviceRoleKey, {
       auth: {
         autoRefreshToken: false,
         persistSession: false,

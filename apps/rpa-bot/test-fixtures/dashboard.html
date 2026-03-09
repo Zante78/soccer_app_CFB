@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>DFBnet Dashboard (Test Fixture)</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f5f5f5; }
+    .header { background: #003366; color: white; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
+    .header h1 { font-size: 18px; margin: 0; }
+    .dashboard-welcome { color: #ccddee; font-size: 14px; }
+    nav { background: #004080; padding: 0 24px; }
+    nav a { color: white; text-decoration: none; padding: 12px 16px; display: inline-block; font-size: 14px; }
+    nav a:hover { background: #005599; }
+    .submenu { background: #005599; padding: 0 24px; display: none; }
+    .submenu a { color: white; text-decoration: none; padding: 10px 16px; display: inline-block; font-size: 13px; }
+    .submenu a:hover { background: #0066aa; }
+    .content { padding: 24px; }
+    .card { background: white; border-radius: 8px; padding: 24px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+    .version { color: #999; font-size: 12px; text-align: center; padding: 16px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>DFBnet Vereinsverwaltung</h1>
+    <span class="dashboard-welcome">Willkommen, Testbenutzer</span>
+  </div>
+
+  <nav>
+    <a href="#" id="nav-spielerverwaltung" onclick="toggleSubmenu()">Spielerverwaltung</a>
+    <a href="#">Vereinsdaten</a>
+    <a href="#">Berichte</a>
+  </nav>
+
+  <div class="submenu" id="spielerverwaltung-submenu">
+    <a href="spielerpass-form.html" id="nav-spielerpass-beantragen">Spielerpass beantragen</a>
+    <a href="#">Spielerliste</a>
+    <a href="#">Transfers</a>
+  </div>
+
+  <div class="content">
+    <div class="card">
+      <h2>Dashboard</h2>
+      <p>Aktive Antraege: 3</p>
+      <p>Entwuerfe: 1</p>
+      <p>Abgeschlossen: 12</p>
+    </div>
+  </div>
+
+  <div class="version">DFBnet 4.2.1 (Test Fixture)</div>
+
+  <script>
+    function toggleSubmenu() {
+      var sub = document.getElementById('spielerverwaltung-submenu');
+      sub.style.display = sub.style.display === 'block' ? 'none' : 'block';
+    }
+
+    // Also handle selector-based navigation
+    document.querySelector('a[href*="spielerverwaltung"]')?.addEventListener('click', function(e) {
+      e.preventDefault();
+      toggleSubmenu();
+    });
+  </script>
+</body>
+</html>
