@@ -28,7 +28,7 @@ export default function RegisterPage() {
     },
   });
 
-  const handleStepData = (data: Record<string, any>) => {
+  const handleStepData = (data: Record<string, string | number | boolean | null | object>) => {
     updateFormData(data);
     nextStep();
   };

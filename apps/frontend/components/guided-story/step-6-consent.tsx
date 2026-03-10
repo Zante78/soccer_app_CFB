@@ -164,6 +164,7 @@ export function Step6Consent({ onNext, onBack, playerData }: Step6ConsentProps) 
               canvasProps={{
                 className: 'w-full h-40 bg-white',
                 style: { touchAction: 'none' },
+                'aria-label': 'Unterschriftsfeld — mit Maus oder Touch unterschreiben',
               }}
               backgroundColor="white"
               penColor="black"
@@ -172,7 +173,7 @@ export function Step6Consent({ onNext, onBack, playerData }: Step6ConsentProps) 
 
           <div className="flex justify-between items-center mt-2">
             {signatureError && (
-              <p className="text-sm text-error">{signatureError}</p>
+              <p role="alert" className="text-sm text-error">{signatureError}</p>
             )}
             <button
               type="button"
@@ -191,6 +192,7 @@ export function Step6Consent({ onNext, onBack, playerData }: Step6ConsentProps) 
               className="w-5 h-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0"
               fill="currentColor"
               viewBox="0 0 20 20"
+              aria-hidden="true"
             >
               <path
                 fillRule="evenodd"

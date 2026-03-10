@@ -83,7 +83,7 @@ async function DashboardContent({ userName }: { userName: string }) {
 }
 
 export default async function DashboardPage() {
-  const user = await requireRole(["SUPER_ADMIN", "PASSWART", "TRAINER", "ANTRAGSTELLER"]);
+  const user = await requireRole(["SUPER_ADMIN", "PASSWART", "TRAINER"]);
 
   return (
     <div className="space-y-8">

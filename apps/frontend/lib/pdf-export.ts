@@ -22,7 +22,7 @@ type RegistrationForPDF = {
     paid_amount: number | null;
     paid_at: string | null;
   } | null;
-  player_data: Record<string, any>;
+  player_data: Record<string, unknown>;
   created_at: string;
   submitted_at: string | null;
 };
@@ -103,7 +103,9 @@ export function generateRegistrationPDF(registration: RegistrationForPDF): void 
   });
 
   // Team
-  const lastY = (doc as any).lastAutoTable.finalY + 10;
+  // jspdf-autotable extends jsPDF with lastAutoTable but has no type declaration
+  const docWithAutoTable = doc as jsPDF & { lastAutoTable: { finalY: number } };
+  const lastY = docWithAutoTable.lastAutoTable.finalY + 10;
   doc.setFontSize(14);
   doc.text("Vereinszugehörigkeit", 14, lastY);
 
@@ -123,7 +125,7 @@ export function generateRegistrationPDF(registration: RegistrationForPDF): void 
   });
 
   // Sperrfrist
-  const lastY2 = (doc as any).lastAutoTable.finalY + 10;
+  const lastY2 = docWithAutoTable.lastAutoTable.finalY + 10;
   doc.setFontSize(14);
   doc.text("Spielberechtigung", 14, lastY2);
 
@@ -162,7 +164,7 @@ export function generateRegistrationPDF(registration: RegistrationForPDF): void 
   });
 
   // Zahlungsinformationen
-  const lastY3 = (doc as any).lastAutoTable.finalY + 10;
+  const lastY3 = docWithAutoTable.lastAutoTable.finalY + 10;
   doc.setFontSize(14);
   doc.text("Zahlungsinformationen", 14, lastY3);
 
@@ -203,34 +205,29 @@ export function generateRegistrationPDF(registration: RegistrationForPDF): void 
 
   // Vorverein (falls vorhanden)
   if (registration.player_data.previous_club_name) {
-    const lastY4 = (doc as any).lastAutoTable.finalY + 10;
+    const lastY4 = docWithAutoTable.lastAutoTable.finalY + 10;
     doc.setFontSize(14);
     doc.text("Vorverein", 14, lastY4);
+
+    const deregDate = String(registration.player_data.deregistration_date || "");
+    const lastGameDate = String(registration.player_data.last_game_date || "");
 
     autoTable(doc, {
       startY: lastY4 + 5,
       head: [["Feld", "Wert"]],
       body: [
-        ["Vereinsname", registration.player_data.previous_club_name || "-"],
-        ["Vereins-ID", registration.player_data.previous_club_id || "-"],
+        ["Vereinsname", String(registration.player_data.previous_club_name || "-")],
+        ["Vereins-ID", String(registration.player_data.previous_club_id || "-")],
         [
           "Abmeldedatum",
-          registration.player_data.deregistration_date
-            ? format(
-                new Date(registration.player_data.deregistration_date),
-                "dd.MM.yyyy",
-                { locale: de }
-              )
+          deregDate
+            ? format(new Date(deregDate), "dd.MM.yyyy", { locale: de })
             : "-",
         ],
         [
           "Letztes Spiel",
-          registration.player_data.last_game_date
-            ? format(
-                new Date(registration.player_data.last_game_date),
-                "dd.MM.yyyy",
-                { locale: de }
-              )
+          lastGameDate
+            ? format(new Date(lastGameDate), "dd.MM.yyyy", { locale: de })
             : "-",
         ],
       ],

@@ -1,8 +1,9 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./dist",
-    "rootDir": "./src"
+    "paths": {
+      "@packages/shared-types": ["../../packages/shared-types/src"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["**/*.test.ts", "**/__tests__"]

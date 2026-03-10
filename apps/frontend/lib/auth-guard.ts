@@ -26,7 +26,11 @@ export const requireAuth = cache(async (): Promise<AuthenticatedUser> => {
     .eq("id", user.id)
     .maybeSingle();
 
-  const role = (userProfile?.role as RoleType) || "ANTRAGSTELLER"; // Fallback
+  const VALID_ROLES: RoleType[] = ["SUPER_ADMIN", "PASSWART", "TRAINER", "ANTRAGSTELLER"];
+  const rawRole = userProfile?.role;
+  const role: RoleType = typeof rawRole === "string" && VALID_ROLES.includes(rawRole as RoleType)
+    ? (rawRole as RoleType)
+    : "ANTRAGSTELLER";
 
   return {
     id: user.id,
@@ -47,9 +51,10 @@ export async function requireRole(
   const user = await requireAuth();
 
   if (!allowedRoles.includes(user.role)) {
-    throw new Error(
-      `Keine Berechtigung. Erforderliche Rolle: ${allowedRoles.join(", ")}. Deine Rolle: ${user.role}`
+    console.error(
+      `Auth denied: User ${user.id} has role ${user.role}, required: ${allowedRoles.join(", ")}`
     );
+    throw new Error("Keine Berechtigung für diese Aktion.");
   }
 
   return user;

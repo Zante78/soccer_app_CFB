@@ -3,7 +3,6 @@
 import { cache } from "react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth-guard";
-import type { RegistrationStatus, RPATraceStatus } from "@packages/shared-types";
 import type {
   DashboardMetrics,
   StatusBreakdown,
@@ -18,7 +17,7 @@ import type {
  */
 export const getDashboardMetrics = cache(async (): Promise<DashboardMetrics> => {
   // Auth Guard: Alle authentifizierten Rollen (RLS filtert Daten)
-  await requireRole(["SUPER_ADMIN", "PASSWART", "TRAINER", "ANTRAGSTELLER"]);
+  await requireRole(["SUPER_ADMIN", "PASSWART", "TRAINER"]);
 
   const supabase = await createSupabaseServerClient();
 

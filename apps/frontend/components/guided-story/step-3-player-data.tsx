@@ -150,9 +150,11 @@ export function Step3PlayerData({ onNext, onBack, initialData }: Step3PlayerData
               id="registration_number"
               className="input"
               placeholder="z.B. 12345678"
+              aria-invalid={!!errors.registration_number}
+              aria-describedby={errors.registration_number ? "error-registration_number" : undefined}
             />
             {errors.registration_number && (
-              <p className="text-sm text-error mt-1">{errors.registration_number.message}</p>
+              <p id="error-registration_number" role="alert" className="text-sm text-error mt-1">{errors.registration_number.message}</p>
             )}
           </div>
 
