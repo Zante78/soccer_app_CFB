@@ -1,5 +1,6 @@
 "use server";
 
+import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth-guard";
 import { calculateEligibility } from "@packages/shared-logic";
@@ -7,13 +8,7 @@ import { notFound } from "next/navigation";
 import type { RegistrationStatus, EligibilityResult } from "@packages/shared-types";
 import type { RegistrationDetail, RegistrationDetailResult } from "./types";
 
-/**
- * UUID Validation Helper
- */
-function isValidUUID(uuid: string): boolean {
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  return uuidRegex.test(uuid);
-}
+const uuidSchema = z.string().uuid();
 
 /**
  * Lädt vollständige Details einer Registration
@@ -21,12 +16,13 @@ function isValidUUID(uuid: string): boolean {
 export async function getRegistrationDetails(
   id: string
 ): Promise<RegistrationDetailResult> {
-  // Validate UUID format first
-  if (!isValidUUID(id)) {
+  // 1. Input-Validierung
+  const parseResult = uuidSchema.safeParse(id);
+  if (!parseResult.success) {
     notFound();
   }
 
-  // Auth Guard
+  // 2. Auth Guard
   const user = await requireRole(["SUPER_ADMIN", "PASSWART", "TRAINER", "ANTRAGSTELLER"]);
 
   const supabase = await createSupabaseServerClient();
@@ -110,6 +106,18 @@ export async function getRegistrationDetails(
     : [];
 
   // Transform Data
+  const teams = data.teams as unknown as { id: string; name: string; dfbnet_id: string | null } | null;
+  const financeStatus = data.finance_status as unknown as RegistrationDetail["finance_status"];
+  const rpaTraces = (data.rpa_traces || []) as unknown as Array<{
+    id: string; registration_id: string; execution_id: string; status: string;
+    started_at: string; completed_at: string | null; error_message: string | null;
+    screenshot_baseline: string | null; screenshot_actual: string | null; visual_diff_score: number | null;
+  }>;
+  const auditLogs = (data.audit_logs || []) as unknown as Array<{
+    id: string; action: string; old_value: string | null; new_value: string | null;
+    timestamp: string; users: { full_name: string | null; role: string } | null;
+  }>;
+
   const registration: RegistrationDetail = {
     id: data.id,
     player_name: data.player_name,
@@ -128,15 +136,9 @@ export async function getRegistrationDetails(
     updated_at: data.updated_at,
     submitted_at: data.submitted_at,
     created_by_user_id: data.created_by_user_id,
-    team: (data.teams as any)
-      ? {
-          id: (data.teams as any).id,
-          name: (data.teams as any).name,
-          dfbnet_id: (data.teams as any).dfbnet_id,
-        }
-      : null,
-    finance_status: (data.finance_status as any) || null,
-    rpa_traces: ((data.rpa_traces as any) || []).map((trace: any) => ({
+    team: teams ? { id: teams.id, name: teams.name, dfbnet_id: teams.dfbnet_id } : null,
+    finance_status: financeStatus || null,
+    rpa_traces: rpaTraces.map((trace) => ({
       id: trace.id,
       registration_id: trace.registration_id,
       execution_id: trace.execution_id,
@@ -148,17 +150,14 @@ export async function getRegistrationDetails(
       screenshot_actual: trace.screenshot_actual,
       visual_diff_score: trace.visual_diff_score,
     })),
-    audit_logs: ((data.audit_logs as any) || []).map((log: any) => ({
+    audit_logs: auditLogs.map((log) => ({
       id: log.id,
       action: log.action,
       old_value: log.old_value,
       new_value: log.new_value,
       timestamp: log.timestamp,
       user: log.users
-        ? {
-            full_name: log.users.full_name,
-            role: log.users.role,
-          }
+        ? { full_name: log.users.full_name, role: log.users.role }
         : null,
     })),
   };

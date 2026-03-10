@@ -3,10 +3,9 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { calculateSeniorEligibility } from '@packages/shared-logic/src/eligibility/senior-calculator';
-import { calculateJuniorEligibility } from '@packages/shared-logic/src/eligibility/junior-calculator';
-import type { EligibilityResult } from '@packages/shared-types/src';
-import { RegistrationReason } from '@packages/shared-types/src';
+import { calculateSeniorEligibility, calculateJuniorEligibility } from '@packages/shared-logic';
+import type { EligibilityResult } from '@packages/shared-types';
+import { RegistrationReason } from '@packages/shared-types';
 
 interface Step5EligibilityProps {
   onNext: (data: { eligibility_result: EligibilityResult }) => void;

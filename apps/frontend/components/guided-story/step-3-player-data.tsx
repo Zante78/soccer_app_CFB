@@ -74,9 +74,11 @@ export function Step3PlayerData({ onNext, onBack, initialData }: Step3PlayerData
                 id="first_name"
                 className="input"
                 placeholder="Max"
+                aria-invalid={!!errors.first_name}
+                aria-describedby={errors.first_name ? "error-first_name" : undefined}
               />
               {errors.first_name && (
-                <p className="text-sm text-error mt-1">{errors.first_name.message}</p>
+                <p id="error-first_name" role="alert" className="text-sm text-error mt-1">{errors.first_name.message}</p>
               )}
             </div>
 
@@ -91,9 +93,11 @@ export function Step3PlayerData({ onNext, onBack, initialData }: Step3PlayerData
                 id="last_name"
                 className="input"
                 placeholder="Mustermann"
+                aria-invalid={!!errors.last_name}
+                aria-describedby={errors.last_name ? "error-last_name" : undefined}
               />
               {errors.last_name && (
-                <p className="text-sm text-error mt-1">{errors.last_name.message}</p>
+                <p id="error-last_name" role="alert" className="text-sm text-error mt-1">{errors.last_name.message}</p>
               )}
             </div>
           </div>
@@ -108,9 +112,11 @@ export function Step3PlayerData({ onNext, onBack, initialData }: Step3PlayerData
               type="date"
               id="birth_date"
               className="input"
+              aria-invalid={!!errors.birth_date}
+              aria-describedby={errors.birth_date ? "error-birth_date" : undefined}
             />
             {errors.birth_date && (
-              <p className="text-sm text-error mt-1">{errors.birth_date.message}</p>
+              <p id="error-birth_date" role="alert" className="text-sm text-error mt-1">{errors.birth_date.message}</p>
             )}
           </div>
 
@@ -125,9 +131,11 @@ export function Step3PlayerData({ onNext, onBack, initialData }: Step3PlayerData
               id="nationality"
               className="input"
               placeholder="Deutschland"
+              aria-invalid={!!errors.nationality}
+              aria-describedby={errors.nationality ? "error-nationality" : undefined}
             />
             {errors.nationality && (
-              <p className="text-sm text-error mt-1">{errors.nationality.message}</p>
+              <p id="error-nationality" role="alert" className="text-sm text-error mt-1">{errors.nationality.message}</p>
             )}
           </div>
 
@@ -157,6 +165,8 @@ export function Step3PlayerData({ onNext, onBack, initialData }: Step3PlayerData
               {...register('team_id')}
               id="team_id"
               className="input"
+              aria-invalid={!!errors.team_id}
+              aria-describedby={errors.team_id ? "error-team_id" : undefined}
             >
               <option value="">Bitte wählen...</option>
               <option value="team-1-herren">1. Herren</option>
@@ -169,7 +179,7 @@ export function Step3PlayerData({ onNext, onBack, initialData }: Step3PlayerData
               <option value="team-u9">U9</option>
             </select>
             {errors.team_id && (
-              <p className="text-sm text-error mt-1">{errors.team_id.message}</p>
+              <p id="error-team_id" role="alert" className="text-sm text-error mt-1">{errors.team_id.message}</p>
             )}
           </div>
         </div>

@@ -1,5 +1,6 @@
 "use server";
 
+import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth-guard";
 import { getSignedUrl } from "@/lib/supabase/storage";
@@ -78,6 +79,13 @@ export async function getRPATraces(): Promise<RPATraceWithUrls[]> {
         ? await getSignedUrl("rpa-screenshots", trace.screenshot_actual)
         : null;
 
+      const reg = trace.registrations as unknown as {
+        player_name: string;
+        player_dfb_id: string | null;
+        status: string;
+        teams: { name: string } | null;
+      };
+
       return {
         id: trace.id,
         registration_id: trace.registration_id,
@@ -92,12 +100,10 @@ export async function getRPATraces(): Promise<RPATraceWithUrls[]> {
         baselineUrl,
         actualUrl,
         registration: {
-          player_name: (trace.registrations as any).player_name,
-          player_dfb_id: (trace.registrations as any).player_dfb_id,
-          status: (trace.registrations as any).status,
-          team: (trace.registrations as any).teams
-            ? { name: (trace.registrations as any).teams.name }
-            : null,
+          player_name: reg.player_name,
+          player_dfb_id: reg.player_dfb_id,
+          status: reg.status,
+          team: reg.teams ? { name: reg.teams.name } : null,
         },
       };
     })
@@ -106,10 +112,14 @@ export async function getRPATraces(): Promise<RPATraceWithUrls[]> {
   return tracesWithUrls;
 }
 
+const traceIdSchema = z.string().uuid();
+const registrationIdSchema = z.string().uuid();
+
 /**
  * Akzeptiert neuen Screenshot als Baseline
  */
 export async function acceptNewBaseline(traceId: string): Promise<void> {
+  const validId = traceIdSchema.parse(traceId);
   await requireRole(["SUPER_ADMIN", "PASSWART"]);
 
   const supabase = await createSupabaseServerClient();
@@ -123,7 +133,7 @@ export async function acceptNewBaseline(traceId: string): Promise<void> {
   const { error } = await supabase
     .from("rpa_traces")
     .update({ status: "SUCCESS" })
-    .eq("id", traceId);
+    .eq("id", validId);
 
   if (error) {
     throw new Error(error.message);
@@ -136,6 +146,7 @@ export async function acceptNewBaseline(traceId: string): Promise<void> {
  * Startet Bot erneut für eine Registration
  */
 export async function retryBotExecution(registrationId: string): Promise<void> {
+  const validId = registrationIdSchema.parse(registrationId);
   await requireRole(["SUPER_ADMIN", "PASSWART"]);
 
   const supabase = await createSupabaseServerClient();
@@ -144,7 +155,7 @@ export async function retryBotExecution(registrationId: string): Promise<void> {
   const { error } = await supabase
     .from("registrations")
     .update({ status: "READY_FOR_BOT" })
-    .eq("id", registrationId);
+    .eq("id", validId);
 
   if (error) {
     throw new Error(error.message);

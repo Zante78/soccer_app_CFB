@@ -1,5 +1,6 @@
 "use server";
 
+import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth-guard";
 import type { RegistrationStatus } from "@packages/shared-types";
@@ -9,24 +10,43 @@ import type {
   GetRegistrationsResult,
 } from "./types";
 
+const REGISTRATION_STATUSES = [
+  "DRAFT", "SUBMITTED", "VALIDATION_PENDING", "READY_FOR_BOT",
+  "BOT_IN_PROGRESS", "COMPLETED", "ERROR", "MANUALLY_PROCESSED",
+  "VISUAL_REGRESSION_ERROR",
+] as const;
+
+const getRegistrationsSchema = z.object({
+  page: z.number().int().positive().optional().default(1),
+  pageSize: z.number().int().min(1).max(100).optional().default(50),
+  status: z.enum(REGISTRATION_STATUSES).nullable().optional(),
+  teamId: z.string().uuid().nullable().optional(),
+  searchQuery: z.string().max(200).nullable().optional(),
+  sortBy: z.enum(["created_at", "player_name", "eligibility_date", "status"]).optional().default("created_at"),
+  sortOrder: z.enum(["asc", "desc"]).optional().default("desc"),
+});
+
 /**
  * Lädt paginierte Registrierungen mit Filtern
  */
 export async function getRegistrations(
   params: GetRegistrationsParams = {}
 ): Promise<GetRegistrationsResult> {
-  // Auth Guard: Alle authentifizierten Rollen (RLS filtert Daten)
+  // 1. Input-Validierung
+  const validated = getRegistrationsSchema.parse(params);
+
+  // 2. Auth Guard: Alle authentifizierten Rollen (RLS filtert Daten)
   const user = await requireRole(["SUPER_ADMIN", "PASSWART", "TRAINER", "ANTRAGSTELLER"]);
 
   const {
-    page = 1,
-    pageSize = 50,
+    page,
+    pageSize,
     status,
     teamId,
     searchQuery,
-    sortBy = "created_at",
-    sortOrder = "desc",
-  } = params;
+    sortBy,
+    sortOrder,
+  } = validated;
 
   const supabase = await createSupabaseServerClient();
   const start = (page - 1) * pageSize;
@@ -67,10 +87,11 @@ export async function getRegistrations(
     query = query.eq("team_id", teamId);
   }
 
-  // Filter: Search (Player Name oder DFB-ID)
+  // Filter: Search (Player Name oder DFB-ID) — sanitized
   if (searchQuery && searchQuery.trim()) {
+    const sanitized = searchQuery.trim().replace(/[%_\\]/g, "\\$&");
     query = query.or(
-      `player_name.ilike.%${searchQuery}%,player_dfb_id.ilike.%${searchQuery}%`
+      `player_name.ilike.%${sanitized}%,player_dfb_id.ilike.%${sanitized}%`
     );
   }
 
@@ -86,19 +107,25 @@ export async function getRegistrations(
   }
 
   // Transform Data
-  const registrations: RegistrationListItem[] = (data || []).map((reg) => ({
-    id: reg.id,
-    player_name: reg.player_name,
-    player_birth_date: reg.player_birth_date,
-    player_dfb_id: reg.player_dfb_id,
-    status: reg.status as RegistrationStatus,
-    team_name: (reg.teams as any)?.name || null,
-    eligibility_date: reg.eligibility_date,
-    created_at: reg.created_at,
-    is_paid: (reg.finance_status as any)?.is_paid || false,
-    payment_method: (reg.finance_status as any)?.payment_method || null,
-    rpa_status: (reg.rpa_traces as any)?.[0]?.status || null,
-  }));
+  const registrations: RegistrationListItem[] = (data || []).map((reg) => {
+    const teams = reg.teams as unknown as { name: string } | null;
+    const financeStatus = reg.finance_status as unknown as { is_paid: boolean; payment_method: string | null } | null;
+    const rpaTraces = reg.rpa_traces as unknown as Array<{ status: string }> | null;
+
+    return {
+      id: reg.id,
+      player_name: reg.player_name,
+      player_birth_date: reg.player_birth_date,
+      player_dfb_id: reg.player_dfb_id,
+      status: reg.status as RegistrationStatus,
+      team_name: teams?.name || null,
+      eligibility_date: reg.eligibility_date,
+      created_at: reg.created_at,
+      is_paid: financeStatus?.is_paid || false,
+      payment_method: financeStatus?.payment_method || null,
+      rpa_status: rpaTraces?.[0]?.status || null,
+    };
+  });
 
   const totalCount = count || 0;
   const totalPages = Math.ceil(totalCount / pageSize);

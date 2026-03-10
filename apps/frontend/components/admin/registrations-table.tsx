@@ -77,6 +77,7 @@ export function RegistrationsTable({ data, isLoading, sortBy, sortOrder, onSort 
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
@@ -160,6 +161,7 @@ export function RegistrationsTable({ data, isLoading, sortBy, sortOrder, onSort 
           ))}
         </TableBody>
       </Table>
+      </div>
     </div>
   );
 }

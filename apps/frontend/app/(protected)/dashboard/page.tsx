@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { requireRole } from "@/lib/auth-guard";
 import { getDashboardMetrics } from "./actions";
 import { MetricCard } from "@/components/admin/metric-card";
@@ -10,22 +11,30 @@ import {
   Clock,
 } from "lucide-react";
 
-export default async function DashboardPage() {
-  // Auth Guard: Alle authentifizierten Rollen dürfen zugreifen (RLS filtert Daten)
-  const user = await requireRole(["SUPER_ADMIN", "PASSWART", "TRAINER", "ANTRAGSTELLER"]);
+function DashboardSkeleton() {
+  return (
+    <div className="space-y-8">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="bg-white rounded-lg border border-gray-200 p-6 animate-pulse">
+            <div className="h-4 bg-gray-200 rounded w-1/2 mb-3" />
+            <div className="h-8 bg-gray-200 rounded w-1/3" />
+          </div>
+        ))}
+      </div>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <div className="bg-white rounded-lg border border-gray-200 p-6 h-64 animate-pulse" />
+        <div className="bg-white rounded-lg border border-gray-200 p-6 h-64 animate-pulse" />
+      </div>
+    </div>
+  );
+}
 
-  // Dashboard Metrics laden
+async function DashboardContent({ userName }: { userName: string }) {
   const metrics = await getDashboardMetrics();
 
   return (
-    <div className="space-y-8">
-      <header>
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600 mt-2">
-          Willkommen zurück, {user.full_name || user.email}!
-        </p>
-      </header>
-
+    <>
       {/* Metric Cards Grid */}
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
@@ -69,6 +78,25 @@ export default async function DashboardPage() {
         <StatusChart data={metrics.statusBreakdown} />
         <ActivityFeed items={metrics.recentActivity} />
       </section>
+    </>
+  );
+}
+
+export default async function DashboardPage() {
+  const user = await requireRole(["SUPER_ADMIN", "PASSWART", "TRAINER", "ANTRAGSTELLER"]);
+
+  return (
+    <div className="space-y-8">
+      <header>
+        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+        <p className="text-gray-600 mt-2">
+          Willkommen zurück, {user.full_name || user.email}!
+        </p>
+      </header>
+
+      <Suspense fallback={<DashboardSkeleton />}>
+        <DashboardContent userName={user.full_name || user.email} />
+      </Suspense>
     </div>
   );
 }

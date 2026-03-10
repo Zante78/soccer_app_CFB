@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import SignatureCanvas from 'react-signature-canvas';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { toast } from 'sonner';
 
 interface Step6ConsentProps {
   onNext: (data: { consents: Record<string, boolean>; signature_data: string }) => void;
@@ -37,7 +38,7 @@ export function Step6Consent({ onNext, onBack, playerData }: Step6ConsentProps) 
   const handleContinue = () => {
     // Validate all consents
     if (!consents.dsgvo || !consents.accuracy || !consents.eligibility) {
-      alert('Bitte akzeptieren Sie alle erforderlichen Erklärungen');
+      toast.error('Bitte akzeptieren Sie alle erforderlichen Erklärungen');
       return;
     }
 
