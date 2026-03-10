@@ -24,7 +24,7 @@ export function QueryClientProviderWrapper({ children }: PropsWithChildren) {
   return (
     <QueryClientProvider client={client}>
       {children}
-      <ReactQueryDevtools initialIsOpen={false} position="bottom-right" />
+      <ReactQueryDevtools initialIsOpen={false} position="bottom" />
     </QueryClientProvider>
   );
 }

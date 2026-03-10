@@ -90,15 +90,14 @@ export const getDashboardMetrics = cache(async (): Promise<DashboardMetrics> => 
 function calculateStatusBreakdown(
   registrations: Array<{ status: string }>
 ): StatusBreakdown {
-  const breakdown: Partial<StatusBreakdown> = {};
+  const breakdown: Record<string, number> = {};
 
   registrations.forEach((reg) => {
-    const status = reg.status as RegistrationStatus;
-    breakdown[status] = (breakdown[status] || 0) + 1;
+    breakdown[reg.status] = (breakdown[reg.status] || 0) + 1;
   });
 
   // Ensure all statuses are present (even with 0)
-  const allStatuses: RegistrationStatus[] = [
+  const allStatuses = [
     "DRAFT",
     "SUBMITTED",
     "VALIDATION_PENDING",

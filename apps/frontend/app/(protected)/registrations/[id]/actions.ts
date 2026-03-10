@@ -88,10 +88,10 @@ export async function getRegistrationDetails(
   // TEMP FIX: Eligibility-Berechnung deaktiviert wegen Datum-Problem
   const eligibility = {
     is_eligible: false,
-    eligibility_date: null,
+    eligibility_date: "",
     sperrfrist_days: 0,
-    sperrfrist_start: null,
-    sperrfrist_end: null,
+    sperrfrist_start: "",
+    sperrfrist_end: "",
     calculation_reason: "Berechnung temporär deaktiviert",
     applied_rule: "Debug Mode",
   };

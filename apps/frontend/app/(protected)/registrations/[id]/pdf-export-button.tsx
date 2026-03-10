@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { FileDown } from "lucide-react";
 import { generateRegistrationPDF } from "@/lib/pdf-export";
 import { toast } from "sonner";
-import type { RegistrationDetail } from "../types";
+import type { RegistrationDetail } from "./types";
 
 type PDFExportButtonProps = {
   registration: RegistrationDetail;

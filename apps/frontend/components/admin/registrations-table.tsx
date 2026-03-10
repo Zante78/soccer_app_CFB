@@ -18,7 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, Eye, FileText, Trash2, CheckCircle, XCircle, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
-import type { RegistrationListItem } from "../app/(protected)/registrations/types";
+import type { RegistrationListItem } from "@/app/(protected)/registrations/types";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 

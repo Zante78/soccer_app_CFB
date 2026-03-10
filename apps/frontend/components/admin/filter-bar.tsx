@@ -11,6 +11,7 @@ import {
 import { Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { RegistrationStatus } from "@packages/shared-types";
+import { RegistrationStatus as RS } from "@packages/shared-types";
 
 type FilterBarProps = {
   searchQuery: string;
@@ -24,15 +25,15 @@ type FilterBarProps = {
 };
 
 const statusOptions: Array<{ value: RegistrationStatus; label: string }> = [
-  { value: "DRAFT", label: "Entwurf" },
-  { value: "SUBMITTED", label: "Eingereicht" },
-  { value: "VALIDATION_PENDING", label: "Validierung" },
-  { value: "READY_FOR_BOT", label: "Bereit für Bot" },
-  { value: "BOT_IN_PROGRESS", label: "Bot läuft" },
-  { value: "COMPLETED", label: "Abgeschlossen" },
-  { value: "ERROR", label: "Fehler" },
-  { value: "MANUALLY_PROCESSED", label: "Manuell" },
-  { value: "VISUAL_REGRESSION_ERROR", label: "Visual Regression" },
+  { value: RS.DRAFT, label: "Entwurf" },
+  { value: RS.SUBMITTED, label: "Eingereicht" },
+  { value: RS.VALIDATION_PENDING, label: "Validierung" },
+  { value: RS.READY_FOR_BOT, label: "Bereit für Bot" },
+  { value: RS.BOT_IN_PROGRESS, label: "Bot läuft" },
+  { value: RS.COMPLETED, label: "Abgeschlossen" },
+  { value: RS.ERROR, label: "Fehler" },
+  { value: RS.MANUALLY_PROCESSED, label: "Manuell" },
+  { value: RS.VISUAL_REGRESSION_ERROR, label: "Visual Regression" },
 ];
 
 export function FilterBar({

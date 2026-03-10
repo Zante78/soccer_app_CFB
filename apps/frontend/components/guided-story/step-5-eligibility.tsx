@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { calculateSeniorEligibility } from '@packages/shared-logic/src/eligibility/senior-calculator';
 import { calculateJuniorEligibility } from '@packages/shared-logic/src/eligibility/junior-calculator';
 import type { EligibilityResult } from '@packages/shared-types/src';
+import { RegistrationReason } from '@packages/shared-types/src';
 
 interface Step5EligibilityProps {
   onNext: (data: { eligibility_result: EligibilityResult }) => void;
@@ -29,17 +30,18 @@ export function Step5Eligibility({ onNext, onBack, playerData }: Step5Eligibilit
     try {
       if (isJunior) {
         const result = calculateJuniorEligibility({
-          birth_date: playerData.birth_date || new Date().toISOString().split('T')[0],
+          player_birth_date: playerData.birth_date || new Date().toISOString().split('T')[0],
           previous_team_deregistration_date: playerData.previous_team_deregistration_date,
           previous_team_last_game: playerData.previous_team_last_game,
-          registration_reason: playerData.previous_club ? 'TRANSFER' : 'NEW_REGISTRATION',
+          registration_reason: playerData.previous_club ? RegistrationReason.TRANSFER : RegistrationReason.NEW_PLAYER,
         });
         setEligibility(result);
       } else {
         const result = calculateSeniorEligibility({
+          player_birth_date: playerData.birth_date || new Date().toISOString().split('T')[0],
           previous_team_deregistration_date: playerData.previous_team_deregistration_date,
           previous_team_last_game: playerData.previous_team_last_game,
-          registration_reason: playerData.previous_club ? 'TRANSFER' : 'NEW_REGISTRATION',
+          registration_reason: playerData.previous_club ? RegistrationReason.TRANSFER : RegistrationReason.NEW_PLAYER,
         });
         setEligibility(result);
       }
@@ -50,6 +52,9 @@ export function Step5Eligibility({ onNext, onBack, playerData }: Step5Eligibilit
         is_eligible: true,
         eligibility_date: new Date().toISOString().split('T')[0],
         sperrfrist_days: 0,
+        sperrfrist_start: "",
+        sperrfrist_end: "",
+        calculation_reason: "Fallback-Berechnung",
         applied_rule: playerData.team_id.toLowerCase().includes('u') ? 'JSpO §20' : 'SpO §16',
       });
     }
