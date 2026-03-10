@@ -89,7 +89,8 @@ export async function getRegistrations(
 
   // Filter: Search (Player Name oder DFB-ID) — sanitized
   if (searchQuery && searchQuery.trim()) {
-    const sanitized = searchQuery.trim().replace(/[%_\\]/g, "\\$&");
+    // Escape PostgREST special chars: %, _, \, commas and dots (filter operators)
+    const sanitized = searchQuery.trim().replace(/[%_\\.,()]/g, "\\$&");
     query = query.or(
       `player_name.ilike.%${sanitized}%,player_dfb_id.ilike.%${sanitized}%`
     );

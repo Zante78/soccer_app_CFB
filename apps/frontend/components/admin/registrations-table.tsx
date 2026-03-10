@@ -35,10 +35,34 @@ type RegistrationsTableProps = {
 export function RegistrationsTable({ data, isLoading, sortBy, sortOrder, onSort }: RegistrationsTableProps) {
   if (isLoading) {
     return (
-      <div className="bg-white rounded-lg border border-gray-200">
-        <div className="p-12 text-center">
-          <div className="animate-spin h-8 w-8 border-4 border-[#0055A4] border-t-transparent rounded-full mx-auto mb-4" />
-          <p className="text-gray-600">Lädt Registrierungen...</p>
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Spieler</TableHead>
+                <TableHead>Geburtsdatum</TableHead>
+                <TableHead>Team</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Zahlung</TableHead>
+                <TableHead>Erstellt</TableHead>
+                <TableHead className="text-right">Aktionen</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {Array.from({ length: 5 }).map((_, i) => (
+                <TableRow key={i}>
+                  <TableCell><div className="h-4 bg-gray-200 rounded w-32 animate-pulse" /></TableCell>
+                  <TableCell><div className="h-4 bg-gray-200 rounded w-24 animate-pulse" /></TableCell>
+                  <TableCell><div className="h-4 bg-gray-200 rounded w-28 animate-pulse" /></TableCell>
+                  <TableCell><div className="h-6 bg-gray-200 rounded-full w-20 animate-pulse" /></TableCell>
+                  <TableCell><div className="h-4 bg-gray-200 rounded w-16 animate-pulse" /></TableCell>
+                  <TableCell><div className="h-4 bg-gray-200 rounded w-28 animate-pulse" /></TableCell>
+                  <TableCell className="text-right"><div className="h-8 bg-gray-200 rounded w-8 ml-auto animate-pulse" /></TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       </div>
     );

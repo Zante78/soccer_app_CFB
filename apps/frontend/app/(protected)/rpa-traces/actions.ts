@@ -65,7 +65,7 @@ export async function getRPATraces(): Promise<RPATraceWithUrls[]> {
 
   if (error) {
     console.error("Error fetching RPA traces:", error);
-    throw new Error(error.message);
+    throw new Error("Fehler beim Laden der RPA-Traces");
   }
 
   // Generate Signed URLs für Screenshots
@@ -136,7 +136,7 @@ export async function acceptNewBaseline(traceId: string): Promise<void> {
     .eq("id", validId);
 
   if (error) {
-    throw new Error(error.message);
+    throw new Error("Fehler beim Aktualisieren des Trace-Status");
   }
 
   revalidatePath("/rpa-traces");
@@ -158,10 +158,9 @@ export async function retryBotExecution(registrationId: string): Promise<void> {
     .eq("id", validId);
 
   if (error) {
-    throw new Error(error.message);
+    console.error("Error retrying bot execution:", error);
+    throw new Error("Fehler beim Neustarten der Bot-Ausführung");
   }
-
-  // TODO: Trigger n8n Webhook für Bot Queue
 
   revalidatePath("/rpa-traces");
   revalidatePath("/registrations");

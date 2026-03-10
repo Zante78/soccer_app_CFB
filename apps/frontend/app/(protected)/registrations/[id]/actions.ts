@@ -4,8 +4,9 @@ import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth-guard";
 import { calculateEligibility } from "@packages/shared-logic";
+import type { EligibilityCalculatorInput } from "@packages/shared-logic";
 import { notFound } from "next/navigation";
-import type { RegistrationStatus, EligibilityResult } from "@packages/shared-types";
+import type { RegistrationStatus, EligibilityResult, RegistrationReason } from "@packages/shared-types";
 import type { RegistrationDetail, RegistrationDetailResult } from "./types";
 
 const uuidSchema = z.string().uuid();
@@ -81,16 +82,32 @@ export async function getRegistrationDetails(
     notFound();
   }
 
-  // TEMP FIX: Eligibility-Berechnung deaktiviert wegen Datum-Problem
-  const eligibility = {
-    is_eligible: false,
-    eligibility_date: "",
-    sperrfrist_days: 0,
-    sperrfrist_start: "",
-    sperrfrist_end: "",
-    calculation_reason: "Berechnung temporär deaktiviert",
-    applied_rule: "Debug Mode",
-  };
+  // Eligibility-Berechnung (mit Fallback bei ungültigen Daten)
+  const playerData = (data.player_data || {}) as Record<string, unknown>;
+  let eligibility: EligibilityResult;
+  try {
+    eligibility = calculateEligibility({
+      player_birth_date: data.player_birth_date,
+      registration_reason: data.registration_reason as RegistrationReason,
+      previous_team_deregistration_date: typeof playerData.previous_team_deregistration_date === "string"
+        ? playerData.previous_team_deregistration_date
+        : undefined,
+      previous_team_last_game: typeof playerData.previous_team_last_game === "string"
+        ? playerData.previous_team_last_game
+        : undefined,
+    });
+  } catch (err) {
+    console.error("Eligibility calculation failed:", err);
+    eligibility = {
+      is_eligible: false,
+      eligibility_date: "",
+      sperrfrist_days: 0,
+      sperrfrist_start: "",
+      sperrfrist_end: "",
+      calculation_reason: "Berechnung fehlgeschlagen — bitte Daten prüfen",
+      applied_rule: "Fehler",
+    };
+  }
 
   // Supabase Storage URLs (Signed URLs für private Buckets)
   const photoUrl = data.photo_path

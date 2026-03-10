@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { getRegistrationDetails } from "./actions";
 import { StatusBadge } from "@/components/admin/status-badge";
 import { Card } from "@/components/ui/card";
@@ -17,8 +18,44 @@ type PageProps = {
   params: Promise<{ id: string }>;
 };
 
+function DetailSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div>
+        <div className="h-4 bg-gray-200 rounded w-32 mb-4 animate-pulse" />
+        <div className="flex items-start justify-between">
+          <div>
+            <div className="h-8 bg-gray-200 rounded w-48 mb-2 animate-pulse" />
+            <div className="h-4 bg-gray-200 rounded w-32 animate-pulse" />
+          </div>
+          <div className="flex gap-2">
+            <div className="h-6 bg-gray-200 rounded-full w-24 animate-pulse" />
+            <div className="h-6 bg-gray-200 rounded-full w-20 animate-pulse" />
+          </div>
+        </div>
+      </div>
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2 bg-white rounded-lg border p-6 h-96 animate-pulse" />
+        <div className="space-y-6">
+          <div className="bg-white rounded-lg border p-6 h-48 animate-pulse" />
+          <div className="bg-white rounded-lg border p-6 h-32 animate-pulse" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default async function RegistrationDetailPage({ params }: PageProps) {
   const { id } = await params;
+
+  return (
+    <Suspense fallback={<DetailSkeleton />}>
+      <RegistrationDetailContent id={id} />
+    </Suspense>
+  );
+}
+
+async function RegistrationDetailContent({ id }: { id: string }) {
   const { registration, eligibility, photoUrl, documentUrls } =
     await getRegistrationDetails(id);
 
@@ -118,9 +155,7 @@ export default async function RegistrationDetailPage({ params }: PageProps) {
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-medium text-gray-900">
-                        {typeof trace.status === 'string'
-                          ? trace.status
-                          : (trace.status as any)?.status || 'UNKNOWN'}
+                        {trace.status}
                       </span>
                       {trace.visual_diff_score !== null && (
                         <span className="text-xs text-gray-500">
