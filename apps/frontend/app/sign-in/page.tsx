@@ -6,6 +6,28 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
 
+const LOGIN_TIMEOUT_MS = 15_000;
+
+function getLoginErrorMessage(error: unknown): string {
+  if (error instanceof Error && error.message === "LOGIN_TIMEOUT") {
+    return "Zeitüberschreitung: Der Server antwortet nicht. Bitte prüfe deine Internetverbindung oder versuche es später erneut.";
+  }
+
+  const message = error instanceof Error ? error.message : String(error);
+
+  if (message.includes("Invalid login credentials")) {
+    return "Ungültige Anmeldedaten. Bitte überprüfe E-Mail und Passwort.";
+  }
+  if (message.includes("Email not confirmed")) {
+    return "E-Mail-Adresse nicht bestätigt. Bitte prüfe dein Postfach.";
+  }
+  if (message.includes("Failed to fetch") || message.includes("NetworkError") || message.includes("503")) {
+    return "Server nicht erreichbar. Bitte versuche es später erneut.";
+  }
+
+  return `Anmeldung fehlgeschlagen: ${message}`;
+}
+
 export default function SignInPage() {
   const supabase = useSupabase();
   const [email, setEmail] = useState("");
@@ -18,17 +40,24 @@ export default function SignInPage() {
     setLoading(true);
     setError(null);
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const result = await Promise.race([
+        supabase.auth.signInWithPassword({ email, password }),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error("LOGIN_TIMEOUT")), LOGIN_TIMEOUT_MS)
+        ),
+      ]);
 
-    if (error) {
-      setError(error.message);
-      setLoading(false);
-    } else {
-      // Redirect wird durch Middleware gehandhabt
+      if (result.error) {
+        setError(getLoginErrorMessage(result.error));
+        setLoading(false);
+        return;
+      }
+
       window.location.href = "/dashboard";
+    } catch (err) {
+      setError(getLoginErrorMessage(err));
+      setLoading(false);
     }
   };
 
@@ -42,7 +71,7 @@ export default function SignInPage() {
 
         <form onSubmit={handleSignIn} className="space-y-4">
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded text-sm">
               {error}
             </div>
           )}
