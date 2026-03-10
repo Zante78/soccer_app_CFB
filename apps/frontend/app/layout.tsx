@@ -9,8 +9,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "CfB Pass-Automation | Spielerpass-Anträge Digital",
-  description: "Digitale Passstelle für CfB Ford Niehl e.V. - Schnell, sicher, automatisiert.",
+  title: "CFB Digitale Passstelle",
+  description: "Digitale Passstelle des CfB Ford Niehl e.V. - Spielerpass-Anträge schnell, sicher und automatisiert.",
 };
 
 export default function RootLayout({

@@ -36,7 +36,7 @@ export default function SignInPage() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md p-8">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-[#0055A4]">CfB Pass-Admin</h1>
+          <h1 className="text-3xl font-bold text-[#0055A4]">CFB Digitale Passstelle</h1>
           <p className="text-gray-600 mt-2">Anmelden</p>
         </div>
 

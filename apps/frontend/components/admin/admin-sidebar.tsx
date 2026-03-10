@@ -107,7 +107,7 @@ export function AdminSidebar() {
       >
       {/* Logo/Header */}
       <div className="p-6 border-b border-gray-200" tabIndex={!isOpen ? -1 : undefined}>
-        <h2 className="text-xl font-bold text-[#0055A4]">CfB Pass-Admin</h2>
+        <h2 className="text-xl font-bold text-[#0055A4]">CFB Digitale Passstelle</h2>
         <p className="text-sm text-gray-600 mt-1">Verwaltung</p>
       </div>
 

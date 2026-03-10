@@ -24,10 +24,10 @@ export default function HomePage() {
 
           {/* Title */}
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            CfB Pass-Automation
+            CFB Digitale Passstelle
           </h1>
           <p className="text-xl text-gray-600 mb-8">
-            Digitale Passstelle für CfB Ford Niehl e.V.
+            Spielerpass-Anträge des CfB Ford Niehl e.V.
           </p>
 
           {/* Features */}
@@ -72,7 +72,7 @@ export default function HomePage() {
           {/* Footer Info */}
           <div className="mt-8 pt-6 border-t border-gray-200">
             <p className="text-sm text-gray-500">
-              <strong>Phase 2 Demo</strong> • Next.js 16 • React 19 • Tailwind 4
+              CfB Ford Niehl e.V. • Digitale Passstelle
             </p>
           </div>
         </div>
