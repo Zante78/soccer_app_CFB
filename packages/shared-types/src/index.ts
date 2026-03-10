@@ -5,6 +5,9 @@
  * the monorepo (frontend, rpa-bot, shared-logic).
  */
 
+// ===== GENERATED DATABASE TYPES =====
+export type { Database, Json } from './database.types';
+
 // ===== ENUMS =====
 
 export enum RegistrationStatus {

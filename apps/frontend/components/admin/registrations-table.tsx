@@ -156,9 +156,11 @@ export function RegistrationsTable({ data, isLoading, sortBy, sortOrder, onSort 
                 )}
               </TableCell>
               <TableCell>
-                {format(new Date(registration.created_at), "dd.MM.yyyy HH:mm", {
-                  locale: de,
-                })}
+                {registration.created_at
+                  ? format(new Date(registration.created_at), "dd.MM.yyyy HH:mm", {
+                      locale: de,
+                    })
+                  : "—"}
               </TableCell>
               <TableCell className="text-right">
                 <DropdownMenu>

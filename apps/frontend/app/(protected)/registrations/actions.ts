@@ -109,9 +109,9 @@ export async function getRegistrations(
 
   // Transform Data
   const registrations: RegistrationListItem[] = (data || []).map((reg) => {
-    const teams = reg.teams as unknown as { name: string } | null;
-    const financeStatus = reg.finance_status as unknown as { is_paid: boolean; payment_method: string | null } | null;
-    const rpaTraces = reg.rpa_traces as unknown as Array<{ status: string }> | null;
+    const teams = reg.teams;
+    const financeStatus = reg.finance_status;
+    const rpaTraces = reg.rpa_traces;
 
     return {
       id: reg.id,

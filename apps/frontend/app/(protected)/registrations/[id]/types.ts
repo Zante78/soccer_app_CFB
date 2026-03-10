@@ -12,14 +12,14 @@ export type RegistrationDetail = {
   sperrfrist_start: string | null;
   sperrfrist_end: string | null;
   registration_reason: string;
-  player_data: Record<string, any>;
-  consent_flags: Record<string, any>;
+  player_data: Record<string, unknown>;
+  consent_flags: Record<string, unknown>;
   document_paths: string[] | null;
   photo_path: string | null;
-  created_at: string;
-  updated_at: string;
+  created_at: string | null;
+  updated_at: string | null;
   submitted_at: string | null;
-  created_by_user_id: string;
+  created_by_user_id: string | null;
   team: {
     id: string;
     name: string;
@@ -39,7 +39,7 @@ export type RegistrationDetail = {
     registration_id: string;
     execution_id: string;
     status: string;
-    started_at: string;
+    started_at: string | null;
     completed_at: string | null;
     error_message: string | null;
     screenshot_baseline: string | null;
@@ -51,7 +51,7 @@ export type RegistrationDetail = {
     action: string;
     old_value: string | null;
     new_value: string | null;
-    timestamp: string;
+    timestamp: string | null;
     user: {
       full_name: string | null;
       role: string;

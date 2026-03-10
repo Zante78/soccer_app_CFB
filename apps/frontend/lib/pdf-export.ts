@@ -23,7 +23,7 @@ type RegistrationForPDF = {
     paid_at: string | null;
   } | null;
   player_data: Record<string, unknown>;
-  created_at: string;
+  created_at: string | null;
   submitted_at: string | null;
 };
 

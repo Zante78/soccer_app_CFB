@@ -11,7 +11,7 @@ export type RPATraceWithUrls = {
   registration_id: string;
   execution_id: string;
   status: string;
-  started_at: string;
+  started_at: string | null;
   completed_at: string | null;
   error_message: string | null;
   visual_diff_score: number | null;
@@ -79,12 +79,7 @@ export async function getRPATraces(): Promise<RPATraceWithUrls[]> {
         ? await getSignedUrl("rpa-screenshots", trace.screenshot_actual)
         : null;
 
-      const reg = trace.registrations as unknown as {
-        player_name: string;
-        player_dfb_id: string | null;
-        status: string;
-        teams: { name: string } | null;
-      };
+      const reg = trace.registrations;
 
       return {
         id: trace.id,

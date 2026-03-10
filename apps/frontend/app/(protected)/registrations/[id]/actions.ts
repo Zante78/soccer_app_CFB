@@ -123,17 +123,10 @@ export async function getRegistrationDetails(
     : [];
 
   // Transform Data
-  const teams = data.teams as unknown as { id: string; name: string; dfbnet_id: string | null } | null;
-  const financeStatus = data.finance_status as unknown as RegistrationDetail["finance_status"];
-  const rpaTraces = (data.rpa_traces || []) as unknown as Array<{
-    id: string; registration_id: string; execution_id: string; status: string;
-    started_at: string; completed_at: string | null; error_message: string | null;
-    screenshot_baseline: string | null; screenshot_actual: string | null; visual_diff_score: number | null;
-  }>;
-  const auditLogs = (data.audit_logs || []) as unknown as Array<{
-    id: string; action: string; old_value: string | null; new_value: string | null;
-    timestamp: string; users: { full_name: string | null; role: string } | null;
-  }>;
+  const teams = data.teams;
+  const financeStatus = data.finance_status;
+  const rpaTraces = data.rpa_traces || [];
+  const auditLogs = data.audit_logs || [];
 
   const registration: RegistrationDetail = {
     id: data.id,
@@ -145,8 +138,8 @@ export async function getRegistrationDetails(
     sperrfrist_start: data.sperrfrist_start,
     sperrfrist_end: data.sperrfrist_end,
     registration_reason: data.registration_reason,
-    player_data: data.player_data || {},
-    consent_flags: data.consent_flags || {},
+    player_data: (data.player_data || {}) as Record<string, unknown>,
+    consent_flags: (data.consent_flags || {}) as Record<string, unknown>,
     document_paths: data.document_paths,
     photo_path: data.photo_path,
     created_at: data.created_at,
@@ -170,8 +163,8 @@ export async function getRegistrationDetails(
     audit_logs: auditLogs.map((log) => ({
       id: log.id,
       action: log.action,
-      old_value: log.old_value,
-      new_value: log.new_value,
+      old_value: log.old_value ? JSON.stringify(log.old_value) : null,
+      new_value: log.new_value ? JSON.stringify(log.new_value) : null,
       timestamp: log.timestamp,
       user: log.users
         ? { full_name: log.users.full_name, role: log.users.role }

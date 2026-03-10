@@ -182,9 +182,11 @@ function TraceCard({
               )}
               <span>
                 Ausgeführt:{" "}
-                {format(new Date(trace.started_at), "dd.MM.yyyy HH:mm", {
-                  locale: de,
-                })}
+                {trace.started_at
+                  ? format(new Date(trace.started_at), "dd.MM.yyyy HH:mm", {
+                      locale: de,
+                    })
+                  : "—"}
               </span>
             </div>
           </div>

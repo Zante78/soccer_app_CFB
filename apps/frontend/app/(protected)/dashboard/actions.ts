@@ -63,18 +63,12 @@ export const getDashboardMetrics = cache(async (): Promise<DashboardMetrics> => 
 
   // Payment Stats berechnen (finance_status ist nested)
   const paymentStats = calculatePaymentStats(
-    (financeResult.data || []).map(reg => {
-      const fs = reg.finance_status as unknown as { is_paid: boolean } | null;
-      return fs;
-    }).filter(Boolean) as Array<{ is_paid: boolean }>
+    (financeResult.data || []).map(reg => reg.finance_status).filter(Boolean) as Array<{ is_paid: boolean }>
   );
 
   // Bot Stats berechnen (rpa_traces ist nested array)
   const allTraces = (rpaTracesResult.data || [])
-    .flatMap(reg => {
-      const traces = reg.rpa_traces as unknown as Array<{ status: string }> | null;
-      return traces || [];
-    })
+    .flatMap(reg => reg.rpa_traces || [])
     .filter(Boolean);
   const botStats = calculateBotStats(allTraces);
 
@@ -147,23 +141,20 @@ function calculateBotStats(
   return { total, success, failed, successRate };
 }
 
-function formatAuditLogs(logs: unknown[]): AuditLogEntry[] {
-  return logs.map((raw) => {
-    const log = raw as {
-      id: string;
-      action: string;
-      timestamp: string;
-      users: { full_name: string } | { full_name: string }[] | null;
-      registrations: { player_name: string } | { player_name: string }[] | null;
-    };
-    const user = Array.isArray(log.users) ? log.users[0] : log.users;
-    const reg = Array.isArray(log.registrations) ? log.registrations[0] : log.registrations;
+function formatAuditLogs(logs: Array<{
+  id: string;
+  action: string;
+  timestamp: string | null;
+  users: { full_name: string } | null;
+  registrations: { player_name: string } | null;
+}>): AuditLogEntry[] {
+  return logs.map((log) => {
     return {
       id: log.id,
       action: log.action,
-      timestamp: log.timestamp,
-      user_name: user?.full_name || null,
-      registration_player_name: reg?.player_name || null,
+      timestamp: log.timestamp || "",
+      user_name: log.users?.full_name || null,
+      registration_player_name: log.registrations?.player_name || null,
     };
   });
 }

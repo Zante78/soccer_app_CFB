@@ -10,7 +10,7 @@ export type RegistrationListItem = {
   status: RegistrationStatus;
   team_name: string | null;
   eligibility_date: string | null;
-  created_at: string;
+  created_at: string | null;
   is_paid: boolean;
   payment_method: string | null;
   rpa_status: string | null;

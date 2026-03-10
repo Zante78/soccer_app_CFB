@@ -9,12 +9,12 @@ type PlayerDataDisplayProps = {
     player_birth_date: string;
     player_dfb_id: string | null;
     registration_reason: string;
-    player_data: Record<string, any>;
+    player_data: Record<string, unknown>;
     team: {
       name: string;
       dfbnet_id: string | null;
     } | null;
-    created_at: string;
+    created_at: string | null;
     submitted_at: string | null;
   };
 };
@@ -28,6 +28,7 @@ const registrationReasonLabels: Record<string, string> = {
 
 export function PlayerDataDisplay({ registration }: PlayerDataDisplayProps) {
   const playerData = registration.player_data || {};
+  const str = (val: unknown): string => (val != null ? String(val) : "-");
 
   return (
     <Card className="p-6">
@@ -75,22 +76,22 @@ export function PlayerDataDisplay({ registration }: PlayerDataDisplayProps) {
         <Separator />
 
         {/* Kontaktdaten */}
-        {(playerData.email || playerData.phone || playerData.address) && (
+        {!!(playerData.email || playerData.phone || playerData.address) && (
           <>
             <div>
               <h4 className="text-sm font-semibold text-gray-900 mb-3">
                 Kontaktdaten
               </h4>
               <div className="grid gap-4 sm:grid-cols-2">
-                {playerData.email && (
-                  <DataField label="E-Mail" value={playerData.email} />
+                {!!playerData.email && (
+                  <DataField label="E-Mail" value={str(playerData.email)} />
                 )}
-                {playerData.phone && (
-                  <DataField label="Telefon" value={playerData.phone} />
+                {!!playerData.phone && (
+                  <DataField label="Telefon" value={str(playerData.phone)} />
                 )}
-                {playerData.address && (
+                {!!playerData.address && (
                   <div className="sm:col-span-2">
-                    <DataField label="Adresse" value={playerData.address} />
+                    <DataField label="Adresse" value={str(playerData.address)} />
                   </div>
                 )}
               </div>
@@ -100,7 +101,7 @@ export function PlayerDataDisplay({ registration }: PlayerDataDisplayProps) {
         )}
 
         {/* Vorverein (falls Transfer) */}
-        {playerData.previous_club_name && (
+        {!!playerData.previous_club_name && (
           <>
             <div>
               <h4 className="text-sm font-semibold text-gray-900 mb-3">
@@ -109,29 +110,29 @@ export function PlayerDataDisplay({ registration }: PlayerDataDisplayProps) {
               <div className="grid gap-4 sm:grid-cols-2">
                 <DataField
                   label="Vereinsname"
-                  value={playerData.previous_club_name}
+                  value={str(playerData.previous_club_name)}
                 />
-                {playerData.previous_club_id && (
+                {!!playerData.previous_club_id && (
                   <DataField
                     label="Vereins-ID"
-                    value={playerData.previous_club_id}
+                    value={str(playerData.previous_club_id)}
                   />
                 )}
-                {playerData.deregistration_date && (
+                {!!playerData.deregistration_date && (
                   <DataField
                     label="Abmeldedatum"
                     value={format(
-                      new Date(playerData.deregistration_date),
+                      new Date(str(playerData.deregistration_date)),
                       "dd.MM.yyyy",
                       { locale: de }
                     )}
                   />
                 )}
-                {playerData.last_game_date && (
+                {!!playerData.last_game_date && (
                   <DataField
                     label="Letztes Spiel"
                     value={format(
-                      new Date(playerData.last_game_date),
+                      new Date(str(playerData.last_game_date)),
                       "dd.MM.yyyy",
                       { locale: de }
                     )}
@@ -151,9 +152,12 @@ export function PlayerDataDisplay({ registration }: PlayerDataDisplayProps) {
           <div className="grid gap-4 sm:grid-cols-2">
             <DataField
               label="Erstellt am"
-              value={format(new Date(registration.created_at), "dd.MM.yyyy HH:mm", {
-                locale: de,
-              })}
+              value={registration.created_at
+                ? format(new Date(registration.created_at), "dd.MM.yyyy HH:mm", {
+                    locale: de,
+                  })
+                : "—"
+              }
             />
             {registration.submitted_at && (
               <DataField

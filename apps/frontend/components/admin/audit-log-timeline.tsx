@@ -8,7 +8,7 @@ type AuditLogEntry = {
   action: string;
   old_value: string | null;
   new_value: string | null;
-  timestamp: string;
+  timestamp: string | null;
   user: {
     full_name: string | null;
     role: string;
@@ -89,9 +89,11 @@ export function AuditLogTimeline({ logs }: AuditLogTimelineProps) {
                       </p>
                     </div>
                     <p className="text-xs text-gray-500">
-                      {format(new Date(log.timestamp), "dd.MM.yyyy HH:mm", {
-                        locale: de,
-                      })}
+                      {log.timestamp
+                        ? format(new Date(log.timestamp), "dd.MM.yyyy HH:mm", {
+                            locale: de,
+                          })
+                        : "—"}
                     </p>
                   </div>
 
