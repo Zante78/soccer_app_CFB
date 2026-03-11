@@ -1,6 +1,14 @@
 import { createSupabaseServerClient } from "./server";
 
 /**
+ * Prüft ob ein Pfad Traversal-Versuche enthält (inkl. URL-encoded Varianten)
+ */
+function isPathTraversal(input: string): boolean {
+  const decoded = decodeURIComponent(input).replace(/\\/g, '/');
+  return decoded.includes('..') || decoded.startsWith('/');
+}
+
+/**
  * Erstellt eine Signed URL für ein File in Supabase Storage
  * @param bucket - Storage Bucket Name (z.B. "rpa-screenshots")
  * @param path - Dateipfad innerhalb des Buckets
@@ -12,7 +20,7 @@ export async function getSignedUrl(
   path: string,
   expiresIn: number = 3600
 ): Promise<string | null> {
-  if (path.includes("..")) {
+  if (isPathTraversal(path)) {
     console.error(`Invalid storage path (traversal attempt): ${path}`);
     return null;
   }
@@ -35,7 +43,7 @@ export async function getSignedUrl(
  * Listet alle Files in einem Storage Bucket Ordner
  */
 export async function listStorageFiles(bucket: string, folder?: string) {
-  if (folder && folder.includes("..")) {
+  if (folder && isPathTraversal(folder)) {
     console.error(`Invalid storage folder (traversal attempt): ${folder}`);
     return [];
   }

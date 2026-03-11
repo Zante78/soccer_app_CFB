@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function RegistrationsLoading() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" role="status" aria-label="Registrierungen werden geladen">
       <div className="flex items-center justify-between">
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-10 w-32" />

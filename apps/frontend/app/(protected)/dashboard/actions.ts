@@ -1,10 +1,13 @@
 "use server";
 
 import { cache } from "react";
+import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth-guard";
 import { DASHBOARD_ROLES } from "@/lib/auth-types";
 import { RegistrationStatus } from "@packages/shared-types";
+
+const FinanceStatusSchema = z.object({ is_paid: z.boolean() });
 import type {
   DashboardMetrics,
   StatusBreakdown,
@@ -66,9 +69,12 @@ export const getDashboardMetrics = cache(async (): Promise<DashboardMetrics> => 
     registrationsResult.data || []
   );
 
-  // Payment Stats berechnen (finance_status ist nested)
+  // Payment Stats berechnen (finance_status ist nested) — Zod-validated
   const paymentStats = calculatePaymentStats(
-    (financeResult.data || []).map(reg => reg.finance_status).filter(Boolean) as Array<{ is_paid: boolean }>
+    (financeResult.data || [])
+      .map(reg => FinanceStatusSchema.safeParse(reg.finance_status))
+      .filter(r => r.success)
+      .map(r => r.data)
   );
 
   // Bot Stats berechnen (rpa_traces ist nested array)
@@ -94,22 +100,19 @@ export const getDashboardMetrics = cache(async (): Promise<DashboardMetrics> => 
 function calculateStatusBreakdown(
   registrations: Array<{ status: string }>
 ): StatusBreakdown {
-  const breakdown: Record<string, number> = {};
+  // Initialize all statuses to 0 first for type-safe StatusBreakdown
+  const allStatuses = Object.values(RegistrationStatus);
+  const breakdown = Object.fromEntries(
+    allStatuses.map(status => [status, 0])
+  ) as StatusBreakdown;
 
   registrations.forEach((reg) => {
-    breakdown[reg.status] = (breakdown[reg.status] || 0) + 1;
-  });
-
-  // Ensure all statuses are present (even with 0)
-  const allStatuses = Object.values(RegistrationStatus);
-
-  allStatuses.forEach((status) => {
-    if (!(status in breakdown)) {
-      breakdown[status] = 0;
+    if (reg.status in breakdown) {
+      breakdown[reg.status as RegistrationStatus] += 1;
     }
   });
 
-  return breakdown as StatusBreakdown;
+  return breakdown;
 }
 
 function calculatePaymentStats(

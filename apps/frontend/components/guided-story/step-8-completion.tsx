@@ -101,7 +101,7 @@ export function Step8Completion({ magicLink, registrationId, playerName }: Step8
           {/* QR Code */}
           <div className="bg-white p-6 rounded-xl border-2 border-primary/20 mb-4">
             <div className="text-center">
-              <div className="inline-block p-4 bg-white border-2 border-gray-200 rounded-lg">
+              <div className="inline-block p-4 bg-white border-2 border-gray-200 rounded-lg" role="img" aria-label="QR-Code zur Statusverfolgung">
                 <QRCodeSVG value={magicLink} size={200} level="H" />
               </div>
               <p className="text-sm text-gray-600 mt-4">
@@ -148,6 +148,7 @@ export function Step8Completion({ magicLink, registrationId, playerName }: Step8
                 className="w-5 h-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0"
                 fill="currentColor"
                 viewBox="0 0 20 20"
+                aria-hidden="true"
               >
                 <path
                   fillRule="evenodd"
@@ -172,6 +173,7 @@ export function Step8Completion({ magicLink, registrationId, playerName }: Step8
                 className="w-5 h-5 text-success mt-0.5 mr-3 flex-shrink-0"
                 fill="currentColor"
                 viewBox="0 0 20 20"
+                aria-hidden="true"
               >
                 <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
                 <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
