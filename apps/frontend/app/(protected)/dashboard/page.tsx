@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { requireRole } from "@/lib/auth-guard";
+import { DASHBOARD_ROLES } from "@/lib/auth-types";
 import { getDashboardMetrics } from "./actions";
 import { MetricCard } from "@/components/admin/metric-card";
 import { StatusChart } from "@/components/admin/status-chart";
@@ -83,7 +84,7 @@ async function DashboardContent({ userName }: { userName: string }) {
 }
 
 export default async function DashboardPage() {
-  const user = await requireRole(["SUPER_ADMIN", "PASSWART", "TRAINER"]);
+  const user = await requireRole(DASHBOARD_ROLES);
 
   return (
     <div className="space-y-8">

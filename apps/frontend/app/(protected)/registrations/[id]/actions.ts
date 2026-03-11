@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth-guard";
+import { ALL_ROLES } from "@/lib/auth-types";
 import { calculateEligibility } from "@packages/shared-logic";
 import type { EligibilityCalculatorInput } from "@packages/shared-logic";
 import { notFound } from "next/navigation";
@@ -28,7 +29,7 @@ export async function getRegistrationDetails(
   }
 
   // 2. Auth Guard
-  const user = await requireRole(["SUPER_ADMIN", "PASSWART", "TRAINER", "ANTRAGSTELLER"]);
+  const user = await requireRole(ALL_ROLES);
 
   const supabase = await createSupabaseServerClient();
 

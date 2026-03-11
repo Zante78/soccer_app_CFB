@@ -2,6 +2,9 @@
 
 export type RoleType = "SUPER_ADMIN" | "PASSWART" | "TRAINER" | "ANTRAGSTELLER";
 
+/** All valid role values for runtime validation */
+export const VALID_ROLES: RoleType[] = ["SUPER_ADMIN", "PASSWART", "TRAINER", "ANTRAGSTELLER"];
+
 export type AuthenticatedUser = {
   id: string;
   email: string;
@@ -28,6 +31,21 @@ export const STATUS_CHANGE_ROLES: RoleType[] = ["SUPER_ADMIN", "PASSWART"];
 
 /** Rollen die Zahlungen verifizieren dürfen (Cash/QR) */
 export const PAYMENT_VERIFY_ROLES: RoleType[] = [
+  "SUPER_ADMIN",
+  "PASSWART",
+  "TRAINER",
+];
+
+/** Alle authentifizierten Rollen */
+export const ALL_ROLES: RoleType[] = [
+  "SUPER_ADMIN",
+  "PASSWART",
+  "TRAINER",
+  "ANTRAGSTELLER",
+];
+
+/** Dashboard-Rollen (ohne ANTRAGSTELLER) */
+export const DASHBOARD_ROLES: RoleType[] = [
   "SUPER_ADMIN",
   "PASSWART",
   "TRAINER",

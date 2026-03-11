@@ -45,7 +45,7 @@ app.use(helmet());
 app.use(cors({
   origin: process.env.ALLOWED_ORIGINS?.split(",") || ["http://localhost:3000"],
 }));
-app.use(express.json());
+app.use(express.json({ limit: "10kb" }));
 
 // ===== Auth Middleware =====
 function requireAuth(
@@ -72,16 +72,12 @@ function requireAuth(
 // ===== Routes =====
 
 /**
- * GET / - Server Status
+ * GET / - Server Status (minimal, unauthenticated)
  */
 app.get("/", (_req, res) => {
   res.json({
     service: "CFB Bot Runner",
-    version: "2.0.0",
-    mode: config.BOT_MODE,
     status: "running",
-    is_processing: isProcessing,
-    uptime: process.uptime(),
   });
 });
 
@@ -155,7 +151,7 @@ app.post("/execute", requireAuth, async (req, res) => {
     logger.error(`[API] /execute error: ${msg}`);
     res.status(500).json({
       success: false,
-      error: msg,
+      error: config.NODE_ENV === "production" ? "Internal bot execution error" : msg,
       duration_ms: 0,
     });
   }
@@ -164,11 +160,16 @@ app.post("/execute", requireAuth, async (req, res) => {
 /**
  * POST /health-check - Testet DFBnet-Verbindung
  *
- * Body: { check_id?, mode? }
+ * Body: { check_id? }
  * Response: { success, duration_ms, dfbnet_version }
  */
+const healthCheckSchema = z.object({
+  check_id: z.string().uuid().optional(),
+});
+
 app.post("/health-check", requireAuth, async (req, res) => {
-  const { check_id } = req.body;
+  const parsed = healthCheckSchema.safeParse(req.body);
+  const check_id = parsed.success ? parsed.data.check_id : undefined;
 
   logger.info(
     `[API] /health-check received: check_id=${check_id || "none"}, mode=${config.BOT_MODE}`
@@ -194,7 +195,7 @@ app.post("/health-check", requireAuth, async (req, res) => {
     logger.error(`[API] /health-check error: ${msg}`);
     res.status(500).json({
       success: false,
-      error: msg,
+      error: config.NODE_ENV === "production" ? "Internal health check error" : msg,
       duration_ms: 0,
     });
   }

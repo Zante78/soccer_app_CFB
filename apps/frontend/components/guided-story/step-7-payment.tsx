@@ -99,29 +99,30 @@ export function Step7Payment({ onNext, onBack, registrationId }: Step7PaymentPro
               {/* PayPal Logo */}
               <div className="text-4xl">💳</div>
             </div>
-
-            {selectedMethod === 'PAYPAL' && (
-              <div className="mt-4 pt-4 border-t border-gray-200">
-                <Button
-                  onClick={handlePayPalPayment}
-                  disabled={isProcessing}
-                  className="w-full"
-                >
-                  {isProcessing ? (
-                    <div className="flex items-center justify-center">
-                      <div className="h-5 w-5 bg-white/30 rounded animate-pulse mr-2" />
-                      Verarbeite Zahlung...
-                    </div>
-                  ) : (
-                    'Jetzt mit PayPal bezahlen'
-                  )}
-                </Button>
-                <p className="text-xs text-gray-600 text-center mt-2">
-                  Sie werden zu PayPal weitergeleitet
-                </p>
-              </div>
-            )}
           </button>
+
+          {/* PayPal Action (outside radio to avoid nested interactive) */}
+          {selectedMethod === 'PAYPAL' && (
+            <div className="px-6 -mt-2 pb-2">
+              <Button
+                onClick={handlePayPalPayment}
+                disabled={isProcessing}
+                className="w-full"
+              >
+                {isProcessing ? (
+                  <div className="flex items-center justify-center">
+                    <div className="h-5 w-5 bg-white/30 rounded animate-pulse mr-2" />
+                    Verarbeite Zahlung...
+                  </div>
+                ) : (
+                  'Jetzt mit PayPal bezahlen'
+                )}
+              </Button>
+              <p className="text-xs text-gray-600 text-center mt-2">
+                Sie werden zu PayPal weitergeleitet
+              </p>
+            </div>
+          )}
 
           {/* Cash Payment Option */}
           <button
@@ -163,30 +164,31 @@ export function Step7Payment({ onNext, onBack, registrationId }: Step7PaymentPro
               {/* Cash Icon */}
               <div className="text-4xl">💵</div>
             </div>
-
-            {selectedMethod === 'CASH' && (
-              <div className="mt-4 pt-4 border-t border-gray-200">
-                <div className="bg-white p-4 rounded-lg text-center">
-                  <p className="text-sm text-gray-700 mb-4">
-                    Zeigen Sie diesen QR-Code Ihrem Trainer nach der Zahlung:
-                  </p>
-                  <div className="inline-block p-4 bg-white border-2 border-gray-200 rounded-lg">
-                    <QRCodeSVG value={qrCodeData} size={200} level="H" />
-                  </div>
-                  <p className="text-xs text-gray-600 mt-4">
-                    Der Trainer scannt den Code zur Bestätigung der Barzahlung
-                  </p>
-                </div>
-
-                <Button
-                  onClick={handleCashPayment}
-                  className="w-full mt-4"
-                >
-                  Weiter mit Barzahlung
-                </Button>
-              </div>
-            )}
           </button>
+
+          {/* Cash Action (outside radio to avoid nested interactive) */}
+          {selectedMethod === 'CASH' && (
+            <div className="px-6 -mt-2 pb-2">
+              <div className="bg-white p-4 rounded-lg text-center">
+                <p className="text-sm text-gray-700 mb-4">
+                  Zeigen Sie diesen QR-Code Ihrem Trainer nach der Zahlung:
+                </p>
+                <div className="inline-block p-4 bg-white border-2 border-gray-200 rounded-lg">
+                  <QRCodeSVG value={qrCodeData} size={200} level="H" />
+                </div>
+                <p className="text-xs text-gray-600 mt-4">
+                  Der Trainer scannt den Code zur Bestätigung der Barzahlung
+                </p>
+              </div>
+
+              <Button
+                onClick={handleCashPayment}
+                className="w-full mt-4"
+              >
+                Weiter mit Barzahlung
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Info Box */}

@@ -3,6 +3,7 @@
 import { cache } from "react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { RoleType, AuthenticatedUser } from "./auth-types";
+import { VALID_ROLES } from "./auth-types";
 
 /**
  * Stellt sicher, dass ein Benutzer authentifiziert ist.
@@ -26,7 +27,6 @@ export const requireAuth = cache(async (): Promise<AuthenticatedUser> => {
     .eq("id", user.id)
     .maybeSingle();
 
-  const VALID_ROLES: RoleType[] = ["SUPER_ADMIN", "PASSWART", "TRAINER", "ANTRAGSTELLER"];
   const rawRole = userProfile?.role;
   const role: RoleType = typeof rawRole === "string" && VALID_ROLES.includes(rawRole as RoleType)
     ? (rawRole as RoleType)

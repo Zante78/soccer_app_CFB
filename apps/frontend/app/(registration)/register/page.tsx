@@ -73,7 +73,14 @@ export default function RegisterPage() {
               {Math.round(progress)}%
             </span>
           </div>
-          <div className="progress-bar">
+          <div
+            className="progress-bar"
+            role="progressbar"
+            aria-valuenow={Math.round(progress)}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Fortschritt"
+          >
             <div
               className="progress-bar-fill"
               style={{ width: `${progress}%` }}

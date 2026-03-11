@@ -35,6 +35,11 @@ export async function getSignedUrl(
  * Listet alle Files in einem Storage Bucket Ordner
  */
 export async function listStorageFiles(bucket: string, folder?: string) {
+  if (folder && folder.includes("..")) {
+    console.error(`Invalid storage folder (traversal attempt): ${folder}`);
+    return [];
+  }
+
   const supabase = await createSupabaseServerClient();
 
   const { data, error } = await supabase.storage

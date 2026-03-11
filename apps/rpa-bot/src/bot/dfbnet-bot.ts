@@ -27,6 +27,7 @@ import {
 } from '../flows/create-draft.js';
 import { SELECTORS } from '../config/selectors.js';
 import type { SupabaseClient } from '../services/supabase-client.js';
+import type { ExecuteRequest, ExecuteResult, HealthCheckResult } from '../types/bot-types.js';
 
 // ===== Types =====
 
@@ -36,34 +37,6 @@ export type BotConfig = {
   screenshotDir: string;
   baselineDir: string;
   maxRetries: number;
-};
-
-export type ExecuteRequest = {
-  registration_id: string;
-  trace_id: string;
-  player_name?: string;
-  team_name?: string;
-};
-
-export type ExecuteResult = {
-  success: boolean;
-  visual_regression_error?: boolean;
-  draft_url?: string | null;
-  screenshot_actual?: string | null;
-  screenshot_baseline?: string | null;
-  visual_diff_score?: number | null;
-  duration_ms: number;
-  error?: string;
-  dfbnet_version?: string;
-  mock: false;
-};
-
-export type HealthCheckResult = {
-  success: boolean;
-  duration_ms: number;
-  dfbnet_version?: string;
-  mock: false;
-  error?: string;
 };
 
 // ===== Bot Class =====

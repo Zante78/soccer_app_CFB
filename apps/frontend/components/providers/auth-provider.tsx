@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { useSupabase } from "@/components/providers/supabase-provider";
 import { User } from "@supabase/supabase-js";
 import type { RoleType } from "@/lib/auth-types";
+import { VALID_ROLES } from "@/lib/auth-types";
 
 const SESSION_TIMEOUT_MS = 10_000;
 
@@ -113,7 +114,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setProfile({
           id: data.id,
           email: data.email,
-          role: data.role as RoleType,
+          role: VALID_ROLES.includes(data.role as RoleType) ? (data.role as RoleType) : "ANTRAGSTELLER",
           full_name: data.full_name,
           team_id: data.team_id,
         });

@@ -40,6 +40,7 @@ export function PaginationControls({
           className="min-h-[44px] min-w-[44px]"
           onClick={() => onPageChange(1)}
           disabled={currentPage === 1 || isLoading}
+          aria-label="Erste Seite"
         >
           <ChevronsLeft className="h-4 w-4" />
         </Button>
@@ -50,6 +51,7 @@ export function PaginationControls({
           className="min-h-[44px] min-w-[44px]"
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1 || isLoading}
+          aria-label="Vorherige Seite"
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
@@ -66,6 +68,7 @@ export function PaginationControls({
           className="min-h-[44px] min-w-[44px]"
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages || isLoading}
+          aria-label="Nächste Seite"
         >
           <ChevronRight className="h-4 w-4" />
         </Button>
@@ -76,6 +79,7 @@ export function PaginationControls({
           className="min-h-[44px] min-w-[44px]"
           onClick={() => onPageChange(totalPages)}
           disabled={currentPage === totalPages || isLoading}
+          aria-label="Letzte Seite"
         >
           <ChevronsRight className="h-4 w-4" />
         </Button>

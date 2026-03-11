@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth, type UserProfile } from "@/components/providers/auth-provider";
-import { RoleType, canViewRegistration, canEditRegistration, canViewRPATraces, canVerifyPayment } from "@/config/roles";
+import { type RoleType, canViewRegistration, canEditRegistration, canVerifyPayment } from "@/config/roles";
 
 type RoleGateProps = {
   children: React.ReactNode;
@@ -42,26 +42,19 @@ export function RoleGate({
 
   // 2. Context-based Check (Registration-spezifisch)
   if (registrationContext) {
-    const userProfile = {
-      id: profile.id,
-      name: profile.full_name || profile.email,
-      role: profile.role,
-      team_id: profile.team_id,
-    };
-
     switch (registrationContext.type) {
       case "view":
-        if (registrationContext.registration && canViewRegistration(userProfile, registrationContext.registration)) {
+        if (registrationContext.registration && canViewRegistration(profile, registrationContext.registration)) {
           return <>{children}</>;
         }
         break;
       case "edit":
-        if (registrationContext.registration && canEditRegistration(userProfile, registrationContext.registration)) {
+        if (registrationContext.registration && canEditRegistration(profile, registrationContext.registration)) {
           return <>{children}</>;
         }
         break;
       case "verifyPayment":
-        if (canVerifyPayment(userProfile, registrationContext.registration)) {
+        if (canVerifyPayment(profile, registrationContext.registration)) {
           return <>{children}</>;
         }
         break;

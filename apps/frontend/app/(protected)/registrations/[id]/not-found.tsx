@@ -16,7 +16,7 @@ export default function NotFound() {
 
         <Link
           href="/registrations"
-          className="inline-flex items-center justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#0055A4] hover:bg-[#003d7a] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0055A4]"
+          className="inline-flex items-center justify-center py-2 px-4 min-h-[44px] border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#0055A4] hover:bg-[#003d7a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#0055A4]"
         >
           Zurück zur Übersicht
         </Link>

@@ -22,14 +22,14 @@ export default function Error({
         <div className="space-y-4">
           <button
             onClick={reset}
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#0055A4] hover:bg-[#003d7a] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0055A4]"
+            className="w-full flex justify-center py-2 px-4 min-h-[44px] border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#0055A4] hover:bg-[#003d7a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#0055A4]"
           >
             Erneut versuchen
           </button>
 
           <a
             href="/registrations"
-            className="block w-full py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+            className="block w-full py-2 px-4 min-h-[44px] border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#0055A4]"
           >
             Zurück zur Übersicht
           </a>

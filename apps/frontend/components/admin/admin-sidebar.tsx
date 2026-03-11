@@ -104,6 +104,7 @@ export function AdminSidebar() {
       {isOpen && (
         <div
           className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
+          role="presentation"
           onClick={() => setIsOpen(false)}
         />
       )}

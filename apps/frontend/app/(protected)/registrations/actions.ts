@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth-guard";
+import { ALL_ROLES } from "@/lib/auth-types";
 import { RegistrationStatus } from "@packages/shared-types";
 import { parseRegistrationStatus } from "@/lib/utils";
 import type {
@@ -41,7 +42,7 @@ export async function getRegistrations(
   const validated = parseResult.data;
 
   // 2. Auth Guard: Alle authentifizierten Rollen (RLS filtert Daten)
-  const user = await requireRole(["SUPER_ADMIN", "PASSWART", "TRAINER", "ANTRAGSTELLER"]);
+  const user = await requireRole(ALL_ROLES);
 
   const {
     page,
@@ -150,7 +151,7 @@ export async function getRegistrations(
  * Lädt alle Teams für Filter-Dropdown
  */
 export async function getTeams(): Promise<Array<{ id: string; name: string }>> {
-  await requireRole(["SUPER_ADMIN", "PASSWART", "TRAINER", "ANTRAGSTELLER"]);
+  await requireRole(ALL_ROLES);
 
   const supabase = await createSupabaseServerClient();
 

@@ -3,6 +3,8 @@
 import { cache } from "react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth-guard";
+import { DASHBOARD_ROLES } from "@/lib/auth-types";
+import { RegistrationStatus } from "@packages/shared-types";
 import type {
   DashboardMetrics,
   StatusBreakdown,
@@ -17,7 +19,7 @@ import type {
  */
 export const getDashboardMetrics = cache(async (): Promise<DashboardMetrics> => {
   // Auth Guard: Alle authentifizierten Rollen (RLS filtert Daten)
-  await requireRole(["SUPER_ADMIN", "PASSWART", "TRAINER"]);
+  await requireRole(DASHBOARD_ROLES);
 
   const supabase = await createSupabaseServerClient();
 
@@ -32,10 +34,10 @@ export const getDashboardMetrics = cache(async (): Promise<DashboardMetrics> => 
     // 1. Alle Registrierungen (Status Breakdown) — exclude soft-deleted
     supabase.from("registrations").select("status, id").is("deleted_at", null),
 
-    // 2. Finance Status (Payment Stats) - via registrations Join — exclude soft-deleted
+    // 2. Finance Status (Payment Stats) - left join to include registrations without payment
     supabase
       .from("registrations")
-      .select("finance_status!inner(is_paid)")
+      .select("finance_status(is_paid)")
       .is("deleted_at", null),
 
     // 3. RPA Traces (Bot Success Rate) - via registrations Join — exclude soft-deleted
@@ -99,17 +101,7 @@ function calculateStatusBreakdown(
   });
 
   // Ensure all statuses are present (even with 0)
-  const allStatuses = [
-    "DRAFT",
-    "SUBMITTED",
-    "VALIDATION_PENDING",
-    "READY_FOR_BOT",
-    "BOT_IN_PROGRESS",
-    "COMPLETED",
-    "ERROR",
-    "MANUALLY_PROCESSED",
-    "VISUAL_REGRESSION_ERROR",
-  ];
+  const allStatuses = Object.values(RegistrationStatus);
 
   allStatuses.forEach((status) => {
     if (!(status in breakdown)) {

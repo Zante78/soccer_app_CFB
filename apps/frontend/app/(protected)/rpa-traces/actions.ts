@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth-guard";
+import { RPA_ADMIN_ROLES } from "@/lib/auth-types";
 import { getSignedUrl } from "@/lib/supabase/storage";
 import { revalidatePath } from "next/cache";
 
@@ -33,7 +34,7 @@ export type RPATraceWithUrls = {
  * Lädt alle RPA Traces mit Visual Regression Errors
  */
 export async function getRPATraces(): Promise<RPATraceWithUrls[]> {
-  await requireRole(["SUPER_ADMIN", "PASSWART"]);
+  await requireRole(RPA_ADMIN_ROLES);
 
   const supabase = await createSupabaseServerClient();
 
@@ -117,7 +118,7 @@ const registrationIdSchema = z.string().uuid();
  */
 export async function acceptNewBaseline(traceId: string): Promise<void> {
   const validId = traceIdSchema.parse(traceId);
-  await requireRole(["SUPER_ADMIN", "PASSWART"]);
+  await requireRole(RPA_ADMIN_ROLES);
 
   const supabase = await createSupabaseServerClient();
 
@@ -179,7 +180,7 @@ export async function acceptNewBaseline(traceId: string): Promise<void> {
  */
 export async function retryBotExecution(registrationId: string): Promise<void> {
   const validId = registrationIdSchema.parse(registrationId);
-  await requireRole(["SUPER_ADMIN", "PASSWART"]);
+  await requireRole(RPA_ADMIN_ROLES);
 
   const supabase = await createSupabaseServerClient();
 

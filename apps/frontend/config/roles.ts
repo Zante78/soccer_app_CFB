@@ -1,21 +1,18 @@
 // CFB Pass-Automation Rollen
 import type { RoleType } from "@/lib/auth-types";
-export type { RoleType };
+import type { UserProfile } from "@/components/providers/auth-provider";
 
-export type UserProfile = {
-  id: string;
-  name: string;
-  role: RoleType;
-  team_id?: string | null;
-  team_name?: string | null;
-};
+export type { RoleType, UserProfile };
+
+/** Minimal shape for role-based permission checks */
+type RoleCheckUser = Pick<UserProfile, "id" | "role" | "team_id">;
 
 // Helper-Funktionen für Rollen-Checks
 
 /**
  * Prüft ob der User Admin-Rechte hat (SUPER_ADMIN oder PASSWART)
  */
-export function isAdmin(user: UserProfile | null): boolean {
+export function isAdmin(user: RoleCheckUser | null): boolean {
   if (!user) return false;
   return user.role === "SUPER_ADMIN" || user.role === "PASSWART";
 }
@@ -24,7 +21,7 @@ export function isAdmin(user: UserProfile | null): boolean {
  * Prüft ob der User eine bestimmte Registrierung sehen darf
  */
 export function canViewRegistration(
-  user: UserProfile | null,
+  user: RoleCheckUser | null,
   registration: { team_id?: string; created_by_user_id?: string }
 ): boolean {
   if (!user) return false;
@@ -49,7 +46,7 @@ export function canViewRegistration(
  * Prüft ob der User eine Registrierung bearbeiten darf
  */
 export function canEditRegistration(
-  user: UserProfile | null,
+  user: RoleCheckUser | null,
   registration: { team_id?: string; created_by_user_id?: string; status?: string }
 ): boolean {
   if (!user) return false;
@@ -69,7 +66,7 @@ export function canEditRegistration(
 /**
  * Prüft ob der User RPA Traces sehen darf
  */
-export function canViewRPATraces(user: UserProfile | null): boolean {
+export function canViewRPATraces(user: RoleCheckUser | null): boolean {
   if (!user) return false;
   return isAdmin(user);
 }
@@ -78,7 +75,7 @@ export function canViewRPATraces(user: UserProfile | null): boolean {
  * Prüft ob der User Zahlungen verifizieren darf
  */
 export function canVerifyPayment(
-  user: UserProfile | null,
+  user: RoleCheckUser | null,
   registration?: { team_id?: string }
 ): boolean {
   if (!user) return false;
