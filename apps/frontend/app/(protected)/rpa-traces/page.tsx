@@ -31,8 +31,8 @@ export default function RPATracesPage() {
     staleTime: 1000 * 30, // 30s — shorter than default: bot status changes frequently during execution
   });
 
-  const acceptBaselineMutation = useMutation({
-    mutationFn: (traceId: string) => acceptNewBaseline(traceId),
+  const acceptBaselineMutation = useMutation<void, Error, string>({
+    mutationFn: (traceId) => acceptNewBaseline(traceId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["rpa-traces"] });
       toast.success("Baseline akzeptiert");
@@ -42,8 +42,8 @@ export default function RPATracesPage() {
     },
   });
 
-  const retryBotMutation = useMutation({
-    mutationFn: (registrationId: string) => retryBotExecution(registrationId),
+  const retryBotMutation = useMutation<void, Error, string>({
+    mutationFn: (registrationId) => retryBotExecution(registrationId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["rpa-traces"] });
       toast.success("Bot wird erneut ausgeführt");

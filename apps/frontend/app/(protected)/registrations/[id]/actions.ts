@@ -101,12 +101,8 @@ export async function getRegistrationDetails(
     eligibility = calculateEligibility({
       player_birth_date: data.player_birth_date,
       registration_reason: data.registration_reason as RegistrationReason,
-      previous_team_deregistration_date: typeof playerData.previous_team_deregistration_date === "string"
-        ? playerData.previous_team_deregistration_date
-        : undefined,
-      previous_team_last_game: typeof playerData.previous_team_last_game === "string"
-        ? playerData.previous_team_last_game
-        : undefined,
+      previous_team_deregistration_date: playerData.previous_team_deregistration_date,
+      previous_team_last_game: playerData.previous_team_last_game,
     });
   } catch (err) {
     console.error("Eligibility calculation failed:", err);

@@ -215,7 +215,8 @@ export function Step4Upload({ onNext, onBack }: Step4UploadProps) {
                   <button
                     type="button"
                     onClick={() => removeDocument(index)}
-                    className="text-error hover:text-red-700 transition-colors"
+                    className="text-error hover:text-red-700 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded"
+                    aria-label={`Dokument ${file.name} entfernen`}
                   >
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                       <path

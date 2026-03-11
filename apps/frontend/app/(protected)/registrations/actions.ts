@@ -10,12 +10,6 @@ import type {
   GetRegistrationsResult,
 } from "./types";
 
-const REGISTRATION_STATUSES = [
-  "DRAFT", "SUBMITTED", "VALIDATION_PENDING", "READY_FOR_BOT",
-  "BOT_IN_PROGRESS", "COMPLETED", "ERROR", "MANUALLY_PROCESSED",
-  "VISUAL_REGRESSION_ERROR",
-] as const;
-
 const registrationStatusValues = Object.values(RegistrationStatus) as string[];
 
 function parseRegistrationStatus(value: string): RegistrationStatus {
@@ -28,7 +22,7 @@ function parseRegistrationStatus(value: string): RegistrationStatus {
 const getRegistrationsSchema = z.object({
   page: z.number().int().positive().optional().default(1),
   pageSize: z.number().int().min(1).max(100).optional().default(50),
-  status: z.enum(REGISTRATION_STATUSES).nullable().optional(),
+  status: z.nativeEnum(RegistrationStatus).nullable().optional(),
   teamId: z.string().uuid().nullable().optional(),
   searchQuery: z.string().max(200).nullable().optional(),
   sortBy: z.enum(["created_at", "player_name", "eligibility_date", "status"]).optional().default("created_at"),

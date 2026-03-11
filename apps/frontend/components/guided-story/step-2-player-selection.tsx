@@ -41,7 +41,7 @@ export function Step2PlayerSelection({ onNext, onBack }: Step2PlayerSelectionPro
             role="radio"
             aria-checked={selection === 'new'}
             onClick={() => setSelection('new')}
-            className={`w-full p-6 rounded-xl border-2 text-left transition-all ${
+            className={`w-full p-6 rounded-xl border-2 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
               selection === 'new'
                 ? 'border-primary bg-primary/5'
                 : 'border-gray-200 hover:border-gray-300'
@@ -79,7 +79,7 @@ export function Step2PlayerSelection({ onNext, onBack }: Step2PlayerSelectionPro
             role="radio"
             aria-checked={selection === 'existing'}
             onClick={() => setSelection('existing')}
-            className={`w-full p-6 rounded-xl border-2 text-left transition-all ${
+            className={`w-full p-6 rounded-xl border-2 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
               selection === 'existing'
                 ? 'border-primary bg-primary/5'
                 : 'border-gray-200 hover:border-gray-300'

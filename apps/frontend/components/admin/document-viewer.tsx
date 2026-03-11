@@ -11,10 +11,9 @@ type DocumentViewerProps = {
 };
 
 const consentLabels: Record<string, string> = {
-  data_protection: "Datenschutzerklärung",
-  photo_consent: "Fotoerlaubnis",
-  medical_consent: "Medizinische Einwilligung",
-  terms_accepted: "AGB akzeptiert",
+  dsgvo_consent: "Datenschutzerklärung (DSGVO)",
+  eligibility_declaration: "Spielberechtigung bestätigt",
+  accuracy_confirmed: "Richtigkeit der Angaben bestätigt",
 };
 
 export function DocumentViewer({

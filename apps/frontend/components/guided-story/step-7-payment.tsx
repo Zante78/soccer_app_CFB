@@ -64,7 +64,7 @@ export function Step7Payment({ onNext, onBack, registrationId }: Step7PaymentPro
             role="radio"
             aria-checked={selectedMethod === 'PAYPAL'}
             onClick={() => setSelectedMethod('PAYPAL')}
-            className={`w-full p-6 rounded-xl border-2 text-left transition-all ${
+            className={`w-full p-6 rounded-xl border-2 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
               selectedMethod === 'PAYPAL'
                 ? 'border-primary bg-primary/5'
                 : 'border-gray-200 hover:border-gray-300'
@@ -128,7 +128,7 @@ export function Step7Payment({ onNext, onBack, registrationId }: Step7PaymentPro
             role="radio"
             aria-checked={selectedMethod === 'CASH'}
             onClick={() => setSelectedMethod('CASH')}
-            className={`w-full p-6 rounded-xl border-2 text-left transition-all ${
+            className={`w-full p-6 rounded-xl border-2 text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
               selectedMethod === 'CASH'
                 ? 'border-primary bg-primary/5'
                 : 'border-gray-200 hover:border-gray-300'
