@@ -178,7 +178,7 @@ export function Step6Consent({ onNext, onBack, playerData }: Step6ConsentProps) 
             <button
               type="button"
               onClick={clearSignature}
-              className="ml-auto text-sm text-gray-600 hover:text-primary transition-colors"
+              className="ml-auto text-sm text-gray-600 hover:text-primary transition-colors min-h-[44px] px-3 inline-flex items-center rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             >
               Unterschrift löschen
             </button>

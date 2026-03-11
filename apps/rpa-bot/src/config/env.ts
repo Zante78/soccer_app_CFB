@@ -58,6 +58,11 @@ export const config = {
  * Validate required config for live mode
  */
 export function validateConfig() {
+  // BOT_API_KEY must always be set in production (regardless of mode)
+  if (config.NODE_ENV === "production" && config.BOT_API_KEY === "dev-secret-key") {
+    throw new Error("BOT_API_KEY must be set in production — default 'dev-secret-key' is not allowed");
+  }
+
   if (config.BOT_MODE === "mock") {
     // Mock mode only needs Supabase (optional)
     return;

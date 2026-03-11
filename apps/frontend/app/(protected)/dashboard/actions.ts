@@ -27,6 +27,7 @@ export const getDashboardMetrics = cache(async (): Promise<DashboardMetrics> => 
     registrationsResult,
     financeResult,
     rpaTracesResult,
+    auditLogsResult,
   ] = await Promise.all([
     // 1. Alle Registrierungen (Status Breakdown) — exclude soft-deleted
     supabase.from("registrations").select("status, id").is("deleted_at", null),
@@ -42,21 +43,21 @@ export const getDashboardMetrics = cache(async (): Promise<DashboardMetrics> => 
       .from("registrations")
       .select("rpa_traces(status)")
       .is("deleted_at", null),
-  ]);
 
-  // 4. Recent Activity (Audit Logs) - Load directly with RLS
-  // RLS policies on audit_logs will filter based on role
-  const auditLogsResult = await supabase
-    .from("audit_logs")
-    .select(`
-      id,
-      action,
-      timestamp,
-      users(full_name),
-      registrations(player_name)
-    `)
-    .order("timestamp", { ascending: false })
-    .limit(10);
+    // 4. Recent Activity (Audit Logs) - via registrations join to exclude soft-deleted
+    supabase
+      .from("audit_logs")
+      .select(`
+        id,
+        action,
+        timestamp,
+        users(full_name),
+        registrations!inner(player_name)
+      `)
+      .is("registrations.deleted_at", null)
+      .order("timestamp", { ascending: false })
+      .limit(10),
+  ]);
 
   // Status Breakdown berechnen
   const statusBreakdown = calculateStatusBreakdown(

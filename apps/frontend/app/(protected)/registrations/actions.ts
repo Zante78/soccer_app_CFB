@@ -4,20 +4,12 @@ import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth-guard";
 import { RegistrationStatus } from "@packages/shared-types";
+import { parseRegistrationStatus } from "@/lib/utils";
 import type {
   RegistrationListItem,
   GetRegistrationsParams,
   GetRegistrationsResult,
 } from "./types";
-
-const registrationStatusValues = Object.values(RegistrationStatus) as string[];
-
-function parseRegistrationStatus(value: string): RegistrationStatus {
-  if (registrationStatusValues.includes(value)) {
-    return value as RegistrationStatus;
-  }
-  return RegistrationStatus.DRAFT;
-}
 
 const getRegistrationsSchema = z.object({
   page: z.number().int().positive().optional().default(1),

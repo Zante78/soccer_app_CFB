@@ -46,6 +46,7 @@ export class SupabaseClient {
       `
       )
       .eq("status", "READY_FOR_BOT")
+      .is("deleted_at", null)
       .order("created_at", { ascending: true })
       .limit(10); // Max 10 pro Batch
 

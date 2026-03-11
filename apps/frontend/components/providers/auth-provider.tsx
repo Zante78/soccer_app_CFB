@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useSupabase } from "@/components/providers/supabase-provider";
 import { User } from "@supabase/supabase-js";
-import { RoleType } from "@/config/roles";
+import type { RoleType } from "@/lib/auth-types";
 
 const SESSION_TIMEOUT_MS = 10_000;
 

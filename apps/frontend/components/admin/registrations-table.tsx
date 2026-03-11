@@ -91,7 +91,7 @@ export function RegistrationsTable({ data, isLoading, sortBy, sortOrder, onSort 
     return (
       <button
         onClick={() => onSort?.(column)}
-        className="flex items-center gap-1 hover:text-gray-900 transition-colors"
+        className="flex items-center gap-1 hover:text-gray-900 transition-colors min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded"
       >
         {children}
         <Icon className={`h-4 w-4 ${isActive ? "text-[#0055A4]" : "text-gray-400"}`} />

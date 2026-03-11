@@ -1,5 +1,6 @@
 // CFB Pass-Automation Rollen
-export type RoleType = "SUPER_ADMIN" | "PASSWART" | "TRAINER" | "ANTRAGSTELLER";
+import type { RoleType } from "@/lib/auth-types";
+export type { RoleType };
 
 export type UserProfile = {
   id: string;

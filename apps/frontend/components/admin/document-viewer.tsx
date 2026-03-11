@@ -43,7 +43,7 @@ export function DocumentViewer({
               href={photoUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm text-[#0055A4] hover:underline"
+              className="inline-flex items-center gap-2 text-sm text-[#0055A4] hover:underline min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded"
             >
               <Download className="h-4 w-4" />
               Foto herunterladen
@@ -106,7 +106,7 @@ export function DocumentViewer({
                 href={url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               >
                 <FileText className="h-5 w-5 text-gray-600" />
                 <span className="text-sm text-gray-700 flex-1">

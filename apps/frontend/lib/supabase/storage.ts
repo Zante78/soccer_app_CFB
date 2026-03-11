@@ -12,6 +12,11 @@ export async function getSignedUrl(
   path: string,
   expiresIn: number = 3600
 ): Promise<string | null> {
+  if (path.includes("..")) {
+    console.error(`Invalid storage path (traversal attempt): ${path}`);
+    return null;
+  }
+
   const supabase = await createSupabaseServerClient();
 
   const { data, error } = await supabase.storage

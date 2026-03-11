@@ -6,18 +6,11 @@ import { requireRole } from "@/lib/auth-guard";
 import { calculateEligibility } from "@packages/shared-logic";
 import type { EligibilityCalculatorInput } from "@packages/shared-logic";
 import { notFound } from "next/navigation";
-import { RegistrationStatus } from "@packages/shared-types";
-import type { EligibilityResult, RegistrationReason } from "@packages/shared-types";
+import type { EligibilityResult } from "@packages/shared-types";
 import { PlayerDataSchema, ConsentFlagsSchema } from "@/lib/schemas";
+import { parseRegistrationStatus, parseRegistrationReason } from "@/lib/utils";
+import { getSignedUrl } from "@/lib/supabase/storage";
 
-const registrationStatusValues = Object.values(RegistrationStatus) as string[];
-
-function parseRegistrationStatus(value: string): RegistrationStatus {
-  if (registrationStatusValues.includes(value)) {
-    return value as RegistrationStatus;
-  }
-  return RegistrationStatus.DRAFT;
-}
 import type { RegistrationDetail, RegistrationDetailResult } from "./types";
 
 const uuidSchema = z.string().uuid();
@@ -76,6 +69,7 @@ export async function getRegistrationDetails(
     `
     )
     .eq("id", id)
+    .is("deleted_at", null)
     .single();
 
   if (error || !data) {
@@ -100,7 +94,7 @@ export async function getRegistrationDetails(
   try {
     eligibility = calculateEligibility({
       player_birth_date: data.player_birth_date,
-      registration_reason: data.registration_reason as RegistrationReason,
+      registration_reason: parseRegistrationReason(data.registration_reason),
       previous_team_deregistration_date: playerData.previous_team_deregistration_date,
       previous_team_last_game: playerData.previous_team_last_game,
     });
@@ -181,24 +175,6 @@ export async function getRegistrationDetails(
     registration,
     eligibility,
     photoUrl,
-    documentUrls,
+    documentUrls: documentUrls.filter((url): url is string => url !== null),
   };
-}
-
-/**
- * Helper: Erstellt Signed URL für Supabase Storage
- */
-async function getSignedUrl(bucket: string, path: string): Promise<string> {
-  const supabase = await createSupabaseServerClient();
-
-  const { data, error } = await supabase.storage
-    .from(bucket)
-    .createSignedUrl(path, 3600); // 1 hour expiry
-
-  if (error) {
-    console.error(`Error creating signed URL for ${bucket}/${path}:`, error);
-    return "";
-  }
-
-  return data.signedUrl;
 }

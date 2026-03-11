@@ -47,11 +47,21 @@ export function AdminSidebar() {
   const { profile } = useAuth();
   const supabase = useSupabase();
   const [isOpen, setIsOpen] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     window.location.href = "/";
   };
+
+  // Track desktop breakpoint (lg = 1024px)
+  useEffect(() => {
+    const mql = window.matchMedia("(min-width: 1024px)");
+    setIsDesktop(mql.matches);
+    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
+    mql.addEventListener("change", handler);
+    return () => mql.removeEventListener("change", handler);
+  }, []);
 
   // Filter nav items basierend auf Rolle
   const visibleNavItems = navItems.filter((item) => {
@@ -70,6 +80,9 @@ export function AdminSidebar() {
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isOpen]);
+
+  // On desktop, sidebar is always visible; on mobile, controlled by isOpen
+  const isSidebarAccessible = isDesktop || isOpen;
 
   return (
     <>
@@ -103,10 +116,10 @@ export function AdminSidebar() {
           transform transition-transform duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}
-        aria-label="Hauptnavigation"
+        aria-label="Seitenleiste"
       >
       {/* Logo/Header */}
-      <div className="p-6 border-b border-gray-200" tabIndex={!isOpen ? -1 : undefined}>
+      <div className="p-6 border-b border-gray-200" tabIndex={!isSidebarAccessible ? -1 : undefined}>
         <h2 className="text-xl font-bold text-[#0055A4]">CFB Digitale Passstelle</h2>
         <p className="text-sm text-gray-600 mt-1">Verwaltung</p>
       </div>
@@ -122,7 +135,7 @@ export function AdminSidebar() {
               key={item.href}
               href={item.href}
               onClick={() => setIsOpen(false)} // Close sidebar on mobile after click
-              tabIndex={!isOpen ? -1 : undefined}
+              tabIndex={!isSidebarAccessible ? -1 : undefined}
               aria-current={isActive ? "page" : undefined}
               className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                 isActive
@@ -140,7 +153,7 @@ export function AdminSidebar() {
       {/* User Info & Sign Out */}
       {profile && (
         <div className="p-4 border-t border-gray-200 space-y-3">
-          <div className="flex items-center gap-3 px-4 py-2 bg-gray-50 rounded-lg" tabIndex={!isOpen ? -1 : undefined}>
+          <div className="flex items-center gap-3 px-4 py-2 bg-gray-50 rounded-lg" tabIndex={!isSidebarAccessible ? -1 : undefined}>
             <div className="h-8 w-8 rounded-full bg-[#0055A4] flex items-center justify-center text-white font-semibold">
               {profile.full_name?.[0] || profile.email[0].toUpperCase()}
             </div>
@@ -160,7 +173,7 @@ export function AdminSidebar() {
             variant="secondary"
             className="w-full justify-start"
             onClick={handleSignOut}
-            tabIndex={!isOpen ? -1 : undefined}
+            tabIndex={!isSidebarAccessible ? -1 : undefined}
           >
             <LogOut className="h-4 w-4 mr-2" />
             Abmelden

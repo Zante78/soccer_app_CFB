@@ -187,7 +187,8 @@ export async function retryBotExecution(registrationId: string): Promise<void> {
   const { error } = await supabase
     .from("registrations")
     .update({ status: "READY_FOR_BOT" })
-    .eq("id", validId);
+    .eq("id", validId)
+    .is("deleted_at", null);
 
   if (error) {
     console.error("Error retrying bot execution:", error);

@@ -35,23 +35,23 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   // Pfade, die keinen Login benötigen
-  const publicPaths = [
+  const publicPaths = new Set([
     "/",
     "/register",
     "/status",
     "/sign-in",
     "/sign-up",
     "/auth/callback",
-  ];
-  const isPublicPath = publicPaths.some((path) =>
-    request.nextUrl.pathname.startsWith(path)
-  );
+  ]);
+  const isPublicPath = publicPaths.has(request.nextUrl.pathname) ||
+    request.nextUrl.pathname.startsWith("/auth/");
 
   // Geschützte Admin-Routen
-  const isProtectedPath = request.nextUrl.pathname.startsWith("/(protected)") ||
+  const isProtectedPath =
     request.nextUrl.pathname.startsWith("/dashboard") ||
     request.nextUrl.pathname.startsWith("/registrations") ||
-    request.nextUrl.pathname.startsWith("/rpa-traces");
+    request.nextUrl.pathname.startsWith("/rpa-traces") ||
+    request.nextUrl.pathname.startsWith("/settings");
 
   // 1. Nicht eingeloggt, aber geschützte Route -> Redirect zu /sign-in
   if (!user && isProtectedPath) {
@@ -71,6 +71,8 @@ export async function middleware(request: NextRequest) {
   supabaseResponse.headers.set("X-Frame-Options", "DENY");
   supabaseResponse.headers.set("X-Content-Type-Options", "nosniff");
   supabaseResponse.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  supabaseResponse.headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
+  supabaseResponse.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
   supabaseResponse.headers.set(
     "Content-Security-Policy",
     [

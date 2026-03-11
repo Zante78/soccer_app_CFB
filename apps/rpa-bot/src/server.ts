@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
+import { z } from "zod";
 import { config, validateConfig } from "./config/env.js";
 import { logger } from "./utils/logger.js";
 import { MockBot } from "./bot/mock-bot.js";
@@ -41,7 +42,9 @@ if (config.BOT_MODE === "live") {
 
 // ===== Middleware =====
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+  origin: process.env.ALLOWED_ORIGINS?.split(",") || ["http://localhost:3000"],
+}));
 app.use(express.json());
 
 // ===== Auth Middleware =====
@@ -88,13 +91,22 @@ app.get("/", (_req, res) => {
  * Body: { registration_id, trace_id, player_name?, team_name? }
  * Response: { success, draft_url?, error?, duration_ms, ... }
  */
-app.post("/execute", requireAuth, async (req, res) => {
-  const { registration_id, trace_id, player_name, team_name } = req.body;
+const executeSchema = z.object({
+  registration_id: z.string().uuid(),
+  trace_id: z.string().uuid(),
+  player_name: z.string().max(200).optional(),
+  team_name: z.string().max(200).optional(),
+});
 
-  if (!registration_id) {
-    res.status(400).json({ error: "Missing registration_id" });
+app.post("/execute", requireAuth, async (req, res) => {
+  const parsed = executeSchema.safeParse(req.body);
+
+  if (!parsed.success) {
+    res.status(400).json({ error: "Invalid request body", details: parsed.error.flatten().fieldErrors });
     return;
   }
+
+  const { registration_id, trace_id, player_name, team_name } = parsed.data;
 
   logger.info(
     `[API] /execute received: registration=${registration_id}, player=${player_name || "unknown"}, mode=${config.BOT_MODE}`
