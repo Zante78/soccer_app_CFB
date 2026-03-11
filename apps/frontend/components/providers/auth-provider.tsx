@@ -7,7 +7,7 @@ import { RoleType } from "@/config/roles";
 
 const SESSION_TIMEOUT_MS = 10_000;
 
-type UserProfile = {
+export type UserProfile = {
   id: string;
   email: string;
   role: RoleType;
@@ -24,9 +24,9 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+function withTimeout<T>(promise: PromiseLike<T>, ms: number): Promise<T> {
   return Promise.race([
-    promise,
+    Promise.resolve(promise),
     new Promise<never>((_, reject) =>
       setTimeout(() => reject(new Error("Zeitüberschreitung: Server nicht erreichbar.")), ms)
     ),
@@ -97,14 +97,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function loadUserProfile(userId: string) {
     try {
-      const query = supabase
-        .from("users")
-        .select("id, email, role, full_name, team_id")
-        .eq("id", userId)
-        .maybeSingle();
-
       const { data, error } = await withTimeout(
-        Promise.resolve(query),
+        supabase
+          .from("users")
+          .select("id, email, role, full_name, team_id")
+          .eq("id", userId)
+          .maybeSingle(),
         SESSION_TIMEOUT_MS
       );
 

@@ -37,6 +37,7 @@ export function PaginationControls({
         <Button
           variant="outline"
           size="sm"
+          className="min-h-[44px] min-w-[44px]"
           onClick={() => onPageChange(1)}
           disabled={currentPage === 1 || isLoading}
         >
@@ -46,6 +47,7 @@ export function PaginationControls({
         <Button
           variant="outline"
           size="sm"
+          className="min-h-[44px] min-w-[44px]"
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1 || isLoading}
         >
@@ -61,6 +63,7 @@ export function PaginationControls({
         <Button
           variant="outline"
           size="sm"
+          className="min-h-[44px] min-w-[44px]"
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages || isLoading}
         >
@@ -70,6 +73,7 @@ export function PaginationControls({
         <Button
           variant="outline"
           size="sm"
+          className="min-h-[44px] min-w-[44px]"
           onClick={() => onPageChange(totalPages)}
           disabled={currentPage === totalPages || isLoading}
         >

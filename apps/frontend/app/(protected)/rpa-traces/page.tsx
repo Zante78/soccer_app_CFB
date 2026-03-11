@@ -226,7 +226,7 @@ function TraceCard({
           </div>
         ) : (
           <div className="bg-gray-100 rounded-lg p-12 text-center">
-            <XCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <XCircle className="h-12 w-12 text-gray-500 mx-auto mb-4" />
             <p className="text-gray-600">Screenshots nicht verfügbar</p>
           </div>
         )}

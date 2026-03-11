@@ -67,6 +67,25 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // Security headers
+  supabaseResponse.headers.set("X-Frame-Options", "DENY");
+  supabaseResponse.headers.set("X-Content-Type-Options", "nosniff");
+  supabaseResponse.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  supabaseResponse.headers.set(
+    "Content-Security-Policy",
+    [
+      "default-src 'self'",
+      `script-src 'self' 'unsafe-inline' 'unsafe-eval'`,
+      `style-src 'self' 'unsafe-inline'`,
+      `img-src 'self' blob: data: ${process.env.NEXT_PUBLIC_SUPABASE_URL}`,
+      `connect-src 'self' ${process.env.NEXT_PUBLIC_SUPABASE_URL} wss://*.supabase.co`,
+      "font-src 'self'",
+      "frame-ancestors 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+    ].join("; ")
+  );
+
   return supabaseResponse;
 }
 

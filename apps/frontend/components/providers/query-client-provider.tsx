@@ -1,8 +1,16 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { PropsWithChildren, useState } from "react";
+import { PropsWithChildren, useState, lazy, Suspense } from "react";
+
+const ReactQueryDevtools =
+  process.env.NODE_ENV === "development"
+    ? lazy(() =>
+        import("@tanstack/react-query-devtools").then((mod) => ({
+          default: mod.ReactQueryDevtools,
+        }))
+      )
+    : () => null;
 
 export function QueryClientProviderWrapper({ children }: PropsWithChildren) {
   const [client] = useState(
@@ -25,7 +33,9 @@ export function QueryClientProviderWrapper({ children }: PropsWithChildren) {
   return (
     <QueryClientProvider client={client}>
       {children}
-      <ReactQueryDevtools initialIsOpen={false} position="bottom" />
+      <Suspense fallback={null}>
+        <ReactQueryDevtools initialIsOpen={false} position="bottom" />
+      </Suspense>
     </QueryClientProvider>
   );
 }

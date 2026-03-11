@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useMemo, useState } from "react";
+import { createContext, useContext, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -11,9 +11,8 @@ const SupabaseContext = createContext<SupabaseContextValue | null>(null);
 
 export function SupabaseProvider({ children }: { children: React.ReactNode }) {
   const [client] = useState(() => createSupabaseBrowserClient());
-  const value = useMemo(() => client, [client]);
 
-  return <SupabaseContext.Provider value={value}>{children}</SupabaseContext.Provider>;
+  return <SupabaseContext.Provider value={client}>{children}</SupabaseContext.Provider>;
 }
 
 export function useSupabase() {

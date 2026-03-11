@@ -2,10 +2,11 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 import { FileText, Download, CheckCircle, XCircle } from "lucide-react";
+import type { ConsentFlags } from "@/lib/schemas";
 
 type DocumentViewerProps = {
   photoUrl: string | null;
-  consentFlags: Record<string, any>;
+  consentFlags: ConsentFlags;
   documentUrls?: string[];
 };
 
@@ -108,11 +109,11 @@ export function DocumentViewer({
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
               >
-                <FileText className="h-5 w-5 text-gray-400" />
+                <FileText className="h-5 w-5 text-gray-500" />
                 <span className="text-sm text-gray-700 flex-1">
                   Dokument {index + 1}
                 </span>
-                <Download className="h-4 w-4 text-gray-400" />
+                <Download className="h-4 w-4 text-gray-500" />
               </a>
             ))}
           </div>

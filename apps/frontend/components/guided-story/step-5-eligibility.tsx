@@ -68,9 +68,14 @@ export function Step5Eligibility({ onNext, onBack, playerData }: Step5Eligibilit
   if (!eligibility) {
     return (
       <Card>
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-gray-600">Berechne Spielberechtigung...</p>
+        <div className="space-y-6 py-6">
+          <div className="text-center">
+            <div className="h-7 bg-gray-200 rounded w-48 mx-auto mb-2 animate-pulse" />
+            <div className="h-4 bg-gray-200 rounded w-64 mx-auto animate-pulse" />
+          </div>
+          <div className="h-28 bg-gray-200 rounded-xl animate-pulse" />
+          <div className="h-40 bg-gray-200 rounded-xl animate-pulse" />
+          <p className="text-sm text-gray-600 text-center">Berechne Spielberechtigung...</p>
         </div>
       </Card>
     );

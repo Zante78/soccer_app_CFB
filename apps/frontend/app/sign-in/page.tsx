@@ -9,15 +9,8 @@ import Link from "next/link";
 const LOGIN_TIMEOUT_MS = 15_000;
 
 function getLoginErrorMessage(error: unknown): string {
-  if (error instanceof Error && error.message === "LOGIN_TIMEOUT") {
-    return "Zeitüberschreitung: Der Server antwortet nicht. Bitte prüfe deine Internetverbindung oder versuche es später erneut.";
-  }
-
   const message = error instanceof Error ? error.message : String(error);
 
-  if (message.includes("Invalid login credentials")) {
-    return "Ungültige Anmeldedaten. Bitte überprüfe E-Mail und Passwort.";
-  }
   if (message.includes("Email not confirmed")) {
     return "E-Mail-Adresse nicht bestätigt. Bitte prüfe dein Postfach.";
   }
@@ -25,6 +18,8 @@ function getLoginErrorMessage(error: unknown): string {
     return "Server nicht erreichbar. Bitte versuche es später erneut.";
   }
 
+  // Generic message for invalid credentials, timeout, and all other errors
+  // to prevent user enumeration via timing differences
   return "Anmeldung fehlgeschlagen. Bitte versuche es erneut.";
 }
 

@@ -9,6 +9,29 @@ import { Step5Eligibility } from '@/components/guided-story/step-5-eligibility';
 import { Step6Consent } from '@/components/guided-story/step-6-consent';
 import { Step7Payment } from '@/components/guided-story/step-7-payment';
 import { Step8Completion } from '@/components/guided-story/step-8-completion';
+import type { EligibilityResult } from '@packages/shared-types';
+
+type RegistrationFormData = {
+  is_new_player: boolean;
+  selected_player_id: string;
+  first_name: string;
+  last_name: string;
+  birth_date: string;
+  nationality: string;
+  registration_number: string;
+  team_id: string;
+  previous_club: string;
+  previous_team_deregistration_date: string;
+  previous_team_last_game: string;
+  photo_file: File | null;
+  document_files: File[];
+  eligibility_result: EligibilityResult;
+  consents: Record<string, boolean>;
+  signature_data: string;
+  payment_method: string;
+  payment_id: string;
+  registration_id: string;
+};
 
 export default function RegisterPage() {
   const {
@@ -20,7 +43,7 @@ export default function RegisterPage() {
     prevStep,
     updateFormData,
     isFirstStep,
-  } = useMultiStepForm({
+  } = useMultiStepForm<RegistrationFormData>({
     totalSteps: 8,
     onComplete: () => {
       console.log('Registration completed!', formData);
@@ -28,13 +51,13 @@ export default function RegisterPage() {
     },
   });
 
-  const handleStepData = (data: Record<string, string | number | boolean | null | object>) => {
+  const handleStepData = (data: Partial<RegistrationFormData>) => {
     updateFormData(data);
     nextStep();
   };
 
   // Generate demo magic link (in production: from Supabase)
-  const registrationId = formData.registration_id || 'REG-' + Date.now();
+  const registrationId = formData.registration_id ?? 'REG-' + Date.now();
   const magicLink = `${typeof window !== 'undefined' ? window.location.origin : ''}/status/${registrationId}`;
 
   return (

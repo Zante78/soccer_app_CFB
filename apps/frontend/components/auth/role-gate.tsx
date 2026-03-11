@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth } from "@/components/providers/auth-provider";
+import { useAuth, type UserProfile } from "@/components/providers/auth-provider";
 import { RoleType, canViewRegistration, canEditRegistration, canViewRPATraces, canVerifyPayment } from "@/config/roles";
 
 type RoleGateProps = {
@@ -14,7 +14,7 @@ type RoleGateProps = {
     registration?: { team_id?: string; created_by_user_id?: string; status?: string };
   };
   // Custom Check-Funktion
-  check?: (profile: any) => boolean;
+  check?: (profile: UserProfile) => boolean;
 };
 
 export function RoleGate({

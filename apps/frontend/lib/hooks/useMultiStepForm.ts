@@ -1,13 +1,14 @@
 import { useState } from 'react';
 
-export interface UseMultiStepFormProps {
+export interface UseMultiStepFormProps<T extends Record<string, unknown> = Record<string, unknown>> {
   totalSteps: number;
   onComplete: () => void;
+  initialData?: Partial<T>;
 }
 
-export function useMultiStepForm({ totalSteps, onComplete }: UseMultiStepFormProps) {
+export function useMultiStepForm<T extends Record<string, unknown> = Record<string, unknown>>({ totalSteps, onComplete, initialData }: UseMultiStepFormProps<T>) {
   const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState<Record<string, any>>({});
+  const [formData, setFormData] = useState<Partial<T>>((initialData ?? {}) as Partial<T>);
 
   const progress = (currentStep / totalSteps) * 100;
 
@@ -31,7 +32,7 @@ export function useMultiStepForm({ totalSteps, onComplete }: UseMultiStepFormPro
     }
   };
 
-  const updateFormData = (stepData: Record<string, any>) => {
+  const updateFormData = (stepData: Partial<T>) => {
     setFormData((prev) => ({
       ...prev,
       ...stepData,
