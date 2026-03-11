@@ -71,7 +71,7 @@ export default function HomePage() {
 
           {/* Footer Info */}
           <div className="mt-8 pt-6 border-t border-gray-200">
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-600">
               CfB Ford Niehl e.V. • Digitale Passstelle
             </p>
           </div>

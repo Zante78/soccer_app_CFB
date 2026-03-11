@@ -33,7 +33,17 @@ export async function getRegistrations(
   params: GetRegistrationsParams = {}
 ): Promise<GetRegistrationsResult> {
   // 1. Input-Validierung
-  const validated = getRegistrationsSchema.parse(params);
+  const parseResult = getRegistrationsSchema.safeParse(params);
+  if (!parseResult.success) {
+    return {
+      registrations: [],
+      totalCount: 0,
+      pageSize: 50,
+      currentPage: 1,
+      totalPages: 0,
+    };
+  }
+  const validated = parseResult.data;
 
   // 2. Auth Guard: Alle authentifizierten Rollen (RLS filtert Daten)
   const user = await requireRole(["SUPER_ADMIN", "PASSWART", "TRAINER", "ANTRAGSTELLER"]);

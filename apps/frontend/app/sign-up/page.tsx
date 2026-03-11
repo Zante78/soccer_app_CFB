@@ -31,7 +31,14 @@ export default function SignUpPage() {
     });
 
     if (signUpError) {
-      setError(signUpError.message);
+      const msg = signUpError.message;
+      if (msg.includes("already registered") || msg.includes("already exists")) {
+        setError("Registrierung fehlgeschlagen. Bitte versuche es erneut oder melde dich an.");
+      } else if (msg.includes("Password") || msg.includes("password")) {
+        setError("Passwort zu schwach. Bitte verwende mindestens 8 Zeichen.");
+      } else {
+        setError("Registrierung fehlgeschlagen. Bitte versuche es später erneut.");
+      }
       setLoading(false);
     } else {
       setSuccess(true);
@@ -122,7 +129,7 @@ export default function SignUpPage() {
               className="input w-full"
               placeholder="••••••••"
             />
-            <p className="text-xs text-gray-500 mt-1">Mindestens 8 Zeichen</p>
+            <p className="text-xs text-gray-600 mt-1">Mindestens 8 Zeichen</p>
           </div>
 
           <Button type="submit" className="w-full" disabled={loading}>

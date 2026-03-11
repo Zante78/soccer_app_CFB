@@ -84,7 +84,7 @@ export function Step1Welcome({ onNext }: Step1WelcomeProps) {
         </Button>
 
         {/* Footer */}
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-gray-600">
           Ihre Daten werden verschlüsselt und DSGVO-konform verarbeitet
         </p>
       </div>

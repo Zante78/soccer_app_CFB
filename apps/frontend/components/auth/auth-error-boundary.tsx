@@ -12,7 +12,7 @@ export function AuthErrorBoundary({ children }: { children: React.ReactNode }) {
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center space-y-4">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-[#0055A4] mx-auto" />
-          <p className="text-sm text-gray-500">Anwendung wird geladen...</p>
+          <p className="text-sm text-gray-600">Anwendung wird geladen...</p>
         </div>
       </div>
     );

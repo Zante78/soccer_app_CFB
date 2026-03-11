@@ -106,7 +106,7 @@ export function Step2PlayerSelection({ onNext, onBack }: Step2PlayerSelectionPro
                 </p>
                 {selection === 'existing' && (
                   <div className="mt-4 p-3 bg-white rounded-lg border border-gray-200">
-                    <p className="text-sm text-gray-500 italic">
+                    <p className="text-sm text-gray-600 italic">
                       Suche nach bestehendem Spieler wird in Phase 3 implementiert
                     </p>
                   </div>

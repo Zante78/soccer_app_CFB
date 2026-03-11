@@ -148,7 +148,7 @@ export function AdminSidebar() {
               <p className="text-sm font-medium text-gray-900 truncate">
                 {profile.full_name || profile.email}
               </p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-600">
                 {profile.role === "SUPER_ADMIN" ? "Super Admin" :
                  profile.role === "PASSWART" ? "Passwart" :
                  profile.role === "TRAINER" ? "Trainer" : "Benutzer"}

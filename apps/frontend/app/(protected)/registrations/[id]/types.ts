@@ -1,6 +1,7 @@
 // Registration Detail Types (separate file because "use server" can't export types)
 
 import type { RegistrationStatus, EligibilityResult } from "@packages/shared-types";
+import type { PlayerData, ConsentFlags } from "@/lib/schemas";
 
 export type RegistrationDetail = {
   id: string;
@@ -12,8 +13,8 @@ export type RegistrationDetail = {
   sperrfrist_start: string | null;
   sperrfrist_end: string | null;
   registration_reason: string;
-  player_data: Record<string, unknown>;
-  consent_flags: Record<string, unknown>;
+  player_data: PlayerData;
+  consent_flags: ConsentFlags;
   document_paths: string[] | null;
   photo_path: string | null;
   created_at: string | null;

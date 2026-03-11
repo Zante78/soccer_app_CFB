@@ -7,6 +7,7 @@ import { calculateEligibility } from "@packages/shared-logic";
 import type { EligibilityCalculatorInput } from "@packages/shared-logic";
 import { notFound } from "next/navigation";
 import type { RegistrationStatus, EligibilityResult, RegistrationReason } from "@packages/shared-types";
+import { PlayerDataSchema, ConsentFlagsSchema } from "@/lib/schemas";
 import type { RegistrationDetail, RegistrationDetailResult } from "./types";
 
 const uuidSchema = z.string().uuid();
@@ -82,8 +83,9 @@ export async function getRegistrationDetails(
     notFound();
   }
 
-  // Eligibility-Berechnung (mit Fallback bei ungültigen Daten)
-  const playerData = (data.player_data || {}) as Record<string, unknown>;
+  // Validate JSONB fields with Zod schemas
+  const playerData = PlayerDataSchema.parse(data.player_data || {});
+  const consentFlags = ConsentFlagsSchema.parse(data.consent_flags || {});
   let eligibility: EligibilityResult;
   try {
     eligibility = calculateEligibility({
@@ -109,18 +111,15 @@ export async function getRegistrationDetails(
     };
   }
 
-  // Supabase Storage URLs (Signed URLs für private Buckets)
-  const photoUrl = data.photo_path
-    ? await getSignedUrl("player-photos", data.photo_path)
-    : null;
-
-  const documentUrls = data.document_paths
-    ? await Promise.all(
-        data.document_paths.map((path: string) =>
-          getSignedUrl("player-documents", path)
-        )
-      )
-    : [];
+  // Supabase Storage URLs (Signed URLs für private Buckets) — parallel
+  const [photoUrl, ...documentUrls] = await Promise.all([
+    data.photo_path
+      ? getSignedUrl("player-photos", data.photo_path)
+      : Promise.resolve(null),
+    ...(data.document_paths || []).map((path: string) =>
+      getSignedUrl("player-documents", path)
+    ),
+  ]);
 
   // Transform Data
   const teams = data.teams;
@@ -138,8 +137,8 @@ export async function getRegistrationDetails(
     sperrfrist_start: data.sperrfrist_start,
     sperrfrist_end: data.sperrfrist_end,
     registration_reason: data.registration_reason,
-    player_data: (data.player_data || {}) as Record<string, unknown>,
-    consent_flags: (data.consent_flags || {}) as Record<string, unknown>,
+    player_data: playerData,
+    consent_flags: consentFlags,
     document_paths: data.document_paths,
     photo_path: data.photo_path,
     created_at: data.created_at,

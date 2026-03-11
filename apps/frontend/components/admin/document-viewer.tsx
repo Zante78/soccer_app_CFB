@@ -55,7 +55,7 @@ export function DocumentViewer({
           <h4 className="text-sm font-semibold text-gray-900 mb-4">
             Spielerfoto
           </h4>
-          <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+          <div className="flex flex-col items-center justify-center py-12 text-gray-600">
             <FileText className="h-12 w-12 mb-2" />
             <p className="text-sm">Kein Foto vorhanden</p>
           </div>

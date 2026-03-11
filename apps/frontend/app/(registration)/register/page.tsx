@@ -138,7 +138,7 @@ export default function RegisterPage() {
           <p className="text-xs font-mono text-gray-600">
             <strong>Debug:</strong> Step {currentStep}/{totalSteps}
           </p>
-          <pre className="text-xs font-mono text-gray-500 mt-2 max-h-40 overflow-auto">
+          <pre className="text-xs font-mono text-gray-600 mt-2 max-h-40 overflow-auto">
             {JSON.stringify(formData, null, 2)}
           </pre>
         </div>

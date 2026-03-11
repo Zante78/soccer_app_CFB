@@ -132,7 +132,7 @@ export function Step8Completion({ magicLink, registrationId, playerName }: Step8
                 </svg>
               </button>
             </div>
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="text-xs text-gray-600 mt-2">
               Speichern Sie diesen Link, um jederzeit den Status Ihres Antrags zu verfolgen
             </p>
           </div>

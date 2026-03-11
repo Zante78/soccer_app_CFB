@@ -59,7 +59,7 @@ export function EligibilityTimeline({ result }: EligibilityTimelineProps) {
                   })}
                 </p>
                 {result.calculation_reason && (
-                  <p className="text-xs text-gray-500 mt-1">{result.calculation_reason}</p>
+                  <p className="text-xs text-gray-600 mt-1">{result.calculation_reason}</p>
                 )}
               </div>
             </div>

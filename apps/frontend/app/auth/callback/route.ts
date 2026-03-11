@@ -6,12 +6,15 @@ export async function GET(request: Request) {
   const code = searchParams.get("code");
   const next = searchParams.get("next") ?? "/dashboard";
 
+  // Prevent open redirect: only allow relative paths starting with /
+  const safePath = next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
+
   if (code) {
     const supabase = await createSupabaseServerClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
+      return NextResponse.redirect(`${origin}${safePath}`);
     }
   }
 

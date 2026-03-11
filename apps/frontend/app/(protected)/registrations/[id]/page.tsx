@@ -158,7 +158,7 @@ async function RegistrationDetailContent({ id }: { id: string }) {
                         {trace.status}
                       </span>
                       {trace.visual_diff_score !== null && (
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-gray-600">
                           Diff: {(trace.visual_diff_score * 100).toFixed(2)}%
                         </span>
                       )}

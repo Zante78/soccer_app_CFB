@@ -68,41 +68,42 @@ export async function getRPATraces(): Promise<RPATraceWithUrls[]> {
     throw new Error("Fehler beim Laden der RPA-Traces");
   }
 
-  // Generate Signed URLs für Screenshots
-  const tracesWithUrls = await Promise.all(
-    (data || []).map(async (trace) => {
-      const baselineUrl = trace.screenshot_baseline
-        ? await getSignedUrl("rpa-baselines", trace.screenshot_baseline)
-        : null;
+  // Generate Signed URLs für Screenshots — batch all calls
+  const traces = data || [];
+  const urlPromises = traces.flatMap((trace) => [
+    trace.screenshot_baseline
+      ? getSignedUrl("rpa-baselines", trace.screenshot_baseline)
+      : Promise.resolve(null),
+    trace.screenshot_actual
+      ? getSignedUrl("rpa-screenshots", trace.screenshot_actual)
+      : Promise.resolve(null),
+  ]);
+  const urls = await Promise.all(urlPromises);
 
-      const actualUrl = trace.screenshot_actual
-        ? await getSignedUrl("rpa-screenshots", trace.screenshot_actual)
-        : null;
+  const tracesWithUrls = traces.map((trace, i) => {
+    const reg = trace.registrations;
 
-      const reg = trace.registrations;
-
-      return {
-        id: trace.id,
-        registration_id: trace.registration_id,
-        execution_id: trace.execution_id,
-        status: trace.status,
-        started_at: trace.started_at,
-        completed_at: trace.completed_at,
-        error_message: trace.error_message,
-        visual_diff_score: trace.visual_diff_score,
-        screenshot_baseline: trace.screenshot_baseline,
-        screenshot_actual: trace.screenshot_actual,
-        baselineUrl,
-        actualUrl,
-        registration: {
-          player_name: reg.player_name,
-          player_dfb_id: reg.player_dfb_id,
-          status: reg.status,
-          team: reg.teams ? { name: reg.teams.name } : null,
-        },
-      };
-    })
-  );
+    return {
+      id: trace.id,
+      registration_id: trace.registration_id,
+      execution_id: trace.execution_id,
+      status: trace.status,
+      started_at: trace.started_at,
+      completed_at: trace.completed_at,
+      error_message: trace.error_message,
+      visual_diff_score: trace.visual_diff_score,
+      screenshot_baseline: trace.screenshot_baseline,
+      screenshot_actual: trace.screenshot_actual,
+      baselineUrl: urls[i * 2],
+      actualUrl: urls[i * 2 + 1],
+      registration: {
+        player_name: reg.player_name,
+        player_dfb_id: reg.player_dfb_id,
+        status: reg.status,
+        team: reg.teams ? { name: reg.teams.name } : null,
+      },
+    };
+  });
 
   return tracesWithUrls;
 }

@@ -31,7 +31,7 @@ export function MetricCard({
           <p className="text-sm font-medium text-gray-600">{title}</p>
           <p className="text-3xl font-bold text-gray-900 mt-2">{value}</p>
           {subtitle && (
-            <p className="text-sm text-gray-500 mt-1">{subtitle}</p>
+            <p className="text-sm text-gray-600 mt-1">{subtitle}</p>
           )}
           {trend && (
             <div className="flex items-center gap-1 mt-2">
@@ -42,7 +42,7 @@ export function MetricCard({
               >
                 {trend.positive ? "↑" : "↓"} {trend.value}%
               </span>
-              <span className="text-xs text-gray-500">{trend.label}</span>
+              <span className="text-xs text-gray-600">{trend.label}</span>
             </div>
           )}
         </div>

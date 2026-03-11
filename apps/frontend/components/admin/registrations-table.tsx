@@ -127,7 +127,7 @@ export function RegistrationsTable({ data, isLoading, sortBy, sortOrder, onSort 
                 <div>
                   <p className="text-gray-900">{registration.player_name}</p>
                   {registration.player_dfb_id && (
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-600">
                       DFB-ID: {registration.player_dfb_id}
                     </p>
                   )}
@@ -149,7 +149,7 @@ export function RegistrationsTable({ data, isLoading, sortBy, sortOrder, onSort 
                     <span className="text-sm">Bezahlt</span>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-1 text-gray-500">
+                  <div className="flex items-center gap-1 text-gray-600">
                     <XCircle className="h-4 w-4" />
                     <span className="text-sm">Offen</span>
                   </div>
@@ -165,7 +165,7 @@ export function RegistrationsTable({ data, isLoading, sortBy, sortOrder, onSort 
               <TableCell className="text-right">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm">
+                    <Button variant="ghost" size="sm" aria-label={`Aktionen für ${registration.player_name}`} className="min-h-[44px] min-w-[44px]">
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>

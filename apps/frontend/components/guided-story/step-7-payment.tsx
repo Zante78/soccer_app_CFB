@@ -114,7 +114,7 @@ export function Step7Payment({ onNext, onBack, registrationId }: Step7PaymentPro
                     'Jetzt mit PayPal bezahlen'
                   )}
                 </Button>
-                <p className="text-xs text-gray-500 text-center mt-2">
+                <p className="text-xs text-gray-600 text-center mt-2">
                   Sie werden zu PayPal weitergeleitet
                 </p>
               </div>
@@ -169,7 +169,7 @@ export function Step7Payment({ onNext, onBack, registrationId }: Step7PaymentPro
                   <div className="inline-block p-4 bg-white border-2 border-gray-200 rounded-lg">
                     <QRCodeSVG value={qrCodeData} size={200} level="H" />
                   </div>
-                  <p className="text-xs text-gray-500 mt-4">
+                  <p className="text-xs text-gray-600 mt-4">
                     Der Trainer scannt den Code zur Bestätigung der Barzahlung
                   </p>
                 </div>

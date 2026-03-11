@@ -25,7 +25,7 @@ function getLoginErrorMessage(error: unknown): string {
     return "Server nicht erreichbar. Bitte versuche es später erneut.";
   }
 
-  return `Anmeldung fehlgeschlagen: ${message}`;
+  return "Anmeldung fehlgeschlagen. Bitte versuche es erneut.";
 }
 
 export default function SignInPage() {
