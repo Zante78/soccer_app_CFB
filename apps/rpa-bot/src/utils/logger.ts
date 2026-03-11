@@ -42,7 +42,7 @@ export function createRegistrationLogger(registrationId: string) {
   return {
     info: (message: string) =>
       logger.info(`[${registrationId}] ${message}`),
-    error: (message: string, error?: any) =>
+    error: (message: string, error?: unknown) =>
       logger.error(`[${registrationId}] ${message}`, error),
     warn: (message: string) =>
       logger.warn(`[${registrationId}] ${message}`),

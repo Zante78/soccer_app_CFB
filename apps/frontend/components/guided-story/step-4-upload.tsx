@@ -135,7 +135,8 @@ export function Step4Upload({ onNext, onBack }: Step4UploadProps) {
                   setPhotoPreview(null);
                   setPhotoError(null);
                 }}
-                className="absolute top-2 right-2 bg-error text-white rounded-full p-2 hover:bg-red-600 transition-colors"
+                className="absolute top-2 right-2 bg-error text-white rounded-full p-2 min-h-[44px] min-w-[44px] flex items-center justify-center hover:bg-red-600 transition-colors"
+                aria-label="Foto entfernen"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path

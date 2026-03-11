@@ -1,4 +1,5 @@
 import { createClient, SupabaseClient as SupabaseClientType } from "@supabase/supabase-js";
+import { z } from "zod";
 import { logger } from "../utils/logger.js";
 
 /**
@@ -23,6 +24,12 @@ export class SupabaseClient {
    * Holt alle Registrierungen mit Status READY_FOR_BOT
    */
   async getPendingRegistrations() {
+    const teamSchema = z.object({
+      id: z.string(),
+      name: z.string(),
+      dfbnet_id: z.string().nullable(),
+    });
+
     const { data, error } = await this.client
       .from("registrations")
       .select(
@@ -48,8 +55,8 @@ export class SupabaseClient {
     }
 
     return data.map((reg) => {
-      const teams = reg.teams as unknown as Array<{ id: string; name: string; dfbnet_id: string | null }>;
-      const team = teams[0];
+      const teamsRaw = Array.isArray(reg.teams) ? reg.teams[0] : reg.teams;
+      const team = teamSchema.parse(teamsRaw);
       return {
         id: reg.id,
         player_name: reg.player_name,

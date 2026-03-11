@@ -61,6 +61,7 @@ export async function getRPATraces(): Promise<RPATraceWithUrls[]> {
     `
     )
     .eq("status", "VISUAL_REGRESSION_ERROR")
+    .is("registrations.deleted_at", null)
     .order("started_at", { ascending: false });
 
   if (error) {

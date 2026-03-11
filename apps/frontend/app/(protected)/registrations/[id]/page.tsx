@@ -65,7 +65,7 @@ async function RegistrationDetailContent({ id }: { id: string }) {
       <div>
         <Link
           href="/registrations"
-          className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-4"
+          className="inline-flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900 mb-4"
         >
           <ArrowLeft className="h-4 w-4" />
           Zurück zur Übersicht

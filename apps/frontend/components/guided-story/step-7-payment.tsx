@@ -109,7 +109,7 @@ export function Step7Payment({ onNext, onBack, registrationId }: Step7PaymentPro
                 >
                   {isProcessing ? (
                     <div className="flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                      <div className="h-5 w-5 bg-white/30 rounded animate-pulse mr-2" />
                       Verarbeite Zahlung...
                     </div>
                   ) : (

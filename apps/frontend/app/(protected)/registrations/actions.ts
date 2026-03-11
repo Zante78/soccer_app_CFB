@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth-guard";
-import type { RegistrationStatus } from "@packages/shared-types";
+import { RegistrationStatus } from "@packages/shared-types";
 import type {
   RegistrationListItem,
   GetRegistrationsParams,
@@ -15,6 +15,15 @@ const REGISTRATION_STATUSES = [
   "BOT_IN_PROGRESS", "COMPLETED", "ERROR", "MANUALLY_PROCESSED",
   "VISUAL_REGRESSION_ERROR",
 ] as const;
+
+const registrationStatusValues = Object.values(RegistrationStatus) as string[];
+
+function parseRegistrationStatus(value: string): RegistrationStatus {
+  if (registrationStatusValues.includes(value)) {
+    return value as RegistrationStatus;
+  }
+  return RegistrationStatus.DRAFT;
+}
 
 const getRegistrationsSchema = z.object({
   page: z.number().int().positive().optional().default(1),
@@ -80,7 +89,8 @@ export async function getRegistrations(
       rpa_traces(status)
     `,
       { count: "exact" }
-    );
+    )
+    .is("deleted_at", null);
 
   // RLS: Trainer sehen nur ihr Team
   if (user.role === "TRAINER" && user.team_id) {
@@ -128,7 +138,7 @@ export async function getRegistrations(
       player_name: reg.player_name,
       player_birth_date: reg.player_birth_date,
       player_dfb_id: reg.player_dfb_id,
-      status: reg.status as RegistrationStatus,
+      status: parseRegistrationStatus(reg.status),
       team_name: teams?.name || null,
       eligibility_date: reg.eligibility_date,
       created_at: reg.created_at,

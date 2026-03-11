@@ -27,8 +27,8 @@ export default function RPATracesPage() {
   const { data: traces, isLoading } = useQuery({
     queryKey: ["rpa-traces"],
     queryFn: () => getRPATraces(),
-    refetchInterval: 60000, // Refresh every 60s
-    staleTime: 1000 * 30, // 30s stale for RPA traces (more dynamic)
+    refetchInterval: 60000, // Refresh every 60s (bot may produce new traces)
+    staleTime: 1000 * 30, // 30s — shorter than default: bot status changes frequently during execution
   });
 
   const acceptBaselineMutation = useMutation({
