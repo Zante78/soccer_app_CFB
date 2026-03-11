@@ -75,7 +75,7 @@ export async function middleware(request: NextRequest) {
     "Content-Security-Policy",
     [
       "default-src 'self'",
-      `script-src 'self' 'unsafe-inline' 'unsafe-eval'`,
+      `script-src 'self' 'unsafe-inline'`,
       `style-src 'self' 'unsafe-inline'`,
       `img-src 'self' blob: data: ${process.env.NEXT_PUBLIC_SUPABASE_URL}`,
       `connect-src 'self' ${process.env.NEXT_PUBLIC_SUPABASE_URL} wss://*.supabase.co`,

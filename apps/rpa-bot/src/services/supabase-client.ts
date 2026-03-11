@@ -47,21 +47,25 @@ export class SupabaseClient {
       throw new Error(error.message);
     }
 
-    return data.map((reg) => ({
-      id: reg.id,
-      player_name: reg.player_name,
-      player_birth_date: reg.player_birth_date,
-      player_dfb_id: reg.player_dfb_id,
-      status: reg.status,
-      registration_reason: reg.registration_reason,
-      player_data: reg.player_data,
-      team_id: reg.team_id,
-      team: {
-        id: (reg.teams as any).id,
-        name: (reg.teams as any).name,
-        dfbnet_id: (reg.teams as any).dfbnet_id,
-      },
-    }));
+    return data.map((reg) => {
+      const teams = reg.teams as unknown as Array<{ id: string; name: string; dfbnet_id: string | null }>;
+      const team = teams[0];
+      return {
+        id: reg.id,
+        player_name: reg.player_name,
+        player_birth_date: reg.player_birth_date,
+        player_dfb_id: reg.player_dfb_id,
+        status: reg.status,
+        registration_reason: reg.registration_reason,
+        player_data: reg.player_data,
+        team_id: reg.team_id,
+        team: {
+          id: team.id,
+          name: team.name,
+          dfbnet_id: team.dfbnet_id,
+        },
+      };
+    });
   }
 
   /**

@@ -6,8 +6,18 @@ import { requireRole } from "@/lib/auth-guard";
 import { calculateEligibility } from "@packages/shared-logic";
 import type { EligibilityCalculatorInput } from "@packages/shared-logic";
 import { notFound } from "next/navigation";
-import type { RegistrationStatus, EligibilityResult, RegistrationReason } from "@packages/shared-types";
+import { RegistrationStatus } from "@packages/shared-types";
+import type { EligibilityResult, RegistrationReason } from "@packages/shared-types";
 import { PlayerDataSchema, ConsentFlagsSchema } from "@/lib/schemas";
+
+const registrationStatusValues = Object.values(RegistrationStatus) as string[];
+
+function parseRegistrationStatus(value: string): RegistrationStatus {
+  if (registrationStatusValues.includes(value)) {
+    return value as RegistrationStatus;
+  }
+  return RegistrationStatus.DRAFT;
+}
 import type { RegistrationDetail, RegistrationDetailResult } from "./types";
 
 const uuidSchema = z.string().uuid();
@@ -132,7 +142,7 @@ export async function getRegistrationDetails(
     player_name: data.player_name,
     player_birth_date: data.player_birth_date,
     player_dfb_id: data.player_dfb_id,
-    status: data.status as RegistrationStatus,
+    status: parseRegistrationStatus(data.status),
     eligibility_date: data.eligibility_date,
     sperrfrist_start: data.sperrfrist_start,
     sperrfrist_end: data.sperrfrist_end,

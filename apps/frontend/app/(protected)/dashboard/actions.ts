@@ -28,18 +28,20 @@ export const getDashboardMetrics = cache(async (): Promise<DashboardMetrics> => 
     financeResult,
     rpaTracesResult,
   ] = await Promise.all([
-    // 1. Alle Registrierungen (Status Breakdown)
-    supabase.from("registrations").select("status, id"),
+    // 1. Alle Registrierungen (Status Breakdown) — exclude soft-deleted
+    supabase.from("registrations").select("status, id").is("deleted_at", null),
 
-    // 2. Finance Status (Payment Stats) - via registrations Join
+    // 2. Finance Status (Payment Stats) - via registrations Join — exclude soft-deleted
     supabase
       .from("registrations")
-      .select("finance_status!inner(is_paid)"),
+      .select("finance_status!inner(is_paid)")
+      .is("deleted_at", null),
 
-    // 3. RPA Traces (Bot Success Rate) - via registrations Join
+    // 3. RPA Traces (Bot Success Rate) - via registrations Join — exclude soft-deleted
     supabase
       .from("registrations")
-      .select("rpa_traces(status)"),
+      .select("rpa_traces(status)")
+      .is("deleted_at", null),
   ]);
 
   // 4. Recent Activity (Audit Logs) - Load directly with RLS

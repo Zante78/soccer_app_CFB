@@ -100,7 +100,7 @@ export function Step6Consent({ onNext, onBack, playerData }: Step6ConsentProps) 
               type="checkbox"
               checked={consents.dsgvo}
               onChange={(e) => handleConsentChange('dsgvo', e.target.checked)}
-              className="mt-1 w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary focus:ring-2"
+              className="mt-1 w-5 h-5 text-primary border-gray-300 rounded focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             />
             <div className="ml-3 flex-1">
               <span className="text-sm font-medium text-gray-900 group-hover:text-primary transition-colors">
@@ -119,7 +119,7 @@ export function Step6Consent({ onNext, onBack, playerData }: Step6ConsentProps) 
               type="checkbox"
               checked={consents.accuracy}
               onChange={(e) => handleConsentChange('accuracy', e.target.checked)}
-              className="mt-1 w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary focus:ring-2"
+              className="mt-1 w-5 h-5 text-primary border-gray-300 rounded focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             />
             <div className="ml-3 flex-1">
               <span className="text-sm font-medium text-gray-900 group-hover:text-primary transition-colors">
@@ -138,7 +138,7 @@ export function Step6Consent({ onNext, onBack, playerData }: Step6ConsentProps) 
               type="checkbox"
               checked={consents.eligibility}
               onChange={(e) => handleConsentChange('eligibility', e.target.checked)}
-              className="mt-1 w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary focus:ring-2"
+              className="mt-1 w-5 h-5 text-primary border-gray-300 rounded focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             />
             <div className="ml-3 flex-1">
               <span className="text-sm font-medium text-gray-900 group-hover:text-primary transition-colors">

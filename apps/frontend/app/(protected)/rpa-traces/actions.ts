@@ -120,15 +120,50 @@ export async function acceptNewBaseline(traceId: string): Promise<void> {
 
   const supabase = await createSupabaseServerClient();
 
-  // TODO: Implement - Copy screenshot_actual to rpa-baselines bucket
-  // TODO: Update trace status to SUCCESS
-  // For now, just log
-  console.log("Accept new baseline for trace:", traceId);
+  // 1. Fetch trace to get screenshot paths
+  const { data: trace, error: fetchError } = await supabase
+    .from("rpa_traces")
+    .select("screenshot_actual, screenshot_baseline, registration_id")
+    .eq("id", validId)
+    .single();
 
-  // Update status
+  if (fetchError || !trace) {
+    throw new Error("Trace nicht gefunden");
+  }
+
+  if (!trace.screenshot_actual) {
+    throw new Error("Kein aktueller Screenshot vorhanden");
+  }
+
+  // 2. Download actual screenshot
+  const { data: fileData, error: downloadError } = await supabase.storage
+    .from("rpa-screenshots")
+    .download(trace.screenshot_actual);
+
+  if (downloadError || !fileData) {
+    throw new Error("Screenshot konnte nicht heruntergeladen werden");
+  }
+
+  // 3. Upload as new baseline (overwrite existing or create new)
+  const baselinePath = trace.screenshot_baseline || `baseline-${trace.registration_id}-${Date.now()}.png`;
+  const { error: uploadError } = await supabase.storage
+    .from("rpa-baselines")
+    .upload(baselinePath, fileData, {
+      contentType: "image/png",
+      upsert: true,
+    });
+
+  if (uploadError) {
+    throw new Error("Baseline konnte nicht aktualisiert werden");
+  }
+
+  // 4. Update trace: set status to SUCCESS and update baseline path
   const { error } = await supabase
     .from("rpa_traces")
-    .update({ status: "SUCCESS" })
+    .update({
+      status: "SUCCESS",
+      screenshot_baseline: baselinePath,
+    })
     .eq("id", validId);
 
   if (error) {

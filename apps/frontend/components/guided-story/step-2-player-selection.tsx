@@ -35,9 +35,11 @@ export function Step2PlayerSelection({ onNext, onBack }: Step2PlayerSelectionPro
         </div>
 
         {/* Selection Cards */}
-        <div className="space-y-4">
+        <div className="space-y-4" role="radiogroup" aria-label="Spielerauswahl">
           {/* New Player */}
           <button
+            role="radio"
+            aria-checked={selection === 'new'}
             onClick={() => setSelection('new')}
             className={`w-full p-6 rounded-xl border-2 text-left transition-all ${
               selection === 'new'
@@ -74,6 +76,8 @@ export function Step2PlayerSelection({ onNext, onBack }: Step2PlayerSelectionPro
 
           {/* Existing Player */}
           <button
+            role="radio"
+            aria-checked={selection === 'existing'}
             onClick={() => setSelection('existing')}
             className={`w-full p-6 rounded-xl border-2 text-left transition-all ${
               selection === 'existing'

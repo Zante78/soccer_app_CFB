@@ -53,7 +53,7 @@ export function FilterBar({
       <div className="grid gap-4 md:grid-cols-4">
         {/* Search */}
         <div className="relative md:col-span-2">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600" />
           <Input
             placeholder="Spielername oder DFB-ID suchen..."
             value={searchQuery}

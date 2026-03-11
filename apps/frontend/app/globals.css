@@ -25,12 +25,15 @@
   --foreground: #1c1c1e;
 }
 
-* {
-  @apply border-gray-200;
+*,
+::before,
+::after {
+  border-color: #d1d1d6;
 }
 
 body {
-  @apply bg-gray-50 text-gray-900;
+  background-color: #f5f5f7;
+  color: #1c1c1e;
 }
 
 /* Card styles */

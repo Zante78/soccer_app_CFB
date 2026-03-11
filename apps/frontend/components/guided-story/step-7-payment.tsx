@@ -58,9 +58,11 @@ export function Step7Payment({ onNext, onBack, registrationId }: Step7PaymentPro
         </div>
 
         {/* Payment Methods */}
-        <div className="space-y-4">
+        <div className="space-y-4" role="radiogroup" aria-label="Zahlungsmethode">
           {/* PayPal Option */}
           <button
+            role="radio"
+            aria-checked={selectedMethod === 'PAYPAL'}
             onClick={() => setSelectedMethod('PAYPAL')}
             className={`w-full p-6 rounded-xl border-2 text-left transition-all ${
               selectedMethod === 'PAYPAL'
@@ -123,6 +125,8 @@ export function Step7Payment({ onNext, onBack, registrationId }: Step7PaymentPro
 
           {/* Cash Payment Option */}
           <button
+            role="radio"
+            aria-checked={selectedMethod === 'CASH'}
             onClick={() => setSelectedMethod('CASH')}
             className={`w-full p-6 rounded-xl border-2 text-left transition-all ${
               selectedMethod === 'CASH'
