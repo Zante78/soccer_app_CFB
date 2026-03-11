@@ -7,14 +7,19 @@ import {
   retryBotExecution,
   type RPATraceWithUrls,
 } from "./actions";
+import dynamic from "next/dynamic";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  ReactCompareSlider,
-  ReactCompareSliderImage,
-} from "react-compare-slider";
+const ReactCompareSlider = dynamic(
+  () => import("react-compare-slider").then((mod) => mod.ReactCompareSlider),
+  { ssr: false }
+);
+const ReactCompareSliderImage = dynamic(
+  () => import("react-compare-slider").then((mod) => mod.ReactCompareSliderImage),
+  { ssr: false }
+);
 import { CheckCircle, XCircle, RefreshCw, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";

@@ -46,8 +46,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     async function initSession() {
       try {
-        const { data: { session }, error } = await withTimeout(
-          supabase.auth.getSession(),
+        const { data: { user: authUser }, error } = await withTimeout(
+          supabase.auth.getUser(),
           SESSION_TIMEOUT_MS
         );
 
@@ -60,9 +60,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return;
         }
 
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          await loadUserProfile(session.user.id);
+        setUser(authUser ?? null);
+        if (authUser) {
+          await loadUserProfile(authUser.id);
         } else {
           setIsLoading(false);
         }

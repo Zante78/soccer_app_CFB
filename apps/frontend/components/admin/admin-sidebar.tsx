@@ -138,7 +138,7 @@ export function AdminSidebar() {
               onClick={() => setIsOpen(false)} // Close sidebar on mobile after click
               tabIndex={!isSidebarAccessible ? -1 : undefined}
               aria-current={isActive ? "page" : undefined}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0055A4] focus-visible:ring-offset-2 ${
                 isActive
                   ? "bg-[#0055A4] text-white"
                   : "text-gray-700 hover:bg-gray-100"

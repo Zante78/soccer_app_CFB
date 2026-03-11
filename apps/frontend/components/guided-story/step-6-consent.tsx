@@ -1,7 +1,13 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import SignatureCanvas from 'react-signature-canvas';
+import type ReactSignatureCanvas from 'react-signature-canvas';
+import type { SignatureCanvasProps } from 'react-signature-canvas';
+import dynamic from 'next/dynamic';
+const SignatureCanvas = dynamic<SignatureCanvasProps & { ref?: React.Ref<ReactSignatureCanvas> }>(
+  () => import('react-signature-canvas'),
+  { ssr: false }
+);
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
@@ -24,7 +30,7 @@ export function Step6Consent({ onNext, onBack, playerData }: Step6ConsentProps) 
     eligibility: false,
   });
   const [signatureError, setSignatureError] = useState<string | null>(null);
-  const signatureRef = useRef<SignatureCanvas>(null);
+  const signatureRef = useRef<ReactSignatureCanvas>(null);
 
   const handleConsentChange = (key: string, value: boolean) => {
     setConsents((prev) => ({ ...prev, [key]: value }));

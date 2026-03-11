@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { QRCodeSVG } from 'qrcode.react';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
@@ -193,12 +194,12 @@ export function Step8Completion({ magicLink, registrationId, playerName }: Step8
 
         {/* Action Button */}
         <div className="text-center pt-4">
-          <a
+          <Link
             href="/"
             className="btn-primary inline-block px-8 py-4 text-lg"
           >
             Zurück zur Startseite
-          </a>
+          </Link>
         </div>
       </div>
     </Card>

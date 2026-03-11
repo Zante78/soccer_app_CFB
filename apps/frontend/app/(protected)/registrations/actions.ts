@@ -72,7 +72,7 @@ export async function getRegistrations(
       created_at,
       team_id,
       teams!inner(name),
-      finance_status!inner(is_paid, payment_method),
+      finance_status(is_paid, payment_method),
       rpa_traces(status)
     `,
       { count: "exact" }

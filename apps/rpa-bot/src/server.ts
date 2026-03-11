@@ -11,13 +11,15 @@ import { SupabaseClient } from "./services/supabase-client.js";
 const app = express();
 const mockBot = new MockBot();
 
+// ===== Startup Validation (all modes) =====
+validateConfig();
+
 // ===== Live Mode Setup =====
 let dfbnetBot: DFBnetBot | null = null;
 let isProcessing = false;
 
 if (config.BOT_MODE === "live") {
   try {
-    validateConfig();
     const supabase = new SupabaseClient(
       config.SUPABASE_URL,
       config.SUPABASE_SERVICE_ROLE_KEY
