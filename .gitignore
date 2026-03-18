@@ -37,3 +37,9 @@ secrets/
 
 # n8n Templates (contain hardcoded secrets after configuration)
 n8n/templates/*.json
+
+# Claude Code
+.claude/
+claude-learning-path.md
+claude-reference.md
+CFB Projekt/
