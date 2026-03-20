@@ -57,7 +57,7 @@ export function StatusChart({ data }: StatusChartProps) {
         <h3 className="text-lg font-semibold text-gray-900 mb-4">
           Status Verteilung
         </h3>
-        <p className="text-gray-600 text-center py-8">
+        <p className="text-gray-700 text-center py-8">
           Noch keine Registrierungen vorhanden
         </p>
       </Card>
@@ -80,7 +80,7 @@ export function StatusChart({ data }: StatusChartProps) {
                 <span className="font-medium text-gray-700">
                   {config.label}
                 </span>
-                <span className="text-gray-600">
+                <span className="text-gray-700">
                   {count} ({percentage}%)
                 </span>
               </div>

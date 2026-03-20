@@ -103,6 +103,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .from("users")
           .select("id, email, role, full_name, team_id")
           .eq("id", userId)
+          .is("deleted_at", null)
           .maybeSingle(),
         SESSION_TIMEOUT_MS
       );

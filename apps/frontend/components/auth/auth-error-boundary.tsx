@@ -29,7 +29,7 @@ export function AuthErrorBoundary({ children }: { children: React.ReactNode }) {
             </svg>
           </div>
           <h2 className="text-lg font-semibold text-gray-900">Verbindungsfehler</h2>
-          <p className="text-sm text-gray-600">{authError}</p>
+          <p className="text-sm text-gray-700">{authError}</p>
           <Button
             onClick={() => window.location.reload()}
             variant="outline"

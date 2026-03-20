@@ -90,7 +90,7 @@ export default async function DashboardPage() {
     <div className="space-y-8">
       <header>
         <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600 mt-2">
+        <p className="text-gray-700 mt-2">
           Willkommen zurück, {user.full_name || user.email}!
         </p>
       </header>

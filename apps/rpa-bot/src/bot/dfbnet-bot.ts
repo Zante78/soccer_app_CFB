@@ -1,10 +1,20 @@
 /**
  * DFBnet RPA Bot — Real Playwright Automation
  *
- * Orchestrates: Login → Navigate → Fill Form → Upload Docs → Visual Check → Save Draft
+ * Orchestrates: Login → Navigate → Fill Adresse → Save → Reopen → Fill Zusatzdaten → Upload Photo → Save
  *
- * IMPORTANT: This bot operates in DRAFT-ONLY mode.
- * It will NEVER submit/absenden a form — only save as draft.
+ * Three-phase member creation (verified 2026-03-19):
+ * Phase 1: Navigate to "Neues Mitglied" → Fill Adresse tab → Speichern
+ *          (confirm dialog auto-accepted, member created with Mitgliedsnummer)
+ * Phase 2: Open the created member in Edit mode (via search / member list)
+ *          (Edit mode shows ALL tabs including red Zusatzdaten tab)
+ * Phase 3: Click Zusatzdaten tab → Fill Freifelder → Upload photo → Speichern
+ *
+ * Key Discovery: The "Neues Mitglied" form only shows the Adresse tab.
+ * The Zusatzdaten tab (with Freifelder) only appears in Edit mode.
+ *
+ * IMPORTANT: The "Freigabe" Freifeld is set to "Nein" — the Passwart
+ * must manually approve by setting it to "Ja". No auto-submit.
  */
 
 import { chromium, Browser, BrowserContext, Page } from 'playwright';
@@ -15,17 +25,18 @@ import { config } from '../config/env.js';
 import { BotError, ErrorCategory, categorizePlaywrightError } from '../utils/errors.js';
 import { withRetry } from '../utils/retry.js';
 import { compareScreenshots } from '../utils/visual-regression.js';
-import { loginToDFBnet, type LoginConfig, type IMAPConfig } from '../flows/login.js';
+import { loginToDFBnet, type LoginConfig } from '../flows/login.js';
 import {
-  navigateToSpielerpassForm,
-  fillSpielerpassForm,
-  uploadDocumentsToForm,
+  navigateToMemberForm,
+  openCreatedMember,
+  fillAdresseTab,
+  fillZusatzdatenTab,
+  uploadPhotoToForm,
+  saveForm,
   downloadToTemp,
   cleanupTempFile,
-  saveDraft,
   type RegistrationData,
 } from '../flows/create-draft.js';
-import { SELECTORS } from '../config/selectors.js';
 import type { SupabaseClient } from '../services/supabase-client.js';
 import type { ExecuteRequest, ExecuteResult, HealthCheckResult } from '../types/bot-types.js';
 
@@ -162,7 +173,7 @@ export class DFBnetBot {
         };
       }
 
-      // Try to detect DFBnet version from the page
+      // Try to detect DFBnet version from the page footer
       let dfbnetVersion: string | undefined;
       try {
         const versionEl = await page.$('.version, .footer-version, #version');
@@ -192,6 +203,16 @@ export class DFBnetBot {
   /**
    * Full registration processing pipeline.
    * Called by execute() with retry wrapper.
+   *
+   * 3-Phase Pipeline (verified 2026-03-19):
+   * 1. Launch browser
+   * 2. Login to DFBnet Verein (3-field login)
+   * 3. Navigate to "Neues Mitglied" form (extract URL from MegaMenu DOM)
+   * Phase 1: Fill Adresse tab → Speichern (confirm dialog → member created)
+   * Phase 2: Open created member in Edit mode (via search/member list)
+   * Phase 3: Click Zusatzdaten tab → Fill Freifelder → Upload photo → Speichern
+   * 4. Visual regression check
+   * 5. Upload screenshots to Supabase Storage
    */
   private async processRegistration(
     registration: RegistrationData
@@ -221,7 +242,7 @@ export class DFBnetBot {
       page.setDefaultTimeout(this.botConfig.timeout);
 
       // 2. Login
-      regLogger.info('Logging in to DFBnet...');
+      regLogger.info('Logging in to DFBnet Verein...');
       const loginResult = await loginToDFBnet(page, this.getLoginConfig(registration.id));
       if (!loginResult.success) {
         throw new BotError(
@@ -230,59 +251,123 @@ export class DFBnetBot {
         );
       }
 
-      // 3. Navigate to Spielerpass form
-      regLogger.info('Navigating to Spielerpass form...');
-      await navigateToSpielerpassForm(page, {
+      // === Phase 1: Create member via "Neues Mitglied" ===
+
+      // 3. Navigate to "Neues Mitglied" form (extract URL from MegaMenu DOM)
+      regLogger.info('Navigating to Neues Mitglied form...');
+      const navConfig = {
         baseUrl: config.DFBNET_BASE_URL,
         screenshotDir: this.botConfig.screenshotDir,
         registrationId: registration.id,
-      });
+      };
+      await navigateToMemberForm(page, navConfig);
 
-      // 4. Fill form
-      regLogger.info('Filling form...');
-      const fillResult = await fillSpielerpassForm(page, registration, {
+      // 4. Fill Adresse tab (personal data — only tab available in "Neues Mitglied")
+      regLogger.info('Filling Adresse tab...');
+      const adresseResult = await fillAdresseTab(page, registration, {
         screenshotDir: this.botConfig.screenshotDir,
       });
 
-      if (fillResult.warnings.length > 0) {
-        regLogger.warn(`Form warnings: ${fillResult.warnings.join('; ')}`);
+      if (adresseResult.warnings.length > 0) {
+        regLogger.warn(`Adresse warnings: ${adresseResult.warnings.join('; ')}`);
       }
 
-      // 5. Upload documents (if Supabase is available)
-      if (this.supabase && registration.player_data) {
-        regLogger.info('Uploading documents...');
-        const uploadFiles = await this.prepareUploads(registration, tempFiles);
-        if (uploadFiles.length > 0) {
-          const uploadResult = await uploadDocumentsToForm(page, uploadFiles);
-          if (uploadResult.errors.length > 0) {
-            regLogger.warn(`Upload warnings: ${uploadResult.errors.join('; ')}`);
+      // 5. Save Adresse → member is created (confirm dialog auto-accepted)
+      regLogger.info('Saving Adresse (creating member — confirm dialog will be auto-accepted)...');
+      const adresseSaveResult = await saveForm(page, {
+        screenshotDir: this.botConfig.screenshotDir,
+        registrationId: registration.id,
+        stepName: 'adresse',
+      });
+
+      if (adresseSaveResult.mitgliedsnummer) {
+        regLogger.info(`Member created with Mitgliedsnummer: ${adresseSaveResult.mitgliedsnummer}`);
+      }
+
+      // === Phase 2 (conditional): Reopen member in Edit mode ===
+      // After saving "Neues Mitglied", DFBnet MAY stay in Edit mode (all tabs visible)
+      // or MAY stay in "Neues Mitglied" mode (only Adresse tab). Check first.
+      const zusatzdatenTabExists = await page.$(
+        'a[class*="tabbutton-txt"]:has-text("Zusatzdaten")'
+      );
+
+      if (zusatzdatenTabExists) {
+        regLogger.info('Zusatzdaten tab already available — skipping Phase 2 (reopen)');
+      } else {
+        regLogger.info('Zusatzdaten tab not found — reopening member in Edit mode (Phase 2)...');
+        const openResult = await openCreatedMember(page, registration, navConfig);
+
+        if (!openResult.success) {
+          throw new BotError(
+            `Failed to reopen member in Edit mode: ${openResult.error ?? 'unknown error'}`,
+            ErrorCategory.NAVIGATION
+          );
+        }
+      }
+
+      // === Phase 3: Fill Zusatzdaten + Photo + Save ===
+
+      // 6. Fill Zusatzdaten tab (clicks red tab internally, fills Freifelder)
+      regLogger.info('Filling Zusatzdaten tab (Freifelder)...');
+      const zusatzdatenResult = await fillZusatzdatenTab(page, registration, {
+        screenshotDir: this.botConfig.screenshotDir,
+      });
+
+      if (zusatzdatenResult.warnings.length > 0) {
+        regLogger.warn(`Zusatzdaten warnings: ${zusatzdatenResult.warnings.join('; ')}`);
+      }
+
+      // 7. Upload photo (if available)
+      if (this.supabase) {
+        const photoPath = registration.player_data?.photo_path as string | undefined;
+        if (photoPath) {
+          regLogger.info('Uploading photo...');
+          try {
+            const tempPath = await downloadToTemp(
+              config.SUPABASE_URL,
+              config.SUPABASE_SERVICE_ROLE_KEY,
+              'player-photos',
+              photoPath
+            );
+            tempFiles.push(tempPath);
+            const uploadResult = await uploadPhotoToForm(page, tempPath);
+            if (uploadResult.errors.length > 0) {
+              regLogger.warn(`Photo upload warnings: ${uploadResult.errors.join('; ')}`);
+            }
+          } catch (err) {
+            regLogger.warn(`Photo download/upload failed: ${err}`);
           }
         }
       }
 
-      // 6. Take pre-save screenshot
-      const screenshotPath = `${this.botConfig.screenshotDir}/${registration.id}_${executionId}_pre-save.png`;
-      await page.screenshot({ path: screenshotPath, fullPage: true });
-      regLogger.info(`Screenshot: ${screenshotPath}`);
+      // 8. Save Zusatzdaten
+      regLogger.info('Saving Zusatzdaten...');
+      const zusatzdatenSaveResult = await saveForm(page, {
+        screenshotDir: this.botConfig.screenshotDir,
+        registrationId: registration.id,
+        stepName: 'zusatzdaten',
+      });
 
-      // 7. Visual regression check
-      const baselinePath = `${this.botConfig.baselineDir}/spielerpass-form.png`;
+      // 9. Take final screenshot for visual regression
+      const screenshotPath = `${this.botConfig.screenshotDir}/${registration.id}_${executionId}_final.png`;
+      await page.screenshot({ path: screenshotPath, fullPage: true });
+      regLogger.info(`Final screenshot: ${screenshotPath}`);
+
+      // Visual regression check
+      const baselinePath = `${this.botConfig.baselineDir}/member-form.png`;
       const diffResult = await compareScreenshots(screenshotPath, baselinePath, {
         diffThreshold: config.VISUAL_DIFF_THRESHOLD,
         outputDiffPath: `${this.botConfig.screenshotDir}/${registration.id}_${executionId}_diff.png`,
       });
 
       if (diffResult.threshold_exceeded) {
-        // Upload screenshots to Supabase Storage before throwing
-        let uploadedActual: string | undefined;
-        let uploadedBaseline: string | undefined;
         if (this.supabase) {
           try {
-            uploadedActual = await this.uploadScreenshotToStorage(
+            await this.uploadScreenshotToStorage(
               screenshotPath,
               `${registration.id}/${executionId}/actual.png`
             );
-            uploadedBaseline = await this.uploadScreenshotToStorage(
+            await this.uploadScreenshotToStorage(
               baselinePath,
               `${registration.id}/${executionId}/baseline.png`
             );
@@ -296,14 +381,7 @@ export class DFBnetBot {
         );
       }
 
-      // 8. Save as draft (NEVER submit!)
-      regLogger.info('Saving as draft...');
-      const draftResult = await saveDraft(page, {
-        screenshotDir: this.botConfig.screenshotDir,
-        registrationId: registration.id,
-      });
-
-      // 9. Upload screenshots to Supabase Storage
+      // 10. Upload screenshots to Supabase Storage
       let screenshotActualPath: string | undefined;
       let screenshotBaselinePath: string | undefined;
       if (this.supabase) {
@@ -323,11 +401,11 @@ export class DFBnetBot {
         }
       }
 
-      regLogger.info('Draft completed successfully');
+      regLogger.info('Member created successfully');
 
       return {
         success: true,
-        draft_url: draftResult.draftUrl,
+        draft_url: zusatzdatenSaveResult.draftUrl,
         screenshot_actual: screenshotActualPath ?? screenshotPath,
         screenshot_baseline: screenshotBaselinePath ?? baselinePath,
         visual_diff_score: diffResult.diff_score,
@@ -338,61 +416,6 @@ export class DFBnetBot {
       if (browser) await browser.close();
       for (const tempFile of tempFiles) cleanupTempFile(tempFile);
     }
-  }
-
-  /**
-   * Prepare document uploads: download from Supabase Storage → temp files.
-   */
-  private async prepareUploads(
-    registration: RegistrationData,
-    tempFiles: string[]
-  ): Promise<{ localPath: string; inputSelector: string }[]> {
-    const uploads: { localPath: string; inputSelector: string }[] = [];
-
-    // Photo
-    const photoPath = registration.player_data?.photo_path as string | undefined;
-    if (photoPath) {
-      try {
-        const tempPath = await downloadToTemp(
-          config.SUPABASE_URL,
-          config.SUPABASE_SERVICE_ROLE_KEY,
-          'player-photos',
-          photoPath
-        );
-        tempFiles.push(tempPath);
-        uploads.push({
-          localPath: tempPath,
-          inputSelector: SELECTORS.spielerpassForm.photoUpload,
-        });
-      } catch (err) {
-        logger.warn(`Photo download failed: ${err}`);
-      }
-    }
-
-    // Documents
-    const docPaths = registration.player_data?.document_paths as string[] | undefined;
-    if (docPaths) {
-      for (const docPath of docPaths) {
-        if (!docPath) continue;
-        try {
-          const tempPath = await downloadToTemp(
-            config.SUPABASE_URL,
-            config.SUPABASE_SERVICE_ROLE_KEY,
-            'player-documents',
-            docPath
-          );
-          tempFiles.push(tempPath);
-          uploads.push({
-            localPath: tempPath,
-            inputSelector: SELECTORS.spielerpassForm.documentUpload,
-          });
-        } catch (err) {
-          logger.warn(`Document download failed (${docPath}): ${err}`);
-        }
-      }
-    }
-
-    return uploads;
   }
 
   /**
@@ -409,27 +432,18 @@ export class DFBnetBot {
 
   /**
    * Build login config from environment.
+   * DFBnet Verein uses 3-field login: username, password, Kundennummer.
+   * No IMAP/2FA needed.
    */
   private getLoginConfig(registrationId: string): LoginConfig {
-    const imapConfig: IMAPConfig | undefined =
-      config.IMAP_HOST
-        ? {
-            host: config.IMAP_HOST,
-            port: config.IMAP_PORT,
-            username: config.IMAP_USERNAME,
-            password: config.IMAP_PASSWORD,
-            otpSender: config.IMAP_OTP_SENDER,
-          }
-        : undefined;
-
     return {
       baseUrl: config.DFBNET_BASE_URL,
       username: config.DFBNET_USERNAME,
       password: config.DFBNET_PASSWORD,
+      kundennummer: config.DFBNET_KUNDENNUMMER,
       screenshotDir: this.botConfig.screenshotDir,
       registrationId,
       headless: this.botConfig.headless,
-      imapConfig,
     };
   }
 }

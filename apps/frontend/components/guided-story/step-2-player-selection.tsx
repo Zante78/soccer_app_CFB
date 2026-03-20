@@ -29,7 +29,7 @@ export function Step2PlayerSelection({ onNext, onBack }: Step2PlayerSelectionPro
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             Spielerauswahl
           </h2>
-          <p className="text-gray-600">
+          <p className="text-gray-700">
             Handelt es sich um eine Neuanmeldung oder einen bestehenden Spieler?
           </p>
         </div>
@@ -67,7 +67,7 @@ export function Step2PlayerSelection({ onNext, onBack }: Step2PlayerSelectionPro
                 <h3 className="text-lg font-semibold text-gray-900 mb-1">
                   Neuer Spieler
                 </h3>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-700">
                   Erstanmeldung für einen Spieler, der bisher noch nicht registriert wurde
                 </p>
               </div>
@@ -105,12 +105,12 @@ export function Step2PlayerSelection({ onNext, onBack }: Step2PlayerSelectionPro
                 <h3 className="text-lg font-semibold text-gray-900 mb-1">
                   Bestehender Spieler
                 </h3>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-700">
                   Wechsel oder Wiedereintritt eines bereits registrierten Spielers
                 </p>
                 {selection === 'existing' && (
                   <div className="mt-4 p-3 bg-white rounded-lg border border-gray-200">
-                    <p className="text-sm text-gray-600 italic">
+                    <p className="text-sm text-gray-700 italic">
                       Suche nach bestehendem Spieler wird in Phase 3 implementiert
                     </p>
                   </div>

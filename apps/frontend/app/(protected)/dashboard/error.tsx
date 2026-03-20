@@ -12,11 +12,11 @@ export default function DashboardError({
 }) {
   return (
     <div className="flex items-center justify-center min-h-[60vh] px-4">
-      <Card className="w-full max-w-md p-8 text-center space-y-4">
+      <Card role="alert" className="w-full max-w-md p-8 text-center space-y-4">
         <h2 className="text-lg font-semibold text-gray-900">
           Dashboard konnte nicht geladen werden
         </h2>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-gray-700">
           {error.message || "Ein unerwarteter Fehler ist aufgetreten."}
         </p>
         <Button

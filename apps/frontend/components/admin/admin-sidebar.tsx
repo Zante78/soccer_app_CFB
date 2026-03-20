@@ -122,7 +122,7 @@ export function AdminSidebar() {
       {/* Logo/Header */}
       <div className="p-6 border-b border-gray-200" tabIndex={!isSidebarAccessible ? -1 : undefined}>
         <h2 className="text-xl font-bold text-[#0055A4]">CFB Digitale Passstelle</h2>
-        <p className="text-sm text-gray-600 mt-1">Verwaltung</p>
+        <p className="text-sm text-gray-700 mt-1">Verwaltung</p>
       </div>
 
       {/* Navigation */}
@@ -162,7 +162,7 @@ export function AdminSidebar() {
               <p className="text-sm font-medium text-gray-900 truncate">
                 {profile.full_name || profile.email}
               </p>
-              <p className="text-xs text-gray-600">
+              <p className="text-xs text-gray-700">
                 {profile.role === "SUPER_ADMIN" ? "Super Admin" :
                  profile.role === "PASSWART" ? "Passwart" :
                  profile.role === "TRAINER" ? "Trainer" : "Benutzer"}

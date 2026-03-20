@@ -43,7 +43,7 @@ export function AuditLogTimeline({ logs }: AuditLogTimelineProps) {
         <h3 className="text-lg font-semibold text-gray-900 mb-4">
           Änderungsverlauf
         </h3>
-        <p className="text-gray-600 text-center py-8">
+        <p className="text-gray-700 text-center py-8">
           Noch keine Änderungen vorhanden
         </p>
       </Card>
@@ -81,14 +81,14 @@ export function AuditLogTimeline({ logs }: AuditLogTimelineProps) {
                       <p className="text-sm font-medium text-gray-900">
                         {actionLabels[log.action] || log.action}
                       </p>
-                      <p className="text-xs text-gray-600 mt-0.5">
+                      <p className="text-xs text-gray-700 mt-0.5">
                         {log.user?.full_name || "System"} •{" "}
-                        <span className="text-gray-600">
+                        <span className="text-gray-700">
                           {getRoleLabel(log.user?.role)}
                         </span>
                       </p>
                     </div>
-                    <p className="text-xs text-gray-600">
+                    <p className="text-xs text-gray-700">
                       {log.timestamp
                         ? format(new Date(log.timestamp), "dd.MM.yyyy HH:mm", {
                             locale: de,
@@ -101,7 +101,7 @@ export function AuditLogTimeline({ logs }: AuditLogTimelineProps) {
                   {(log.old_value || log.new_value) && (
                     <div className="mt-2 text-xs">
                       {log.old_value && (
-                        <p className="text-gray-600">
+                        <p className="text-gray-700">
                           <span className="font-medium">Alt:</span>{" "}
                           {typeof log.old_value === 'string'
                             ? log.old_value

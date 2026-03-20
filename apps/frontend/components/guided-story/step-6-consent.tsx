@@ -70,7 +70,7 @@ export function Step6Consent({ onNext, onBack, playerData }: Step6ConsentProps) 
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             Erklärungen & Unterschrift
           </h2>
-          <p className="text-gray-600">
+          <p className="text-gray-700">
             Bitte lesen und akzeptieren Sie die folgenden Erklärungen
           </p>
         </div>
@@ -80,19 +80,19 @@ export function Step6Consent({ onNext, onBack, playerData }: Step6ConsentProps) 
           <h4 className="text-sm font-semibold text-gray-700 mb-3">Zusammenfassung Ihrer Angaben</h4>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-gray-600">Spieler:</span>
+              <span className="text-gray-700">Spieler:</span>
               <span className="font-medium text-gray-900">
                 {playerData.first_name} {playerData.last_name}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-600">Geburtsdatum:</span>
+              <span className="text-gray-700">Geburtsdatum:</span>
               <span className="font-medium text-gray-900">
                 {new Date(playerData.birth_date).toLocaleDateString('de-DE')}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-600">Mannschaft:</span>
+              <span className="text-gray-700">Mannschaft:</span>
               <span className="font-medium text-gray-900">{playerData.team_id}</span>
             </div>
           </div>
@@ -112,7 +112,7 @@ export function Step6Consent({ onNext, onBack, playerData }: Step6ConsentProps) 
               <span className="text-sm font-medium text-gray-900 group-hover:text-primary transition-colors">
                 DSGVO-Einwilligung *
               </span>
-              <p className="text-xs text-gray-600 mt-1">
+              <p className="text-xs text-gray-700 mt-1">
                 Ich willige ein, dass meine personenbezogenen Daten zum Zweck der Spielerpass-Beantragung
                 verarbeitet werden. Die Daten werden nach 48 Stunden automatisch gelöscht.
               </p>
@@ -131,7 +131,7 @@ export function Step6Consent({ onNext, onBack, playerData }: Step6ConsentProps) 
               <span className="text-sm font-medium text-gray-900 group-hover:text-primary transition-colors">
                 Richtigkeit der Angaben *
               </span>
-              <p className="text-xs text-gray-600 mt-1">
+              <p className="text-xs text-gray-700 mt-1">
                 Ich bestätige, dass alle gemachten Angaben wahrheitsgemäß und vollständig sind.
                 Mir ist bekannt, dass falsche Angaben zu Sanktionen führen können.
               </p>
@@ -150,7 +150,7 @@ export function Step6Consent({ onNext, onBack, playerData }: Step6ConsentProps) 
               <span className="text-sm font-medium text-gray-900 group-hover:text-primary transition-colors">
                 Kenntnisnahme Spielberechtigung *
               </span>
-              <p className="text-xs text-gray-600 mt-1">
+              <p className="text-xs text-gray-700 mt-1">
                 Ich habe die berechnete Spielberechtigung zur Kenntnis genommen und bin mir bewusst,
                 dass ein Einsatz vor Ablauf der Sperrfrist zu Bußgeldern führen kann.
               </p>
@@ -184,7 +184,7 @@ export function Step6Consent({ onNext, onBack, playerData }: Step6ConsentProps) 
             <button
               type="button"
               onClick={clearSignature}
-              className="ml-auto text-sm text-gray-600 hover:text-primary transition-colors min-h-[44px] px-3 inline-flex items-center rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+              className="ml-auto text-sm text-gray-700 hover:text-primary transition-colors min-h-[44px] px-3 inline-flex items-center rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             >
               Unterschrift löschen
             </button>

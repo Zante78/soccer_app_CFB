@@ -9,7 +9,7 @@ export default function NotFound() {
           <h2 className="mt-2 text-3xl font-bold text-gray-900">
             Registrierung nicht gefunden
           </h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-2 text-sm text-gray-700">
             Die angeforderte Registrierung existiert nicht oder wurde gelöscht.
           </p>
         </div>

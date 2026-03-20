@@ -14,7 +14,10 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 const ReactCompareSlider = dynamic(
   () => import("react-compare-slider").then((mod) => mod.ReactCompareSlider),
-  { ssr: false }
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-[600px] w-full rounded-lg" />,
+  }
 );
 const ReactCompareSliderImage = dynamic(
   () => import("react-compare-slider").then((mod) => mod.ReactCompareSliderImage),
@@ -65,7 +68,7 @@ export default function RPATracesPage() {
           <h1 className="text-3xl font-bold text-gray-900">
             RPA Visual Regression
           </h1>
-          <p className="text-gray-600 mt-2">
+          <p className="text-gray-700 mt-2">
             Screenshot-Vergleich von Bot-Ausführungen
           </p>
         </header>
@@ -88,7 +91,7 @@ export default function RPATracesPage() {
           <h1 className="text-3xl font-bold text-gray-900">
             RPA Visual Regression
           </h1>
-          <p className="text-gray-600 mt-2">
+          <p className="text-gray-700 mt-2">
             Screenshot-Vergleich von Bot-Ausführungen
           </p>
         </header>
@@ -99,7 +102,7 @@ export default function RPATracesPage() {
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
               Keine Visual Regression Errors
             </h2>
-            <p className="text-gray-600">
+            <p className="text-gray-700">
               Alle Bot-Ausführungen waren erfolgreich! 🎉
             </p>
           </div>
@@ -114,7 +117,7 @@ export default function RPATracesPage() {
         <h1 className="text-3xl font-bold text-gray-900">
           RPA Visual Regression
         </h1>
-        <p className="text-gray-600 mt-2">
+        <p className="text-gray-700 mt-2">
           {traces.length} Screenshot-Unterschied{traces.length !== 1 ? "e" : ""}{" "}
           gefunden
         </p>
@@ -179,7 +182,7 @@ function TraceCard({
                 Diff: {diffPercent.toFixed(2)}%
               </Badge>
             </div>
-            <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
+            <div className="flex items-center gap-4 mt-2 text-sm text-gray-700">
               <span>
                 DFB-ID: {trace.registration.player_dfb_id || "Keine"}
               </span>
@@ -197,7 +200,7 @@ function TraceCard({
             </div>
           </div>
 
-          <div className="text-right text-sm text-gray-600">
+          <div className="text-right text-sm text-gray-700">
             <p>Execution ID</p>
             <p className="font-mono text-xs">{trace.execution_id}</p>
           </div>
@@ -205,7 +208,7 @@ function TraceCard({
 
         {/* Error Message (wenn vorhanden) */}
         {trace.error_message && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div role="alert" className="bg-red-50 border border-red-200 rounded-lg p-4">
             <p className="text-sm text-red-800">{trace.error_message}</p>
           </div>
         )}
@@ -231,8 +234,8 @@ function TraceCard({
           </div>
         ) : (
           <div className="bg-gray-100 rounded-lg p-12 text-center">
-            <XCircle className="h-12 w-12 text-gray-600 mx-auto mb-4" />
-            <p className="text-gray-600">Screenshots nicht verfügbar</p>
+            <XCircle className="h-12 w-12 text-gray-700 mx-auto mb-4" />
+            <p className="text-gray-700">Screenshots nicht verfügbar</p>
           </div>
         )}
 

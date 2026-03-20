@@ -55,7 +55,7 @@ export function Step3PlayerData({ onNext, onBack, initialData }: Step3PlayerData
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             Spielerdaten
           </h2>
-          <p className="text-gray-600">
+          <p className="text-gray-700">
             Bitte geben Sie die persönlichen Daten des Spielers ein
           </p>
         </div>
@@ -220,7 +220,7 @@ export function Step3PlayerData({ onNext, onBack, initialData }: Step3PlayerData
                     id="previous_team_deregistration_date"
                     className="input"
                   />
-                  <p className="text-xs text-gray-600 mt-1">
+                  <p className="text-xs text-gray-700 mt-1">
                     Wichtig für die Berechnung der Sperrfrist
                   </p>
                 </div>
@@ -236,7 +236,7 @@ export function Step3PlayerData({ onNext, onBack, initialData }: Step3PlayerData
                     id="previous_team_last_game"
                     className="input"
                   />
-                  <p className="text-xs text-gray-600 mt-1">
+                  <p className="text-xs text-gray-700 mt-1">
                     Falls später als Abmeldedatum
                   </p>
                 </div>

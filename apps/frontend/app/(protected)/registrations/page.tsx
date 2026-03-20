@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getRegistrations, getTeams } from "./actions";
 import { FilterBar } from "@/components/admin/filter-bar";
@@ -15,6 +15,7 @@ export default function RegistrationsPage() {
   const [teamId, setTeamId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<"created_at" | "player_name" | "eligibility_date" | "status">("created_at");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [isPending, startTransition] = useTransition();
 
   // Debounce search query
   const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
@@ -49,28 +50,30 @@ export default function RegistrationsPage() {
   });
 
   const handleSort = (column: typeof sortBy) => {
-    if (sortBy === column) {
-      // Toggle order if same column
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-    } else {
-      // New column, default to descending
-      setSortBy(column);
-      setSortOrder("desc");
-    }
+    startTransition(() => {
+      if (sortBy === column) {
+        setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+      } else {
+        setSortBy(column);
+        setSortOrder("desc");
+      }
+    });
   };
 
   const handleReset = () => {
-    setSearchQuery("");
-    setStatus(null);
-    setTeamId(null);
-    setPage(1);
+    startTransition(() => {
+      setSearchQuery("");
+      setStatus(null);
+      setTeamId(null);
+      setPage(1);
+    });
   };
 
   return (
     <div className="space-y-6">
       <header>
         <h1 className="text-3xl font-bold text-gray-900">Registrierungen</h1>
-        <p className="text-gray-600 mt-2">Verwalte alle Spielerpass-Anträge</p>
+        <p className="text-gray-700 mt-2">Verwalte alle Spielerpass-Anträge</p>
       </header>
 
       <FilterBar
@@ -80,18 +83,22 @@ export default function RegistrationsPage() {
         teams={teams}
         onSearchChange={setSearchQuery}
         onStatusChange={(newStatus) => {
-          setStatus(newStatus);
-          setPage(1);
+          startTransition(() => {
+            setStatus(newStatus);
+            setPage(1);
+          });
         }}
         onTeamChange={(newTeamId) => {
-          setTeamId(newTeamId);
-          setPage(1);
+          startTransition(() => {
+            setTeamId(newTeamId);
+            setPage(1);
+          });
         }}
         onReset={handleReset}
       />
 
       {error ? (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div role="alert" aria-live="assertive" className="bg-red-50 border border-red-200 rounded-lg p-4">
           <p className="text-red-700">
             Fehler beim Laden der Registrierungen. Bitte versuche es erneut.
           </p>
@@ -100,7 +107,7 @@ export default function RegistrationsPage() {
         <>
           <RegistrationsTable
             data={data?.registrations}
-            isLoading={isLoading}
+            isLoading={isLoading || isPending}
             sortBy={sortBy}
             sortOrder={sortOrder}
             onSort={handleSort}

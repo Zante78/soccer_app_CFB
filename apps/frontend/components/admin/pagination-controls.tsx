@@ -29,7 +29,7 @@ export function PaginationControls({
 
   return (
     <div className="flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200">
-      <div className="text-sm text-gray-600">
+      <div className="text-sm text-gray-700">
         Zeige {startItem} bis {endItem} von {totalCount} Einträgen
       </div>
 

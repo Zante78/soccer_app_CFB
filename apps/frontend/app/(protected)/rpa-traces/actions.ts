@@ -117,7 +117,9 @@ const registrationIdSchema = z.string().uuid();
  * Akzeptiert neuen Screenshot als Baseline
  */
 export async function acceptNewBaseline(traceId: string): Promise<void> {
-  const validId = traceIdSchema.parse(traceId);
+  const parsed = traceIdSchema.safeParse(traceId);
+  if (!parsed.success) throw new Error("Ungültige Trace-ID");
+  const validId = parsed.data;
   await requireRole(RPA_ADMIN_ROLES);
 
   const supabase = await createSupabaseServerClient();
@@ -179,7 +181,9 @@ export async function acceptNewBaseline(traceId: string): Promise<void> {
  * Startet Bot erneut für eine Registration
  */
 export async function retryBotExecution(registrationId: string): Promise<void> {
-  const validId = registrationIdSchema.parse(registrationId);
+  const parsed = registrationIdSchema.safeParse(registrationId);
+  if (!parsed.success) throw new Error("Ungültige Registrierungs-ID");
+  const validId = parsed.data;
   await requireRole(RPA_ADMIN_ROLES);
 
   const supabase = await createSupabaseServerClient();

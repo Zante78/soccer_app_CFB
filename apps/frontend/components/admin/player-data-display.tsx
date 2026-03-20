@@ -179,7 +179,7 @@ export function PlayerDataDisplay({ registration }: PlayerDataDisplayProps) {
 function DataField({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-xs font-medium text-gray-600 uppercase tracking-wide">
+      <p className="text-xs font-medium text-gray-700 uppercase tracking-wide">
         {label}
       </p>
       <p className="text-sm text-gray-900 mt-1">{value}</p>

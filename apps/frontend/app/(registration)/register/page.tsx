@@ -165,10 +165,10 @@ export default function RegisterPage() {
       {/* Debug Info (nur Development) */}
       {process.env.NODE_ENV === 'development' && currentStep < 8 && (
         <div className="fixed bottom-4 right-4 bg-white p-4 rounded-lg shadow-lg border border-gray-200 max-w-sm">
-          <p className="text-xs font-mono text-gray-600">
+          <p className="text-xs font-mono text-gray-700">
             <strong>Debug:</strong> Step {currentStep}/{totalSteps}
           </p>
-          <pre className="text-xs font-mono text-gray-600 mt-2 max-h-40 overflow-auto">
+          <pre className="text-xs font-mono text-gray-700 mt-2 max-h-40 overflow-auto">
             {JSON.stringify(formData, null, 2)}
           </pre>
         </div>

@@ -14,7 +14,7 @@ export default function Error({
           <h2 className="text-3xl font-bold text-gray-900">
             Etwas ist schiefgelaufen
           </h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-2 text-sm text-gray-700">
             {error.message || "Ein unerwarteter Fehler ist aufgetreten"}
           </p>
         </div>

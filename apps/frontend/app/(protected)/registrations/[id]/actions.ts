@@ -89,8 +89,10 @@ export async function getRegistrationDetails(
   }
 
   // Validate JSONB fields with Zod schemas
-  const playerData = PlayerDataSchema.parse(data.player_data || {});
-  const consentFlags = ConsentFlagsSchema.parse(data.consent_flags || {});
+  const playerDataResult = PlayerDataSchema.safeParse(data.player_data || {});
+  const playerData = playerDataResult.success ? playerDataResult.data : {};
+  const consentFlagsResult = ConsentFlagsSchema.safeParse(data.consent_flags || {});
+  const consentFlags = consentFlagsResult.success ? consentFlagsResult.data : {};
   let eligibility: EligibilityResult;
   try {
     eligibility = calculateEligibility({
@@ -148,7 +150,14 @@ export async function getRegistrationDetails(
     created_by_user_id: data.created_by_user_id,
     team: teams ? { id: teams.id, name: teams.name, dfbnet_id: teams.dfbnet_id } : null,
     finance_status: financeStatus || null,
-    rpa_traces: rpaTraces.map((trace) => ({
+    rpa_traces: rpaTraces
+      .sort((a, b) => {
+        const dateA = a.started_at ? new Date(a.started_at).getTime() : 0;
+        const dateB = b.started_at ? new Date(b.started_at).getTime() : 0;
+        return dateB - dateA;
+      })
+      .slice(0, 5)
+      .map((trace) => ({
       id: trace.id,
       registration_id: trace.registration_id,
       execution_id: trace.execution_id,

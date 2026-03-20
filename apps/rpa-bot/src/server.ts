@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
+import crypto from "crypto";
 import { z } from "zod";
 import { config, validateConfig } from "./config/env.js";
 import { logger } from "./utils/logger.js";
@@ -16,7 +17,7 @@ validateConfig();
 
 // ===== Live Mode Setup =====
 let dfbnetBot: DFBnetBot | null = null;
-let isProcessing = false;
+let processingRegistrationId: string | null = null;
 
 if (config.BOT_MODE === "live") {
   try {
@@ -44,8 +45,16 @@ if (config.BOT_MODE === "live") {
 
 // ===== Middleware =====
 app.use(helmet());
+
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(",").filter(Boolean);
+if (config.NODE_ENV === "production" && (!allowedOrigins || allowedOrigins.length === 0)) {
+  logger.error("ALLOWED_ORIGINS must be set in production");
+  process.exit(1);
+}
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS?.split(",") || ["http://localhost:3000"],
+  origin: allowedOrigins || ["http://localhost:3000"],
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 }));
 app.use(express.json({ limit: "10kb" }));
 
@@ -63,7 +72,14 @@ function requireAuth(
   }
 
   const token = authHeader.slice(7);
-  if (token !== config.BOT_API_KEY) {
+  const expected = config.BOT_API_KEY;
+
+  // Constant-time comparison to prevent timing attacks
+  const tokenBuf = Buffer.from(token);
+  const expectedBuf = Buffer.from(expected);
+
+  if (tokenBuf.length !== expectedBuf.length || !crypto.timingSafeEqual(tokenBuf, expectedBuf)) {
+    logger.warn(`Invalid API key attempt from ${req.ip}`);
     res.status(403).json({ error: "Invalid API key" });
     return;
   }
@@ -128,15 +144,15 @@ app.post("/execute", requireAuth, async (req, res) => {
       return;
     }
 
-    if (isProcessing) {
+    if (processingRegistrationId) {
       res.status(429).json({
-        error: "Bot is busy processing another registration",
+        error: `Bot is busy processing registration ${processingRegistrationId}`,
         retry_after_seconds: 60,
       });
       return;
     }
 
-    isProcessing = true;
+    processingRegistrationId = registration_id;
     try {
       const result = await dfbnetBot.execute({
         registration_id,
@@ -146,14 +162,14 @@ app.post("/execute", requireAuth, async (req, res) => {
       });
       res.json(result);
     } finally {
-      isProcessing = false;
+      processingRegistrationId = null;
     }
   } catch (error: unknown) {
-    const msg = error instanceof Error ? (error as Error).message : String(error);
+    const msg = error instanceof Error ? error.message : String(error);
     logger.error(`[API] /execute error: ${msg}`);
     res.status(500).json({
       success: false,
-      error: config.NODE_ENV === "production" ? "Internal bot execution error" : msg,
+      error: "Internal bot execution error",
       duration_ms: 0,
     });
   }
@@ -193,11 +209,11 @@ app.post("/health-check", requireAuth, async (req, res) => {
     const result = await dfbnetBot.healthCheck();
     res.json({ ...result, check_id });
   } catch (error: unknown) {
-    const msg = error instanceof Error ? (error as Error).message : String(error);
+    const msg = error instanceof Error ? error.message : String(error);
     logger.error(`[API] /health-check error: ${msg}`);
     res.status(500).json({
       success: false,
-      error: config.NODE_ENV === "production" ? "Internal health check error" : msg,
+      error: "Internal health check error",
       duration_ms: 0,
     });
   }
@@ -212,7 +228,8 @@ app.get("/status", requireAuth, (_req, res) => {
     version: "2.0.0",
     mode: config.BOT_MODE,
     status: "running",
-    is_processing: isProcessing,
+    is_processing: processingRegistrationId !== null,
+    processing_registration_id: processingRegistrationId,
     config: {
       success_rate: config.BOT_MODE === "mock" ? config.MOCK_SUCCESS_RATE : "N/A",
       delay_ms: config.BOT_MODE === "mock" ? config.MOCK_DELAY_MS : "N/A",

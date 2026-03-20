@@ -26,30 +26,18 @@ export const getDashboardMetrics = cache(async (): Promise<DashboardMetrics> => 
 
   const supabase = await createSupabaseServerClient();
 
-  // Parallel Queries für Performance
-  // WICHTIG: Alle Queries müssen über registrations gehen, damit RLS greift!
+  // Parallel Queries für Performance — konsolidiert (4→2)
+  // Query 1: Alle Registrierungen mit Finance + RPA Traces (single query statt 3)
+  // Query 2: Recent Audit Logs (separate Tabelle, muss eigener Query bleiben)
   const [
     registrationsResult,
-    financeResult,
-    rpaTracesResult,
     auditLogsResult,
   ] = await Promise.all([
-    // 1. Alle Registrierungen (Status Breakdown) — exclude soft-deleted
-    supabase.from("registrations").select("status, id").is("deleted_at", null),
-
-    // 2. Finance Status (Payment Stats) - left join to include registrations without payment
     supabase
       .from("registrations")
-      .select("finance_status(is_paid)")
+      .select("status, id, finance_status(is_paid), rpa_traces(status)")
       .is("deleted_at", null),
 
-    // 3. RPA Traces (Bot Success Rate) - via registrations Join — exclude soft-deleted
-    supabase
-      .from("registrations")
-      .select("rpa_traces(status)")
-      .is("deleted_at", null),
-
-    // 4. Recent Activity (Audit Logs) - via registrations join to exclude soft-deleted
     supabase
       .from("audit_logs")
       .select(`
@@ -64,21 +52,21 @@ export const getDashboardMetrics = cache(async (): Promise<DashboardMetrics> => 
       .limit(10),
   ]);
 
+  const allRegistrations = registrationsResult.data || [];
+
   // Status Breakdown berechnen
-  const statusBreakdown = calculateStatusBreakdown(
-    registrationsResult.data || []
-  );
+  const statusBreakdown = calculateStatusBreakdown(allRegistrations);
 
   // Payment Stats berechnen (finance_status ist nested) — Zod-validated
   const paymentStats = calculatePaymentStats(
-    (financeResult.data || [])
+    allRegistrations
       .map(reg => FinanceStatusSchema.safeParse(reg.finance_status))
       .filter(r => r.success)
       .map(r => r.data)
   );
 
   // Bot Stats berechnen (rpa_traces ist nested array)
-  const allTraces = (rpaTracesResult.data || [])
+  const allTraces = allRegistrations
     .flatMap(reg => reg.rpa_traces || [])
     .filter(Boolean);
   const botStats = calculateBotStats(allTraces);
@@ -87,7 +75,7 @@ export const getDashboardMetrics = cache(async (): Promise<DashboardMetrics> => 
   const recentActivity = formatAuditLogs(auditLogsResult.data || []);
 
   return {
-    totalRegistrations: registrationsResult.data?.length || 0,
+    totalRegistrations: allRegistrations.length,
     statusBreakdown,
     paymentStats,
     botStats,

@@ -46,14 +46,14 @@ export function Step7Payment({ onNext, onBack, registrationId }: Step7PaymentPro
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             Zahlung
           </h2>
-          <p className="text-gray-600">
+          <p className="text-gray-700">
             Wählen Sie Ihre bevorzugte Zahlungsmethode
           </p>
         </div>
 
         {/* Price Info */}
         <div className="bg-primary/5 border-2 border-primary/20 rounded-xl p-6 text-center">
-          <p className="text-sm text-gray-600 mb-2">Bearbeitungsgebühr</p>
+          <p className="text-sm text-gray-700 mb-2">Bearbeitungsgebühr</p>
           <p className="text-4xl font-bold text-primary">25,00 €</p>
         </div>
 
@@ -90,7 +90,7 @@ export function Step7Payment({ onNext, onBack, registrationId }: Step7PaymentPro
                   <h3 className="text-lg font-semibold text-gray-900 mb-1">
                     PayPal
                   </h3>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-700">
                     Sofortige Zahlung per PayPal
                   </p>
                 </div>
@@ -120,7 +120,7 @@ export function Step7Payment({ onNext, onBack, registrationId }: Step7PaymentPro
                   'Jetzt mit PayPal bezahlen'
                 )}
               </Button>
-              <p className="text-xs text-gray-600 text-center mt-2">
+              <p className="text-xs text-gray-700 text-center mt-2">
                 Sie werden zu PayPal weitergeleitet
               </p>
             </div>
@@ -157,7 +157,7 @@ export function Step7Payment({ onNext, onBack, registrationId }: Step7PaymentPro
                   <h3 className="text-lg font-semibold text-gray-900 mb-1">
                     Barzahlung
                   </h3>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-700">
                     Zahlung beim Trainer mit QR-Code
                   </p>
                 </div>
@@ -180,7 +180,7 @@ export function Step7Payment({ onNext, onBack, registrationId }: Step7PaymentPro
                 <div className="inline-block p-4 bg-white border-2 border-gray-200 rounded-lg" role="img" aria-label="QR-Code für Barzahlung">
                   <QRCodeSVG value={qrCodeData} size={200} level="H" />
                 </div>
-                <p className="text-xs text-gray-600 mt-4">
+                <p className="text-xs text-gray-700 mt-4">
                   Der Trainer scannt den Code zur Bestätigung der Barzahlung
                 </p>
               </div>

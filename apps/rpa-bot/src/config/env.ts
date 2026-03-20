@@ -13,18 +13,19 @@ export const config = {
 
   // Server
   SERVER_PORT: parseInt(process.env.SERVER_PORT || "3001", 10),
-  BOT_API_KEY: process.env.BOT_API_KEY || "dev-secret-key",
+  BOT_API_KEY: process.env.BOT_API_KEY || "",
   BOT_MODE: (process.env.BOT_MODE || "mock") as "mock" | "live",
 
   // Supabase
   SUPABASE_URL: process.env.SUPABASE_URL || "",
   SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY || "",
 
-  // DFBnet
+  // DFBnet Verein
   DFBNET_USERNAME: process.env.DFBNET_USERNAME || "",
   DFBNET_PASSWORD: process.env.DFBNET_PASSWORD || "",
+  DFBNET_KUNDENNUMMER: process.env.DFBNET_KUNDENNUMMER || "",
   DFBNET_BASE_URL:
-    process.env.DFBNET_BASE_URL || "https://www.dfbnet.org",
+    process.env.DFBNET_BASE_URL || "https://verein.dfbnet.org",
 
   // IMAP for 2FA OTP retrieval (optional — only needed if DFBnet uses 2FA)
   IMAP_HOST: process.env.IMAP_HOST || "",
@@ -58,7 +59,11 @@ export const config = {
  * Validate required config for live mode
  */
 export function validateConfig() {
-  // BOT_API_KEY must always be set in production (regardless of mode)
+  // BOT_API_KEY must always be set (no fallback)
+  if (!config.BOT_API_KEY) {
+    throw new Error("BOT_API_KEY environment variable is required");
+  }
+
   if (config.NODE_ENV === "production" && config.BOT_API_KEY === "dev-secret-key") {
     throw new Error("BOT_API_KEY must be set in production — default 'dev-secret-key' is not allowed");
   }
@@ -73,6 +78,7 @@ export function validateConfig() {
     "SUPABASE_SERVICE_ROLE_KEY",
     "DFBNET_USERNAME",
     "DFBNET_PASSWORD",
+    "DFBNET_KUNDENNUMMER",
   ] as const;
 
   const missing = required.filter((key) => !config[key]);

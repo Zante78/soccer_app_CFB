@@ -61,7 +61,7 @@ export default function SignInPage() {
       <Card className="w-full max-w-md p-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-[#0055A4]">CFB Digitale Passstelle</h1>
-          <p className="text-gray-600 mt-2">Anmelden</p>
+          <p className="text-gray-700 mt-2">Anmelden</p>
         </div>
 
         <form onSubmit={handleSignIn} className="space-y-4">
@@ -106,7 +106,7 @@ export default function SignInPage() {
           </Button>
         </form>
 
-        <p className="text-center text-sm text-gray-600 mt-6">
+        <p className="text-center text-sm text-gray-700 mt-6">
           Noch kein Konto?{" "}
           <Link href="/sign-up" className="text-[#0055A4] hover:underline font-medium">
             Registrieren

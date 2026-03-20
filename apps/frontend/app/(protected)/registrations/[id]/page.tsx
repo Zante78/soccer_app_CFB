@@ -76,7 +76,7 @@ async function RegistrationDetailContent({ id }: { id: string }) {
             <h1 className="text-3xl font-bold text-gray-900">
               {registration.player_name}
             </h1>
-            <p className="text-gray-600 mt-2">
+            <p className="text-gray-700 mt-2">
               {registration.team?.name || "Kein Team zugeordnet"}
             </p>
           </div>
@@ -89,7 +89,7 @@ async function RegistrationDetailContent({ id }: { id: string }) {
                 Bezahlt
               </Badge>
             ) : (
-              <Badge className="bg-gray-100 text-gray-600 border-gray-200">
+              <Badge className="bg-gray-100 text-gray-700 border-gray-200">
                 <XCircle className="h-3 w-3 mr-1" />
                 Offen
               </Badge>
@@ -158,7 +158,7 @@ async function RegistrationDetailContent({ id }: { id: string }) {
                         {trace.status}
                       </span>
                       {trace.visual_diff_score !== null && (
-                        <span className="text-xs text-gray-600">
+                        <span className="text-xs text-gray-700">
                           Diff: {(trace.visual_diff_score * 100).toFixed(2)}%
                         </span>
                       )}

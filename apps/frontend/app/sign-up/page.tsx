@@ -57,7 +57,7 @@ export default function SignUpPage() {
               </svg>
             </div>
             <h2 className="text-2xl font-bold text-gray-900">Registrierung erfolgreich!</h2>
-            <p className="text-gray-600 mt-2">
+            <p className="text-gray-700 mt-2">
               Bitte bestätige deine E-Mail-Adresse und wende dich an einen Administrator,
               um Zugang zum Admin-Dashboard zu erhalten.
             </p>
@@ -75,7 +75,7 @@ export default function SignUpPage() {
       <Card className="w-full max-w-md p-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-[#0055A4]">CFB Digitale Passstelle</h1>
-          <p className="text-gray-600 mt-2">Registrieren</p>
+          <p className="text-gray-700 mt-2">Registrieren</p>
         </div>
 
         <form onSubmit={handleSignUp} className="space-y-4">
@@ -129,7 +129,7 @@ export default function SignUpPage() {
               className="input w-full"
               placeholder="••••••••"
             />
-            <p className="text-xs text-gray-600 mt-1">Mindestens 8 Zeichen</p>
+            <p className="text-xs text-gray-700 mt-1">Mindestens 8 Zeichen</p>
           </div>
 
           <Button type="submit" className="w-full" disabled={loading}>
@@ -137,7 +137,7 @@ export default function SignUpPage() {
           </Button>
         </form>
 
-        <p className="text-center text-sm text-gray-600 mt-6">
+        <p className="text-center text-sm text-gray-700 mt-6">
           Bereits ein Konto?{" "}
           <Link href="/sign-in" className="text-[#0055A4] hover:underline font-medium">
             Anmelden

@@ -55,7 +55,7 @@ export function DocumentViewer({
           <h4 className="text-sm font-semibold text-gray-900 mb-4">
             Spielerfoto
           </h4>
-          <div className="flex flex-col items-center justify-center py-12 text-gray-600">
+          <div className="flex flex-col items-center justify-center py-12 text-gray-700">
             <FileText className="h-12 w-12 mb-2" />
             <p className="text-sm">Kein Foto vorhanden</p>
           </div>
@@ -82,7 +82,7 @@ export function DocumentViewer({
                     Erteilt
                   </Badge>
                 ) : (
-                  <Badge className="bg-gray-100 text-gray-600 border-gray-200">
+                  <Badge className="bg-gray-100 text-gray-700 border-gray-200">
                     <XCircle className="h-3 w-3 mr-1" />
                     Nicht erteilt
                   </Badge>
@@ -108,11 +108,11 @@ export function DocumentViewer({
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
               >
-                <FileText className="h-5 w-5 text-gray-600" />
+                <FileText className="h-5 w-5 text-gray-700" />
                 <span className="text-sm text-gray-700 flex-1">
                   Dokument {index + 1}
                 </span>
-                <Download className="h-4 w-4 text-gray-600" />
+                <Download className="h-4 w-4 text-gray-700" />
               </a>
             ))}
           </div>

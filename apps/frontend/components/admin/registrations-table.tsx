@@ -72,11 +72,11 @@ export function RegistrationsTable({ data, isLoading, sortBy, sortOrder, onSort 
     return (
       <div className="bg-white rounded-lg border border-gray-200">
         <div className="p-12 text-center">
-          <FileText className="h-12 w-12 text-gray-600 mx-auto mb-4" />
+          <FileText className="h-12 w-12 text-gray-700 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
             Keine Registrierungen gefunden
           </h3>
-          <p className="text-gray-600">
+          <p className="text-gray-700">
             Versuche deine Filtereinstellungen anzupassen.
           </p>
         </div>
@@ -127,7 +127,7 @@ export function RegistrationsTable({ data, isLoading, sortBy, sortOrder, onSort 
                 <div>
                   <p className="text-gray-900">{registration.player_name}</p>
                   {registration.player_dfb_id && (
-                    <p className="text-xs text-gray-600">
+                    <p className="text-xs text-gray-700">
                       DFB-ID: {registration.player_dfb_id}
                     </p>
                   )}
@@ -149,7 +149,7 @@ export function RegistrationsTable({ data, isLoading, sortBy, sortOrder, onSort 
                     <span className="text-sm">Bezahlt</span>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-1 text-gray-600">
+                  <div className="flex items-center gap-1 text-gray-700">
                     <XCircle className="h-4 w-4" />
                     <span className="text-sm">Offen</span>
                   </div>

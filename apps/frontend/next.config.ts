@@ -3,6 +3,7 @@ import path from "path";
 
 const nextConfig: NextConfig = {
   experimental: {
+    ppr: "incremental",
     optimizePackageImports: ["lucide-react", "date-fns"],
   },
   webpack: (config) => {

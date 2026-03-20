@@ -26,7 +26,7 @@ export default function HomePage() {
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             CFB Digitale Passstelle
           </h1>
-          <p className="text-xl text-gray-600 mb-8">
+          <p className="text-xl text-gray-700 mb-8">
             Spielerpass-Anträge des CfB Ford Niehl e.V.
           </p>
 
@@ -39,7 +39,7 @@ export default function HomePage() {
                 </svg>
               </div>
               <h3 className="font-semibold text-gray-900 mb-1">Schnell</h3>
-              <p className="text-sm text-gray-600">Nur 5-10 Minuten</p>
+              <p className="text-sm text-gray-700">Nur 5-10 Minuten</p>
             </div>
 
             <div className="text-center">
@@ -49,7 +49,7 @@ export default function HomePage() {
                 </svg>
               </div>
               <h3 className="font-semibold text-gray-900 mb-1">Sicher</h3>
-              <p className="text-sm text-gray-600">DSGVO-konform</p>
+              <p className="text-sm text-gray-700">DSGVO-konform</p>
             </div>
 
             <div className="text-center">
@@ -60,7 +60,7 @@ export default function HomePage() {
                 </svg>
               </div>
               <h3 className="font-semibold text-gray-900 mb-1">Transparent</h3>
-              <p className="text-sm text-gray-600">Echtzeit-Status</p>
+              <p className="text-sm text-gray-700">Echtzeit-Status</p>
             </div>
           </div>
 
@@ -71,7 +71,7 @@ export default function HomePage() {
 
           {/* Footer Info */}
           <div className="mt-8 pt-6 border-t border-gray-200">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-700">
               CfB Ford Niehl e.V. • Digitale Passstelle
             </p>
           </div>

@@ -22,7 +22,7 @@ export function EligibilityTimeline({ result }: EligibilityTimelineProps) {
             <h3 className="text-lg font-semibold text-gray-900">
               Spielberechtigung
             </h3>
-            <p className="text-sm text-gray-600 mt-1">
+            <p className="text-sm text-gray-700 mt-1">
               Berechnung nach {result.applied_rule}
             </p>
           </div>
@@ -46,20 +46,20 @@ export function EligibilityTimeline({ result }: EligibilityTimelineProps) {
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0 mt-1">
                 <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
-                  <Clock className="h-4 w-4 text-gray-600" />
+                  <Clock className="h-4 w-4 text-gray-700" />
                 </div>
               </div>
               <div className="flex-1">
                 <p className="text-sm font-medium text-gray-900">
                   Sperrfrist Beginn
                 </p>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-700">
                   {format(new Date(result.sperrfrist_start), "dd. MMMM yyyy", {
                     locale: de,
                   })}
                 </p>
                 {result.calculation_reason && (
-                  <p className="text-xs text-gray-600 mt-1">{result.calculation_reason}</p>
+                  <p className="text-xs text-gray-700 mt-1">{result.calculation_reason}</p>
                 )}
               </div>
             </div>
@@ -77,7 +77,7 @@ export function EligibilityTimeline({ result }: EligibilityTimelineProps) {
                 <p className="text-sm font-medium text-gray-900">
                   Gesperrt für
                 </p>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-700">
                   {result.sperrfrist_days} Tage
                 </p>
               </div>
@@ -89,14 +89,14 @@ export function EligibilityTimeline({ result }: EligibilityTimelineProps) {
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0 mt-1">
                 <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
-                  <Clock className="h-4 w-4 text-gray-600" />
+                  <Clock className="h-4 w-4 text-gray-700" />
                 </div>
               </div>
               <div className="flex-1">
                 <p className="text-sm font-medium text-gray-900">
                   Sperrfrist Ende
                 </p>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-700">
                   {format(new Date(result.sperrfrist_end), "dd. MMMM yyyy", {
                     locale: de,
                   })}
@@ -126,7 +126,7 @@ export function EligibilityTimeline({ result }: EligibilityTimelineProps) {
               <p className="text-sm font-medium text-gray-900">
                 Spielberechtigt ab
               </p>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-700">
                 {result.eligibility_date
                   ? format(new Date(result.eligibility_date), "dd. MMMM yyyy", {
                       locale: de,

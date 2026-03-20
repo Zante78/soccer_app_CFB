@@ -75,7 +75,7 @@ export function Step5Eligibility({ onNext, onBack, playerData }: Step5Eligibilit
           </div>
           <div className="h-28 bg-gray-200 rounded-xl animate-pulse" />
           <div className="h-40 bg-gray-200 rounded-xl animate-pulse" />
-          <p className="text-sm text-gray-600 text-center">Berechne Spielberechtigung...</p>
+          <p className="text-sm text-gray-700 text-center">Berechne Spielberechtigung...</p>
         </div>
       </Card>
     );
@@ -89,7 +89,7 @@ export function Step5Eligibility({ onNext, onBack, playerData }: Step5Eligibilit
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             Spielberechtigung
           </h2>
-          <p className="text-gray-600">
+          <p className="text-gray-700">
             Automatische Berechnung nach {eligibility.applied_rule}
           </p>
         </div>
@@ -162,21 +162,21 @@ export function Step5Eligibility({ onNext, onBack, playerData }: Step5Eligibilit
 
           <div className="space-y-3">
             <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Regelwerk:</span>
+              <span className="text-sm text-gray-700">Regelwerk:</span>
               <span className="text-sm font-medium text-gray-900">
                 {eligibility.applied_rule}
               </span>
             </div>
 
             <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Sperrfrist:</span>
+              <span className="text-sm text-gray-700">Sperrfrist:</span>
               <span className="text-sm font-medium text-gray-900">
                 {eligibility.sperrfrist_days} Tage
               </span>
             </div>
 
             <div className="flex justify-between">
-              <span className="text-sm text-gray-600">Spielberechtigung ab:</span>
+              <span className="text-sm text-gray-700">Spielberechtigung ab:</span>
               <span className="text-sm font-medium text-gray-900">
                 {new Date(eligibility.eligibility_date).toLocaleDateString('de-DE', {
                   day: '2-digit',
@@ -188,7 +188,7 @@ export function Step5Eligibility({ onNext, onBack, playerData }: Step5Eligibilit
 
             {!eligibility.is_eligible && (
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600">Verbleibende Tage:</span>
+                <span className="text-sm text-gray-700">Verbleibende Tage:</span>
                 <span className="text-sm font-medium text-orange-700">
                   {Math.max(
                     0,

@@ -35,7 +35,7 @@ export function Step8Completion({ magicLink, registrationId, playerName }: Step8
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
             Antrag erfolgreich!
           </h2>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg text-gray-700">
             Ihr Spielerpass-Antrag für <strong>{playerName}</strong> wurde eingereicht
           </p>
         </div>
@@ -50,7 +50,7 @@ export function Step8Completion({ magicLink, registrationId, playerName }: Step8
               </div>
               <div className="ml-3">
                 <p className="text-sm font-medium text-gray-900">Antrag eingegangen</p>
-                <p className="text-xs text-gray-600">Ihre Daten wurden erfolgreich übermittelt</p>
+                <p className="text-xs text-gray-700">Ihre Daten wurden erfolgreich übermittelt</p>
               </div>
             </div>
 
@@ -60,7 +60,7 @@ export function Step8Completion({ magicLink, registrationId, playerName }: Step8
               </div>
               <div className="ml-3">
                 <p className="text-sm font-medium text-gray-900">Automatische Verarbeitung</p>
-                <p className="text-xs text-gray-600">
+                <p className="text-xs text-gray-700">
                   Der RPA-Bot erstellt einen Entwurf im DFBnet (~30 Sekunden)
                 </p>
               </div>
@@ -72,7 +72,7 @@ export function Step8Completion({ magicLink, registrationId, playerName }: Step8
               </div>
               <div className="ml-3">
                 <p className="text-sm font-medium text-gray-900">Passwart-Prüfung</p>
-                <p className="text-xs text-gray-600">
+                <p className="text-xs text-gray-700">
                   Der Passwart prüft und sendet den Antrag final ab
                 </p>
               </div>
@@ -84,7 +84,7 @@ export function Step8Completion({ magicLink, registrationId, playerName }: Step8
               </div>
               <div className="ml-3">
                 <p className="text-sm font-medium text-gray-900">Fertig!</p>
-                <p className="text-xs text-gray-600">
+                <p className="text-xs text-gray-700">
                   Sie erhalten eine Benachrichtigung, sobald der Pass genehmigt ist
                 </p>
               </div>
@@ -104,7 +104,7 @@ export function Step8Completion({ magicLink, registrationId, playerName }: Step8
               <div className="inline-block p-4 bg-white border-2 border-gray-200 rounded-lg" role="img" aria-label="QR-Code zur Statusverfolgung">
                 <QRCodeSVG value={magicLink} size={200} level="H" />
               </div>
-              <p className="text-sm text-gray-600 mt-4">
+              <p className="text-sm text-gray-700 mt-4">
                 Scannen Sie den QR-Code mit Ihrem Smartphone
               </p>
             </div>
@@ -133,7 +133,7 @@ export function Step8Completion({ magicLink, registrationId, playerName }: Step8
                 </svg>
               </button>
             </div>
-            <p className="text-xs text-gray-600 mt-2">
+            <p className="text-xs text-gray-700 mt-2">
               Speichern Sie diesen Link, um jederzeit den Status Ihres Antrags zu verfolgen
             </p>
           </div>
@@ -190,7 +190,7 @@ export function Step8Completion({ magicLink, registrationId, playerName }: Step8
 
         {/* Registration ID */}
         <div className="text-center pt-4 border-t border-gray-200">
-          <p className="text-sm text-gray-600">Antragsnummer:</p>
+          <p className="text-sm text-gray-700">Antragsnummer:</p>
           <p className="text-lg font-mono font-semibold text-gray-900">{registrationId}</p>
         </div>
 

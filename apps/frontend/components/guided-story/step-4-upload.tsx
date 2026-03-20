@@ -78,7 +78,7 @@ export function Step4Upload({ onNext, onBack }: Step4UploadProps) {
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             Dokumente & Passfoto
           </h2>
-          <p className="text-gray-600">
+          <p className="text-gray-700">
             Laden Sie ein Passfoto und ggf. weitere Dokumente hoch
           </p>
         </div>
@@ -96,7 +96,7 @@ export function Step4Upload({ onNext, onBack }: Step4UploadProps) {
             >
               <div className="flex flex-col items-center justify-center pt-5 pb-6">
                 <svg
-                  className="w-12 h-12 text-gray-600 mb-4"
+                  className="w-12 h-12 text-gray-700 mb-4"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -108,10 +108,10 @@ export function Step4Upload({ onNext, onBack }: Step4UploadProps) {
                     d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                   />
                 </svg>
-                <p className="mb-2 text-sm text-gray-600">
+                <p className="mb-2 text-sm text-gray-700">
                   <span className="font-semibold">Klicken zum Hochladen</span> oder Drag & Drop
                 </p>
-                <p className="text-xs text-gray-600">JPG, PNG oder WebP (max. 5MB)</p>
+                <p className="text-xs text-gray-700">JPG, PNG oder WebP (max. 5MB)</p>
               </div>
               <input
                 id="photo-upload"
@@ -159,7 +159,7 @@ export function Step4Upload({ onNext, onBack }: Step4UploadProps) {
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Weitere Dokumente (optional)
           </label>
-          <p className="text-xs text-gray-600 mb-3">
+          <p className="text-xs text-gray-700 mb-3">
             z.B. Ausweis, Geburtsurkunde, Spielerlaubnis
           </p>
 
@@ -168,7 +168,7 @@ export function Step4Upload({ onNext, onBack }: Step4UploadProps) {
             className="flex items-center justify-center w-full px-4 py-3 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer hover:bg-gray-50 transition-colors focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2"
           >
             <svg
-              className="w-5 h-5 text-gray-600 mr-2"
+              className="w-5 h-5 text-gray-700 mr-2"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -180,7 +180,7 @@ export function Step4Upload({ onNext, onBack }: Step4UploadProps) {
                 d="M12 4v16m8-8H4"
               />
             </svg>
-            <span className="text-sm text-gray-600">Dokument hinzufügen</span>
+            <span className="text-sm text-gray-700">Dokument hinzufügen</span>
             <input
               id="document-upload"
               type="file"
@@ -200,7 +200,7 @@ export function Step4Upload({ onNext, onBack }: Step4UploadProps) {
                 >
                   <div className="flex items-center">
                     <svg
-                      className="w-5 h-5 text-gray-600 mr-2"
+                      className="w-5 h-5 text-gray-700 mr-2"
                       fill="currentColor"
                       viewBox="0 0 20 20"
                     >

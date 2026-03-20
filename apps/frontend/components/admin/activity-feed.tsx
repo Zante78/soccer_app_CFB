@@ -21,7 +21,7 @@ export function ActivityFeed({ items }: ActivityFeedProps) {
         <h3 className="text-lg font-semibold text-gray-900 mb-4">
           Letzte Aktivitäten
         </h3>
-        <p className="text-gray-600 text-center py-8">
+        <p className="text-gray-700 text-center py-8">
           Noch keine Aktivitäten vorhanden
         </p>
       </Card>
@@ -52,7 +52,7 @@ export function ActivityFeed({ items }: ActivityFeedProps) {
                   </span>
                 )}
               </p>
-              <p className="text-xs text-gray-600 mt-1">
+              <p className="text-xs text-gray-700 mt-1">
                 {formatDistanceToNow(new Date(item.timestamp), {
                   addSuffix: true,
                   locale: de,

@@ -53,8 +53,12 @@ export function FilterBar({
       <div className="grid gap-4 md:grid-cols-4">
         {/* Search */}
         <div className="relative md:col-span-2">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600" />
+          <label htmlFor="filter-search" className="sr-only">
+            Spielername oder DFB-ID suchen
+          </label>
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-700" />
           <Input
+            id="filter-search"
             placeholder="Spielername oder DFB-ID suchen..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
@@ -63,42 +67,52 @@ export function FilterBar({
         </div>
 
         {/* Status Filter */}
-        <Select
-          value={status || "all"}
-          onValueChange={(value) =>
-            onStatusChange(value === "all" ? null : (value as RegistrationStatus))
-          }
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Alle Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Alle Status</SelectItem>
-            {statusOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div>
+          <label htmlFor="filter-status" className="sr-only">
+            Status filtern
+          </label>
+          <Select
+            value={status || "all"}
+            onValueChange={(value) =>
+              onStatusChange(value === "all" ? null : (value as RegistrationStatus))
+            }
+          >
+            <SelectTrigger id="filter-status" aria-label="Status filtern">
+              <SelectValue placeholder="Alle Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Alle Status</SelectItem>
+              {statusOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
         {/* Team Filter */}
-        <Select
-          value={teamId || "all"}
-          onValueChange={(value) => onTeamChange(value === "all" ? null : value)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Alle Teams" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Alle Teams</SelectItem>
-            {teams.map((team) => (
-              <SelectItem key={team.id} value={team.id}>
-                {team.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div>
+          <label htmlFor="filter-team" className="sr-only">
+            Team filtern
+          </label>
+          <Select
+            value={teamId || "all"}
+            onValueChange={(value) => onTeamChange(value === "all" ? null : value)}
+          >
+            <SelectTrigger id="filter-team" aria-label="Team filtern">
+              <SelectValue placeholder="Alle Teams" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Alle Teams</SelectItem>
+              {teams.map((team) => (
+                <SelectItem key={team.id} value={team.id}>
+                  {team.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Reset Button */}
@@ -108,7 +122,7 @@ export function FilterBar({
             variant="ghost"
             size="sm"
             onClick={onReset}
-            className="text-gray-600 hover:text-gray-900"
+            className="text-gray-700 hover:text-gray-900"
           >
             <X className="h-4 w-4 mr-1" />
             Filter zurücksetzen
