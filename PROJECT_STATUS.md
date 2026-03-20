@@ -1,7 +1,7 @@
 # CFB Pass-Automation - Project Status
 
-**Stand:** 2026-03-08
-**Version:** Phase 4 Foundation Ready | Phase 5 Templates Ready
+**Stand:** 2026-03-20
+**Version:** Phase 6 Complete | Phase 7 Pending (VPS Deployment)
 
 ---
 
@@ -64,99 +64,83 @@
 - Deutsche Umlaute Support
 - Strukturiertes Layout
 
----
-
-## 🚧 IN PROGRESS
-
-### Phase 4: RPA Bot (Foundation Ready)
-
-#### 4.1: Setup ✅
+### Phase 4: RPA Bot ✅
 - Monorepo Integration (`apps/rpa-bot`)
-- Dependencies (Playwright, Pixelmatch, Winston)
-- TypeScript + ESM Config
-- Environment Config Management
-
-#### 4.2: Bot Foundation ✅
-- DFBnetBot Class (Skeleton)
-- Supabase Client (Admin Access)
-- Logger (Console + File)
-- Browser Launch Test (ERFOLG)
-
-#### 4.3-4.6: TODO
-- DFBnet Login Automation
-- Form Filling Logic
+- Playwright + Pixelmatch + Winston
+- DFBnet Login Automation (3-Feld-Formular)
+- 3-Phasen Mitglied-Erstellungsflow
 - Visual Regression Testing
-- Production Deployment
+- Bot-Core kompiliert fehlerfrei (`tsc --noEmit`)
+- E2E Test BESTANDEN (41 Sekunden, 8/8 Schritte)
+- Test-Mitglied automatisiert erstellt + gelöscht
 
-**Dokumentation:** `PHASE_4_IMPLEMENTATION_GUIDE.md` (vollständig)
+### Phase 5: n8n Workflows ✅ (2026-03-20)
+
+| # | Workflow | Trigger | Email Alert |
+|---|----------|---------|-------------|
+| 1 | CFB PayPal Payment Handler | Webhook | — |
+| 2 | CFB QR Payment Verification | Webhook | — |
+| 3 | CFB Bot Execution Queue | Schedule 60s | Bot-Fehler Alert |
+| 4 | CFB Heartbeat Monitor | Manual (Schedule 4h) | DFBnet RED Alert |
+| 5 | CFB DSGVO Purge | Cron 02:00 UTC | Purge-Bericht |
+
+- 3 Credentials (Supabase Service Role, Bot API Key, Resend SMTP)
+- Email Alerts via Resend (`onboarding@resend.dev` → `simon.kritikos@cfb-niehl.de`)
+- DB: `bot_execution_lock` Singleton, 5 RPC Functions, optimierte RLS
+
+### Phase 6: Testing & Code Audit ✅ (2026-03-10 — 2026-03-20)
+
+#### E2E Tests ✅
+- 30 Tests in 8 Spec-Dateien (Playwright + Chromium)
+- storageState Auth Pattern
+- Admin-Login: `admin@cfb-niehl.de` / `Test1234!`
+- Commit: `2712582`
+
+#### Code-Audit (12 Runden, ~150 Fixes) ✅
+- 5 parallele Agenten (Architecture, Security, UI/UX, Performance, Database)
+- Score-Verlauf: 6.9 → 8.0 (Peak R10)
+- Commits: `7019862` → `2f132c0` (7 Runden)
+
+#### V-PERF Audit (6 Fixes) ✅
+- Suspense Boundaries auf Dynamic Imports
+- `useTransition` für INP-Optimierung (Filter-States)
+- PPR incremental aktiviert (`next.config.ts`)
+- RPA Traces: Server-Side Sort + Limit (5)
+- PDF Export: Lazy-loaded via `useTransition`
+- `optimizePackageImports`: lucide-react, date-fns
+
+#### V-UX Audit (8 Fixes, 37+ Dateien) ✅
+- `prefers-reduced-motion` global (WCAG 2.3.3)
+- WCAG AA Kontrast: `text-gray-600` → `text-gray-700` (30 Dateien)
+- 44px Touch Targets (Input, Select)
+- `role="alert"` + `aria-live` auf Error States
+- sr-only Labels + aria-labels auf Filter-Inputs
+- Focus Ring: `ring-blue-600` → `ring-primary` (konsistent)
+- Skeleton: `motion-safe:animate-pulse` + `motion-reduce:animate-none`
+
+#### V-DATA Audit (5 Fixes) ✅
+- Soft-Delete Enforcement: `deleted_at IS NULL` auf User-Queries
+- Dashboard Query Consolidation: 4 Queries → 2
+- Storage Bucket Whitelist (TypeScript `AllowedBucket` Type)
+- Search Input Sanitization (100 Char Limit + Semicolon Escaping)
+- Path Traversal Hardening (Null-Bytes, Control Characters)
+
+**Audit Commit:** `8b6bab7` (64 Dateien, 4841 Insertions)
 
 ---
 
-## ⏳ AUSSTEHENDE PHASEN
-
-### Phase 5: n8n Workflows ✅ TEMPLATES READY
-
-#### 5.1: PayPal Handler ✅
-- Webhook Trigger (`/webhook/paypal-webhook`)
-- PayPal Payload Parsing (IPN + Checkout API)
-- finance_status Update (is_paid, payment_method)
-- Registration Status → READY_FOR_BOT
-- Audit Log (PAYMENT_RECEIVED)
-
-#### 5.2: QR Verification ✅
-- Webhook Trigger (`/webhook/qr-verify`)
-- Trainer Role Validation
-- Cash Payment Confirmation
-- Registration Status → READY_FOR_BOT
-- Audit Log (CASH_PAYMENT_VERIFIED)
-
-#### 5.3: Bot Execution Queue ✅
-- Schedule Trigger (60 Sekunden)
-- Singleton Lock (n8n Static Data, 10 Min Expiry)
-- Registration → BOT_IN_PROGRESS
-- RPA Trace erstellen
-- Bot Runner HTTP Call
-- Status Update (COMPLETED/ERROR/VISUAL_REGRESSION_ERROR)
-- Error Alert Email
-
-#### 5.4: DSGVO Purge ✅
-- Cron Trigger (täglich 02:00 UTC)
-- 48h Cutoff Berechnung
-- Batch Processing (10 pro Batch)
-- Supabase Storage Delete
-- photo_path = NULL
-- Audit Log (DSGVO_PHOTO_PURGED)
-- Summary Email
-
-#### 5.5: Heartbeat Monitor ✅
-- Schedule Trigger (alle 4 Stunden)
-- Manual Webhook Trigger
-- Bot Health Check Call
-- system_health Table Update (GREEN/YELLOW/RED)
-- Alert Email bei RED
-
-**Templates:** `n8n/templates/` (5 JSON Files)
-**Dokumentation:** `n8n/README.md`
-**Migration:** `supabase/migrations/000005_system_health.sql`
-
-**Nächster Schritt:** Import in n8n Cloud + Credentials konfigurieren
-
----
-
-## ⏳ NOCH AUSSTEHEND
-- Email Notifications
-
-### Phase 6: Testing
-- E2E Tests (Playwright)
-- Integration Tests (Vitest)
-- Load Testing
-- Security Audit
+## ⏳ AUSSTEHEND
 
 ### Phase 7: Deployment
-- Vercel (Frontend)
-- Windows VPS (RPA Bot)
-- Supabase Production
-- CI/CD Pipeline
+- [ ] Windows VPS aufsetzen (Bot Runner)
+- [ ] n8n Docker auf VPS
+- [ ] Bot Runner URL aktualisieren (localhost → VPS)
+- [ ] Heartbeat Schedule Trigger aktivieren
+- [ ] Bot Queue End-to-End Test (echte READY_FOR_BOT Registration)
+- [ ] `passwart@cfb-niehl.de` als Zweit-Empfänger (wenn angelegt)
+- [ ] Custom Domain klären (Jimdo DNS → Cloudflare)
+
+**Status:** Vorstand-Freigabe ausstehend
 
 ---
 
@@ -178,79 +162,71 @@ CFB-Pass-Automation/
 │   │   ├── components/
 │   │   │   ├── admin/
 │   │   │   ├── auth/
+│   │   │   ├── guided-story/
+│   │   │   ├── providers/
 │   │   │   ├── registration/
 │   │   │   └── ui/
-│   │   └── lib/
-│   │       ├── supabase/
-│   │       └── pdf-export.ts
-│   └── rpa-bot/               🚧 FOUNDATION READY
+│   │   ├── lib/
+│   │   │   ├── supabase/
+│   │   │   └── pdf-export.ts
+│   │   └── e2e/               # 30 Playwright Tests
+│   └── rpa-bot/               ✅ BOT CORE COMPLETE
 │       ├── src/
 │       │   ├── bot/
-│       │   │   └── dfbnet-bot.ts
 │       │   ├── config/
-│       │   │   └── env.ts
 │       │   ├── services/
-│       │   │   └── supabase-client.ts
 │       │   ├── utils/
-│       │   │   └── logger.ts
+│       │   ├── scripts/       # DFBnet Exploration + Delete
 │       │   └── test/
-│       │       └── test-bot.ts
 │       └── package.json
 ├── packages/
 │   ├── shared-types/          ✅ COMPLETE
 │   └── shared-logic/          ✅ COMPLETE
+├── n8n/
+│   └── templates/             ✅ 5 WORKFLOWS
 ├── supabase/
-│   ├── migrations/            ✅ UP TO DATE
+│   ├── migrations/            ✅ 7 MIGRATIONS
 │   └── seed.sql
 └── docs/
-    ├── PHASE_4_IMPLEMENTATION_GUIDE.md  ✅ NEW
-    └── RPA_BOT_QUICK_REFERENCE.md       ✅ NEW
+    ├── PHASE_4_IMPLEMENTATION_GUIDE.md
+    └── RPA_BOT_QUICK_REFERENCE.md
 ```
 
 ---
 
 ## 🔑 KEY METRICS
 
-### Frontend (Phase 3)
+### Frontend
 - **Routes:** 8 (Dashboard, Registrations, Detail, RPA Traces, etc.)
-- **Components:** 45+ (Admin, Auth, Registration, UI)
-- **Server Actions:** 12 (CRUD, PDF Export, etc.)
+- **Components:** 50+ (Admin, Auth, Guided Story, Registration, UI)
+- **Server Actions:** 12+ (CRUD, PDF Export, etc.)
 - **RLS Policies:** 16 (4 Tables × 4 Roles)
-- **Tests:** 3/3 Admin Dashboard Tests ✅
+- **E2E Tests:** 30/30 ✅
 
-### RPA Bot (Phase 4)
-- **Dependencies:** 6 (Playwright, Supabase, Winston, etc.)
-- **Code Files:** 5 (Bot, Config, Logger, Supabase, Test)
-- **Test Status:** Browser Launch ✅
-- **Documentation:** 2 Guides (Implementation + Quick Ref)
+### RPA Bot
+- **DFBnet Login:** ✅ Verifiziert
+- **3-Phasen Mitglied-Flow:** ✅ E2E bestanden
+- **Visual Regression:** ✅ Implementiert
+- **Bot-Core:** `tsc --noEmit` clean
+
+### n8n Workflows
+- **Workflows:** 5/5 Published + getestet
+- **Credentials:** 3 (Supabase, Bot API, Resend SMTP)
+- **Email Alerts:** 3 Workflows (Bot Queue, Heartbeat, DSGVO)
 
 ### Database
-- **Tables:** 8 (registrations, teams, users, audit_logs, etc.)
-- **Test Data:** 3 Registrierungen, 2 Auth Users
+- **Tables:** 8+ (registrations, teams, users, audit_logs, etc.)
+- **Migrations:** 7
+- **RPC Functions:** 5 (Bot Lock, Expired Records, Health)
 - **Storage Buckets:** 4 (player-photos, player-documents, rpa-screenshots, rpa-baselines)
 
----
-
-## 🎯 SUCCESS CRITERIA (Phase 4)
-
-### Minimum Viable Bot (MVP)
-- [ ] Login zu DFBnet funktioniert
-- [ ] Formular wird ausgefüllt (5 Felder)
-- [ ] Screenshot wird erstellt
-- [ ] Visual Regression erkennt Unterschiede
-- [ ] Supabase Integration (RPA Traces)
-
-### Production Ready
-- [ ] Error Handling + Retry Logic (3x)
-- [ ] File Upload (Photo)
-- [ ] Headless Mode stabil
-- [ ] Windows VPS Deployment
-- [ ] n8n Webhook Trigger
-
-### Performance
-- [ ] Execution Time: < 90 Sekunden
-- [ ] Visual Diff Threshold: < 0.2%
-- [ ] Success Rate: > 95%
+### Code Quality (Audit Results)
+- **Audit Runden:** 12 (General) + 4 (V-PERF, V-UX, V-DATA, Deep Audit)
+- **Total Fixes:** ~190+ über alle Runden
+- **Type Safety:** Zero `any`/`as` casts, Zod validation auf Server Actions
+- **Security:** getUser() statt getSession(), Path Traversal Hardening, Bucket Whitelist
+- **Accessibility:** WCAG AA Kontrast, 44px Touch Targets, ARIA Roles, Reduced Motion
+- **Performance:** PPR incremental, useTransition, Dynamic Imports, Suspense Boundaries
 
 ---
 
@@ -262,67 +238,60 @@ CFB-Pass-Automation/
 | Phase 1 | 5 days | 5 days | ✅ Done |
 | Phase 2 | 10 days | 12 days | ✅ Done |
 | Phase 3 | 20 days | 25 days | ✅ Done |
-| Phase 4 | 10 days | 2 days | 🚧 In Progress (20% done) |
-| Phase 5 | 5 days | - | ⏳ Pending |
-| Phase 6 | 7 days | - | ⏳ Pending |
+| Phase 4 | 10 days | 8 days | ✅ Done |
+| Phase 5 | 5 days | 3 days | ✅ Done |
+| Phase 6 | 7 days | 10 days | ✅ Done |
 | Phase 7 | 5 days | - | ⏳ Pending |
-| **Total** | **65 days** | **47 days** | **62% Complete** |
+| **Total** | **65 days** | **66 days** | **~90% Complete** |
 
 ---
 
 ## 🆘 KNOWN ISSUES
 
 ### Frontend
-- ✅ ALLE BUGS BEHOBEN (3/3 Tests bestanden)
+- ✅ ALLE BUGS BEHOBEN (30/30 E2E Tests bestanden)
+- ✅ Code Audit: ~190+ Fixes über 16 Audit-Runden
 
 ### RPA Bot
-- ⚠️ DFBnet Credentials fehlen (für Produktion nötig)
-- ⚠️ Baseline Screenshots fehlen (erst nach erstem Run)
-- ⚠️ Windows VPS noch nicht aufgesetzt
+- ✅ DFBnet Credentials verifiziert
+- ✅ E2E Test bestanden (Mitglied erstellt + gelöscht)
+- ⚠️ Windows VPS noch nicht aufgesetzt (Phase 7)
+
+### Infrastructure
+- ⚠️ Custom Domain: Jimdo DNS → Cloudflare Migration ausstehend
+- ⚠️ Vorstand-Freigabe für VPS Deployment ausstehend
 
 ---
 
 ## 🔗 WICHTIGE LINKS
 
-### Dokumentation
-- **Phase 4 Guide:** `PHASE_4_IMPLEMENTATION_GUIDE.md`
-- **Bot Quick Ref:** `RPA_BOT_QUICK_REFERENCE.md`
-- **Plan (Original):** `.claude/plans/imperative-greeting-sutton.md`
+### Live
+- **Production:** https://soccer-app-cfb-frontend.vercel.app
+- **GitHub:** https://github.com/Zante78/soccer_app_CFB
 
-### Development
-- **Frontend:** http://localhost:3000
-- **Supabase:** https://supabase.com/dashboard
-- **GitHub:** (Repository URL hier einfügen)
+### Dokumentation
+- **Phase 4 Guide:** `docs/PHASE_4_IMPLEMENTATION_GUIDE.md`
+- **Bot Quick Ref:** `docs/RPA_BOT_QUICK_REFERENCE.md`
+- **Plan:** `.claude/plans/drifting-twirling-lake.md`
 
 ### Credentials (Secure!)
 - `.env` Files (Frontend + Bot)
 - Supabase Service Role Key
-- DFBnet Bot Account
+- DFBnet Bot Account (CfB_Passwesen)
+- n8n Credentials (3 Header Auth)
 
 ---
 
-## 🚀 NEXT STEPS
+## 🚀 NEXT STEPS (Phase 7)
 
-### Immediate (Heute/Morgen)
-1. DFBnet Test-Account besorgen
-2. Login Selektoren finden (DevTools)
-3. `login()` Methode implementieren
-4. Test: Login funktioniert (Headed Mode)
-
-### Short-Term (Diese Woche)
-1. Spielerpass-Formular Selektoren finden
-2. `fillForm()` implementieren
-3. Baseline Screenshot erstellen
-4. Visual Regression testen
-
-### Mid-Term (Nächste Woche)
-1. Retry Logic + Error Handling
-2. Supabase Integration (RPA Traces)
-3. File Upload (Photo)
-4. Production Deployment (Windows VPS)
+1. Vorstand-Freigabe einholen für VPS
+2. Windows VPS aufsetzen + Node.js + Playwright installieren
+3. Bot Runner deployen + PM2 Setup
+4. n8n Docker auf VPS + Workflow URLs aktualisieren
+5. End-to-End Test: Echter Antrag durch gesamte Pipeline
+6. Custom Domain klären (optional)
 
 ---
 
-**Last Updated:** 2026-03-06
-**Maintained by:** Development Team
-**Contact:** (E-Mail hier einfügen)
+**Last Updated:** 2026-03-20
+**Maintained by:** Simon Kritikos
