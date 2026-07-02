@@ -37,3 +37,4 @@ secrets/
 
 # n8n Templates (contain hardcoded secrets after configuration)
 n8n/templates/*.json
+.playwright-cli/
