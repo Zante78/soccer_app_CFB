@@ -107,29 +107,84 @@ export async function getRPATraces(): Promise<RPATraceWithUrls[]> {
 }
 
 /**
- * Akzeptiert neuen Screenshot als Baseline
+ * Akzeptiert neuen Screenshot als Baseline.
+ *
+ * Ablauf:
+ * 1. Lade Trace + aktuelle screenshot_actual + registration_id
+ * 2. Download screenshot_actual aus rpa-screenshots Bucket
+ * 3. Upload als neue Baseline in rpa-baselines Bucket (Pfad: {registration_id}/spielerpass-form.png)
+ * 4. Update trace: status=SUCCESS + screenshot_baseline=neuer Pfad
+ * 5. Schreibe audit_log
+ *
+ * Wird vom Passwart im Visual-Diff-Viewer aufgerufen wenn UI-Änderung legitim ist.
  */
 export async function acceptNewBaseline(traceId: string): Promise<void> {
-  await requireRole(["SUPER_ADMIN", "PASSWART"]);
-
+  const user = await requireRole(["SUPER_ADMIN", "PASSWART"]);
   const supabase = await createSupabaseServerClient();
 
-  // TODO: Implement - Copy screenshot_actual to rpa-baselines bucket
-  // TODO: Update trace status to SUCCESS
-  // For now, just log
-  console.log("Accept new baseline for trace:", traceId);
-
-  // Update status
-  const { error } = await supabase
+  // 1. Load trace with screenshot_actual + registration_id
+  const { data: trace, error: fetchErr } = await supabase
     .from("rpa_traces")
-    .update({ status: "SUCCESS" })
-    .eq("id", traceId);
+    .select("id, registration_id, screenshot_actual, screenshot_baseline")
+    .eq("id", traceId)
+    .single();
 
-  if (error) {
-    throw new Error(error.message);
+  if (fetchErr || !trace) {
+    throw new Error(`Trace ${traceId} nicht gefunden: ${fetchErr?.message ?? "unbekannt"}`);
   }
 
+  if (!trace.screenshot_actual) {
+    throw new Error(`Trace ${traceId} hat keinen screenshot_actual — nichts zu übernehmen`);
+  }
+
+  // 2. Download actual screenshot from rpa-screenshots
+  const { data: screenshotBlob, error: downloadErr } = await supabase.storage
+    .from("rpa-screenshots")
+    .download(trace.screenshot_actual);
+
+  if (downloadErr || !screenshotBlob) {
+    throw new Error(`Screenshot-Download fehlgeschlagen: ${downloadErr?.message ?? "kein Blob"}`);
+  }
+
+  // 3. Upload as new baseline
+  // Convention: baselines liegen unter {registration_id}/spielerpass-form.png
+  const baselinePath = `${trace.registration_id}/spielerpass-form.png`;
+  const { error: uploadErr } = await supabase.storage
+    .from("rpa-baselines")
+    .upload(baselinePath, screenshotBlob, {
+      contentType: "image/png",
+      upsert: true, // Alte Baseline überschreiben
+    });
+
+  if (uploadErr) {
+    throw new Error(`Baseline-Upload fehlgeschlagen: ${uploadErr.message}`);
+  }
+
+  // 4. Update trace: status + neuer baseline-Pfad
+  const { error: updateErr } = await supabase
+    .from("rpa_traces")
+    .update({
+      status: "SUCCESS",
+      screenshot_baseline: baselinePath,
+      completed_at: new Date().toISOString(),
+    })
+    .eq("id", traceId);
+
+  if (updateErr) {
+    throw new Error(`Trace-Update fehlgeschlagen: ${updateErr.message}`);
+  }
+
+  // 5. Audit log — wer hat wann welche Baseline akzeptiert
+  await supabase.from("audit_logs").insert({
+    registration_id: trace.registration_id,
+    action: "BASELINE_ACCEPTED",
+    old_value: { screenshot_baseline: trace.screenshot_baseline },
+    new_value: { screenshot_baseline: baselinePath, trace_id: traceId },
+    user_id: user.id,
+  });
+
   revalidatePath("/rpa-traces");
+  revalidatePath(`/registrations/${trace.registration_id}`);
 }
 
 /**

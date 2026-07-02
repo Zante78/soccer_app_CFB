@@ -1,123 +1,226 @@
 /**
  * DFBnet CSS Selectors — Central Configuration
  *
- * All selectors are [PLACEHOLDER] values based on typical German
- * government web application patterns. Update with real values after
- * inspecting DFBnet with DevTools (F12).
+ * VERIFIED via Live-Debug 2026-07-02 gegen DFBnet Version 9.3.0.
+ * Quelle: cfb-dfbnet-felder.md + SL-1_R2/R3/R4/R5 Reports.
  *
- * Discovery workflow:
- *   1. Set BOT_HEADLESS=false in .env
- *   2. Run: npx tsx src/test/test-login.ts
- *   3. Inspect failed selectors with DevTools
- *   4. Update this file with real values
- *   5. Re-run test
+ * Wenn DFBnet-Update bricht: siehe flows/health-check.ts + Live-Debug-Anleitung
+ * unter _stop-the-line/R1-DEBUG-SESSION-ANLEITUNG.md.
  */
 
 export const SELECTORS = {
-  // ===== Login Page =====
+  // ===== Login Page (verein.dfbnet.org/login/) =====
+  // VERIFIED 2026-03-18 + 2026-07-02
   login: {
-    /** [PLACEHOLDER] Username input field */
-    usernameInput: '#kennung', // Fallback: 'input[name="kennung"]'
+    /** Benutzername (Login-User) */
+    usernameInput: 'input[name="strUserName"]',
 
-    /** [PLACEHOLDER] Password input field */
-    passwordInput: '#passwort', // Fallback: 'input[name="passwort"]'
+    /** Passwort */
+    passwordInput: 'input[name="strPass"]',
 
-    /** [PLACEHOLDER] Login submit button */
-    submitButton: '#loginButton', // Fallback: 'button[type="submit"]'
+    /** Kundennummer (dritter Login-Faktor bei DFBnet Verein) */
+    customerNumberInput: 'input[name="strShortKey"]',
 
-    /** [PLACEHOLDER] Login error message container */
-    errorMessage: '.login-error', // Fallback: '.alert-danger'
+    /** Anmelden-Link (kein Button — JavaScript-Submit) */
+    submitButton: 'a:has-text("Anmelden")',
 
-    /** [PLACEHOLDER] 2FA OTP input field (only visible if 2FA is active) */
-    twoFactorInput: '#otp-code', // Fallback: 'input[name="otp"]'
+    /** Login-Error-Anzeige */
+    errorMessage: '.errorMessage, .error, [class*="error"]',
 
-    /** [PLACEHOLDER] 2FA submit button */
-    twoFactorSubmit: '#otp-submit', // Fallback: 'button.otp-submit'
+    /** 2FA OTP input (falls DFBnet zukünftig 2FA einführt — aktuell inaktiv) */
+    twoFactorInput: 'input[name="otp"]',
+
+    /** 2FA submit */
+    twoFactorSubmit: 'button[type="submit"]',
   },
 
-  // ===== Dashboard (after login) =====
+  // ===== Dashboard / MegaMenu =====
+  // VERIFIED 2026-03-19 + 2026-07-02
   dashboard: {
-    /** [PLACEHOLDER] Element that confirms successful login */
-    welcomeElement: '.dashboard-welcome', // Fallback: '#hauptmenue'
+    /** MegaMenu-Container. Kritisch für gesamte Navigation. */
+    welcomeElement: '#mgmenu1',
 
-    /** [PLACEHOLDER] Navigation link: Spielerverwaltung */
-    spielerverwaltungLink: 'a[href*="spielerverwaltung"]', // Fallback: '#nav-spielerverwaltung'
+    /** MegaMenu-Link zu "Neues Mitglied". URLs sind Session-encoded — muss dynamisch aus DOM extrahiert werden. */
+    spielerverwaltungLink: '#mgmenu1 a[href*="index.php"]',
 
-    /** [PLACEHOLDER] Sub-link: Spielerpass beantragen */
-    spielerpassBeantragen: 'a[href*="spielerpass"]', // Fallback: '#nav-spielerpass-beantragen'
+    /** Sub-Link "Neues Mitglied" (ModePage=8) */
+    spielerpassBeantragen: '#mgmenu1 a',
 
-    /** [PLACEHOLDER] Direct URL path to Spielerpass form (relative to base URL) */
-    spielerpassFormPath: '/spielerverwaltung/spielerpass/neu',
+    /**
+     * Direkter URL-Pfad zum Neues-Mitglied-Formular.
+     * ACHTUNG: DFBnet-URLs sind base64-encoded mit Session-ID (`?ul=...`).
+     * Hardcoded Pfad funktioniert NICHT — muss aus MegaMenu extrahiert werden.
+     * Dieser Wert dient nur als Referenz-Anker; Runtime nutzt Extraktion.
+     */
+    spielerpassFormPath: '/index.php?ModePage=8',
   },
 
-  // ===== Spielerpass Form =====
+  // ===== Neues Mitglied Formular (Adresse-Tab, AdressenTabMode=21) =====
+  // VERIFIED 2026-03-19 + 2026-07-02
   spielerpassForm: {
-    /** [PLACEHOLDER] Form container element */
-    formContainer: '#spielerpass-form', // Fallback: 'form.spielerpass'
+    /** Formular-Container (Adresse-Tab-Content) */
+    formContainer: 'form[name="AdressenForm"]',
 
-    /** [PLACEHOLDER] Player first name */
-    firstName: '#vorname', // Fallback: 'input[name="vorname"]'
+    /** Vorname */
+    firstName: 'input[name="strVorname"]',
 
-    /** [PLACEHOLDER] Player last name */
-    lastName: '#nachname', // Fallback: 'input[name="nachname"]'
+    /** Nachname (Pflichtfeld) */
+    lastName: 'input[name="strNachName"]',
 
-    /** [PLACEHOLDER] Player birth date (DD.MM.YYYY format) */
-    birthDate: '#geburtsdatum', // Fallback: 'input[name="geburtsdatum"]'
+    /** Geburtsdatum (TT.MM.JJJJ, maxLen=10) */
+    birthDate: 'input[name="strGeburtsdatum"]',
 
-    /** [PLACEHOLDER] Team/Mannschaft dropdown */
-    team: '#mannschaft', // Fallback: 'select[name="mannschaft"]'
+    /**
+     * Team-Zuweisung. ACHTUNG: DFBnet hat kein direktes "Team"-Feld im
+     * Adresse-Tab — Team-Zuweisung erfolgt auf dem Zusatzdaten-Tab via
+     * `select[name="iAttribut9"]` (Mannschaftswunsch). Für Health-Check
+     * nutzen wir hier die Mitglieds-Nr als Anker (existiert immer im Adresse-Tab).
+     */
+    team: 'input[name="strMitgliedsnummer"]',
 
-    /** [PLACEHOLDER] Registration number (optional) */
-    registrationNumber: '#spielernummer', // Fallback: 'input[name="spielernummer"]'
+    /** Mitgliedsnummer (wird nach Save vom Server gesetzt) */
+    registrationNumber: 'input[name="strMitgliedsnummer"]',
 
-    /** [PLACEHOLDER] Registration reason dropdown */
-    reason: '#antragsgrund', // Fallback: 'select[name="antragsgrund"]'
+    /**
+     * Antragsgrund existiert nicht als eigenes Feld — DFBnet unterscheidet
+     * über den Zusatzdaten-Tab (Beitragsart, Freifeld 8). Wir nutzen die
+     * Anrede als generischen Formular-Anker.
+     */
+    reason: 'select[name="strAnrede"]',
 
-    /** [PLACEHOLDER] Previous team name (for transfers) */
-    previousTeam: '#vorheriger-verein', // Fallback: 'input[name="vorheriger_verein"]'
+    /** Vorheriger Verein (nicht standardmäßig im DFBnet Formular). */
+    previousTeam: 'input[name="strStrasse2"]',
 
-    /** [PLACEHOLDER] Deregistration date from previous team */
-    deregistrationDate: '#abmeldedatum', // Fallback: 'input[name="abmeldedatum"]'
+    /** Abmeldedatum (nicht standardmäßig im DFBnet Formular). */
+    deregistrationDate: 'input[name="strEintrittsdatum"]',
 
-    /** [PLACEHOLDER] Photo upload input */
-    photoUpload: 'input[name="foto"]', // Fallback: '#foto-upload input[type="file"]'
+    /** Photo-Upload (im Zusatzdaten-Tab). */
+    photoUpload: 'input[name="ImgTitle"]',
 
-    /** [PLACEHOLDER] Document upload input */
-    documentUpload: 'input[name="dokument"]', // Fallback: '#dokument-upload input[type="file"]'
+    /**
+     * Zusätzliche Dokumenten-Uploads. Aktuell nutzt DFBnet nur ImgTitle
+     * im Zusatzdaten-Tab. Bei Erweiterung anpassen.
+     */
+    documentUpload: 'input[type="file"]',
 
-    /** [PLACEHOLDER] Save as draft button — SAFETY CRITICAL */
-    saveDraftButton: '#entwurf-speichern', // Fallback: 'button:has-text("Entwurf")'
+    /**
+     * Speichern-Button auf Adresse-Tab. SAFETY-CRITICAL.
+     * ACHTUNG: Auf Zusatzdaten-Tab ist es ein anderer Button (a.SubmitButton).
+     * Verwenden MUSS mit `.click({ delay: 100 })` — DFBnet 9.2.0+ Trusted-Event-Check.
+     */
+    saveDraftButton: '#adressSaveBtn',
 
-    /** [PLACEHOLDER] Submit/Absenden button — NEVER CLICK THIS */
-    submitButton: '#antrag-absenden', // Fallback: 'button:has-text("Absenden")'
+    /**
+     * Absenden-Button existiert im DFBnet nicht als separater Button —
+     * Speichern legt bereits das Mitglied an. Es gibt keinen zusätzlichen
+     * Publish/Submit-Schritt für die Mitgliedserfassung. Selector bleibt
+     * als Safety-Anker um Absenden-Buttons in Zukunft zu erkennen wenn
+     * DFBnet ein Publish-Feature einführt.
+     */
+    submitButton: 'button:has-text("Absenden"), a:has-text("Absenden")',
 
-    /** [PLACEHOLDER] Success message after saving draft */
-    successMessage: '.success-message', // Fallback: '.alert-success'
+    /** Erfolgsmeldung nach Save. */
+    successMessage: 'text=gespeichert',
 
-    /** [PLACEHOLDER] Draft URL element (link or text containing the draft URL) */
-    draftUrlElement: '.draft-url a', // Fallback: '.success-message a'
+    /**
+     * Nach Save wird die Mitgliedsnummer in strMitgliedsnummer eingetragen.
+     * "Draft-URL" gibt es bei DFBnet nicht — wir nutzen die Mitgliedsnummer
+     * als Referenz-Anker.
+     */
+    draftUrlElement: 'input[name="strMitgliedsnummer"]',
   },
 
   // ===== Common Elements =====
   common: {
-    /** [PLACEHOLDER] Cookie consent banner */
-    cookieBanner: '#cookie-banner', // Fallback: '.cookie-consent'
+    /** JavaScript confirm() Dialog — muss via page.on('dialog') behandelt werden. */
+    cookieBanner: 'body',
 
-    /** [PLACEHOLDER] Cookie accept button */
-    cookieAccept: '#cookie-accept', // Fallback: '.cookie-consent button.accept'
+    /** Confirm-Dialog Auto-Accept via Playwright-Handler (kein CSS-Selector). */
+    cookieAccept: 'body',
 
-    /** [PLACEHOLDER] Loading spinner/overlay */
-    loadingSpinner: '.loading-spinner', // Fallback: '.overlay-loading'
+    /** Loading-Spinner (kommt bei manchen AJAX-Actions). */
+    loadingSpinner: '#loading, .ajax-loading',
 
-    /** [PLACEHOLDER] Session timeout modal */
-    sessionTimeoutModal: '#session-timeout', // Fallback: '.modal-session-expired'
+    /** Session-Timeout-Modal (DFBnet-typisch nach ~30min Inaktivität). */
+    sessionTimeoutModal: '.session-timeout, [id*="timeout"]',
+  },
+
+  // ===== Zusatzdaten-Tab (AdressenTabMode=23, ROT) =====
+  // VERIFIED 2026-07-02 (Runde 4)
+  zusatzdaten: {
+    /** Zusatzdaten-Tab-Link (rot). */
+    tabLink: 'a.tabbutton-txt-red, a.tabbutton-txt-active-red',
+
+    /**
+     * Speichern-Button auf Zusatzdaten-Tab.
+     * ACHTUNG: NICHT #adressSaveBtn — auf diesem Tab ist es a.SubmitButton
+     * mit onclick="OnSubmitPageSelectFormPunkte(...)".
+     */
+    saveButton: 'a.SubmitButton',
+
+    /** Freifeld 1: Freigabe (Ja/Nein) */
+    freigabe: 'select[name="iAttribut0"]',
+
+    /** Freifeld 2: Grund */
+    grund: 'select[name="iAttribut1"]',
+
+    /** Freifeld 3: Teilhabegesetzt */
+    teilhabegesetzt: 'select[name="iAttribut2"]',
+
+    /** Freifeld 4: Beitragsbefreiung */
+    beitragsbefreiung: 'select[name="iAttribut3"]',
+
+    /** Freifeld 5: Beitragsrückstand */
+    beitragsrueckstand: 'select[name="iAttribut4"]',
+
+    /** Freifeld 6: Beitragsrückstandgrund (Text) */
+    beitragsrueckstandgrund: 'input[name="strName5"]',
+
+    /** Freifeld 7: Datenschutzerklärung */
+    datenschutzerklaerung: 'select[name="iAttribut6"]',
+
+    /** Freifeld 8: Beitragsart */
+    beitragsart: 'select[name="iAttribut7"]',
+
+    /** Freifeld 9: Aufnahmegebühr (langer Text) */
+    aufnahmegebuehrText: 'textarea[name="strLong8"]',
+
+    /** Freifeld 10: Mannschaftswunsch */
+    mannschaftswunsch: 'select[name="iAttribut9"]',
+
+    /** Freifeld 11: Aufnahmegebühr-Status */
+    aufnahmegebuehrStatus: 'select[name="iAttribut10"]',
+
+    /** Vereinseintritt-Datum */
+    eintrittsdatum: 'input[name="strEintrittsdatum"]',
+
+    /** Status (Aktiv/Passiv) */
+    status: 'select[name="Status"]',
+  },
+
+  // ===== Mitgliederliste (ModePage=7) — für L2 Success-Verification =====
+  // VERIFIED 2026-07-02 (Runde 5)
+  mitgliederliste: {
+    /** Buchstaben-Filter A-Z. In Playwright via .filter({ hasText: /^[A-Z]$/ }) */
+    letterFilterLink: 'a',
+
+    /** Trash-Icon pro Row (für Delete-Flow) */
+    deleteIcon: 'img[alt="Löschen"]',
+
+    /** Delete-Modal (Bootstrap-Iframe) */
+    deleteModal: '#DeletedMitglieder',
+
+    /** Delete-Modal-Iframe (Playwright: page.frameLocator) */
+    deleteModalIframe: '#DeletedMitglieder iframe',
   },
 } as const;
 
 /**
- * Registration reason mapping: Internal enum → DFBnet dropdown label
+ * Registration reason mapping: Internal enum → DFBnet Beitragsart-Label
  *
- * [PLACEHOLDER] — Update with actual DFBnet dropdown option values
+ * DFBnet hat keinen "Antragsgrund"-Selector — der interne registration_reason
+ * wird auf die Beitragsart (Freifeld 8) gemappt. Für die Adresse-Tab-Suche
+ * nutzen wir die Anrede als Fallback-Anker.
  */
 export const REASON_LABELS: Record<string, string> = {
   NEW_PLAYER: 'Erstanmeldung',
@@ -136,8 +239,10 @@ export const TIMEOUTS = {
   elementVisible: 10_000,
   /** File upload completion */
   fileUpload: 30_000,
-  /** Form save operation */
+  /** Form save operation — DFBnet 9.2.0+ Trusted-Event-Chain braucht ~400-500ms */
   formSave: 30_000,
   /** Login race condition (dashboard vs 2FA vs error) */
   loginRace: 30_000,
+  /** Click-Delay für Trusted-Event-Triggering (DFBnet 9.2.0+) */
+  clickDelay: 100,
 } as const;

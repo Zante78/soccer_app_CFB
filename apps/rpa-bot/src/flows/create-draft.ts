@@ -65,6 +65,27 @@ export type DraftResult = {
   error?: string;
 };
 
+/**
+ * Success-Verification result — server-side proof that the save actually persisted.
+ *
+ * Design principle: don't trust screenshots or client-side state (Mitgliedsnummer im Formular
+ * kann Client-side vergeben sein, ohne dass DFBnet den Save akzeptiert hat — siehe DFBnet 9.2.0
+ * Save-Bug 2026-07-02). Prüfe stattdessen ob das Mitglied wirklich in der Mitgliederliste
+ * (ModePage=7) auftaucht.
+ */
+export type VerifyResult = {
+  /** True wenn Mitglied nach Save wirklich in DFBnet-DB steht */
+  verified: boolean;
+  /** Mitgliedsnummer wenn gefunden (z.B. "2026-0123") */
+  mitgliedsnummer?: string;
+  /** Nachname der zum Suchen verwendet wurde */
+  searchedNachname: string;
+  /** Zusätzliche Info was gefunden wurde (für Debugging + Audit) */
+  matchedRowText?: string;
+  /** Fehler-Hinweis wenn nicht verifiziert */
+  reason?: string;
+};
+
 // ===== Field Mapping =====
 
 type FieldType = 'text' | 'date' | 'select';
@@ -510,6 +531,115 @@ export async function saveDraft(
 }
 
 // ===== Helpers =====
+
+/**
+ * Verify that a saved member is really in DFBnet's database.
+ *
+ * Why this exists: DFBnet 9.2.0 has "Trusted Event" server-side validation.
+ * A save-click can look successful client-side (Mitgliedsnummer wird angezeigt,
+ * "Die Daten wurden gespeichert." Text erscheint) — but the server may silently
+ * reject the request. This function is the ground-truth check.
+ *
+ * Approach:
+ * 1. Navigate to Mitgliederliste (ModePage=7)
+ * 2. Filter by first letter of Nachname
+ * 3. Search for exact Nachname match in table rows
+ * 4. If found: extract Mitgliedsnummer + confirm; if not: verified=false
+ *
+ * The bot should call this AFTER saveDraft() and before returning success to
+ * the queue. If verified=false, treat as a save-failure even if the screenshot
+ * suggested success.
+ *
+ * @param page — Playwright page, already logged in and ideally on the edit page
+ *               of the just-saved member. If not, function navigates itself.
+ * @param nachname — Exact Nachname to search for (must be unique enough)
+ * @param options
+ * @param options.mitgliederlistenUrl — Full base64-encoded URL to Mitgliederliste
+ *   (extracted from MegaMenu — see dfbnet-bot.ts for extraction pattern).
+ *   Muss vom Caller übergeben werden weil URLs session-encoded sind.
+ * @param options.timeoutMs — Max wait for navigation + filter (default: 15s)
+ * @returns VerifyResult with verified flag + Mitgliedsnummer if found
+ */
+export async function verifySaveSuccess(
+  page: Page,
+  nachname: string,
+  options: {
+    mitgliederlistenUrl: string;
+    timeoutMs?: number;
+  }
+): Promise<VerifyResult> {
+  const { mitgliederlistenUrl, timeoutMs = 15_000 } = options;
+
+  if (!nachname || nachname.trim().length === 0) {
+    return {
+      verified: false,
+      searchedNachname: nachname,
+      reason: 'Nachname ist leer — keine Suche möglich',
+    };
+  }
+
+  const firstLetter = nachname.trim().charAt(0).toUpperCase();
+  if (!/^[A-Z]$/.test(firstLetter)) {
+    return {
+      verified: false,
+      searchedNachname: nachname,
+      reason: `Nachname "${nachname}" beginnt nicht mit A-Z — Filter-Button nicht wählbar`,
+    };
+  }
+
+  try {
+    // 1. Navigate to Mitgliederliste
+    await page.goto(mitgliederlistenUrl, { waitUntil: 'domcontentloaded', timeout: timeoutMs });
+    await page.waitForTimeout(1_500);
+
+    // 2. Click first-letter filter (e.g. "H" for "HeaderTrace")
+    // Use exact text match to avoid clicking "Alle" or multi-char links.
+    const letterLink = page.locator('a').filter({ hasText: new RegExp(`^${firstLetter}$`) }).first();
+    await letterLink.click({ delay: 100 });
+    await page.waitForLoadState('domcontentloaded', { timeout: timeoutMs });
+    await page.waitForTimeout(1_500);
+
+    // 3. Search for row that contains the exact Nachname
+    // Uses page.evaluate for text-match across all rows (DFBnet layout may vary).
+    const result = await page.evaluate((targetName) => {
+      const rows = Array.from(document.querySelectorAll('tr'));
+      const matchedRow = rows.find((r) => {
+        const text = r.textContent ?? '';
+        return text.includes(targetName);
+      });
+      if (!matchedRow) return null;
+      // Try to extract Mitgliedsnummer from cells (typically cell index 2)
+      const cells = Array.from(matchedRow.querySelectorAll('td'));
+      const nrCell = cells.find((c) => /^\d{4}-\d{4}$/.test(c.textContent?.trim() ?? ''));
+      return {
+        mitgliedsnummer: nrCell?.textContent?.trim(),
+        rowText: matchedRow.textContent?.replace(/\s+/g, ' ').trim().substring(0, 300),
+      };
+    }, nachname);
+
+    if (!result) {
+      return {
+        verified: false,
+        searchedNachname: nachname,
+        reason: `Nachname "${nachname}" nicht in Mitgliederliste unter Buchstabe "${firstLetter}" gefunden`,
+      };
+    }
+
+    return {
+      verified: true,
+      searchedNachname: nachname,
+      mitgliedsnummer: result.mitgliedsnummer,
+      matchedRowText: result.rowText,
+    };
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    return {
+      verified: false,
+      searchedNachname: nachname,
+      reason: `Verifikations-Fehler: ${msg}`,
+    };
+  }
+}
 
 /**
  * Convert ISO date (YYYY-MM-DD) to German format (DD.MM.YYYY)

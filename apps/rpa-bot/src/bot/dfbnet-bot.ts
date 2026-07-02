@@ -23,8 +23,10 @@ import {
   downloadToTemp,
   cleanupTempFile,
   saveDraft,
+  verifySaveSuccess,
   type RegistrationData,
 } from '../flows/create-draft.js';
+import { runDomHealthCheck, formatHealthCheckReport } from '../flows/health-check.js';
 import { SELECTORS } from '../config/selectors.js';
 import type { SupabaseClient } from '../services/supabase-client.js';
 
@@ -257,6 +259,40 @@ export class DFBnetBot {
         );
       }
 
+      // 2b. DOM Health-Check — Frühwarn-System für DFBnet-Updates.
+      // Prüft ob alle kritischen Selektoren existieren BEVOR wir Formulare
+      // auszufüllen versuchen. Kritischer Miss → Bot bricht sofort ab mit
+      // klarem Fehler statt später mitten im Flow zu scheitern.
+      regLogger.info('Running DOM health-check...');
+      const healthReport = await runDomHealthCheck(page, {
+        formUrl: `${config.DFBNET_BASE_URL}${SELECTORS.dashboard.spielerpassFormPath}`,
+      });
+
+      if (healthReport.failedCritical.length > 0) {
+        const failedNames = healthReport.failedCritical.map((c) => c.name).join(', ');
+        regLogger.error(
+          `Health-Check FAILED: ${healthReport.failedCritical.length} kritische Selektoren fehlen (${failedNames})`
+        );
+        // Report als String für Bot-Error-Details
+        const reportText = formatHealthCheckReport(healthReport);
+        regLogger.error(`Full Health-Report:\n${reportText}`);
+
+        throw new BotError(
+          `DFBnet-Update erkannt: ${healthReport.failedCritical.length} kritische Selektoren fehlen (${failedNames}). Bot-Konfiguration muss aktualisiert werden bevor weitere Registrations bearbeitet werden können.`,
+          ErrorCategory.SAFETY
+        );
+      }
+
+      if (healthReport.failedWarning.length > 0) {
+        regLogger.warn(
+          `Health-Check: ${healthReport.failedWarning.length} nicht-kritische Selektoren fehlen — Bot läuft weiter mit reduzierter Funktionalität`
+        );
+      } else {
+        regLogger.info(
+          `Health-Check OK: ${healthReport.passed}/${healthReport.totalChecks} Selektoren gefunden`
+        );
+      }
+
       // 3. Navigate to Spielerpass form
       regLogger.info('Navigating to Spielerpass form...');
       await navigateToSpielerpassForm(page, {
@@ -329,6 +365,41 @@ export class DFBnetBot {
         screenshotDir: this.botConfig.screenshotDir,
         registrationId: registration.id,
       });
+
+      // 8b. Success-Verification — check DB-Level, not just screenshot
+      // Grund: DFBnet 9.2.0+ hat Trusted-Event-Prüfung. Client-side kann
+      // "gespeichert" aussehen während der Server-Save silently abgelehnt wird.
+      // Wir prüfen deshalb aktiv in der Mitgliederliste ob der Nachname wirklich da ist.
+      const mitgliederlistenUrl = await page.evaluate(() => {
+        const link = Array.from(document.querySelectorAll('#mgmenu1 a')).find(
+          (a) => a.textContent?.trim() === 'Mitglieder' && (a as HTMLAnchorElement).href.includes('TW9kZVBhZ2U9Nw')
+        );
+        return (link as HTMLAnchorElement | undefined)?.href;
+      });
+
+      if (!mitgliederlistenUrl) {
+        regLogger.warn('Mitgliederlisten-URL nicht im Menu gefunden — Success-Verification übersprungen');
+      } else {
+        const verifyResult = await verifySaveSuccess(page, registration.player_name, {
+          mitgliederlistenUrl,
+        });
+
+        if (!verifyResult.verified) {
+          regLogger.error(
+            `Save-Verifikation FEHLGESCHLAGEN: ${verifyResult.reason ?? 'Mitglied nicht in Liste'}`
+          );
+          throw new BotError(
+            `Save-Verifikation fehlgeschlagen für Nachname "${registration.player_name}": ${verifyResult.reason ?? 'Mitglied nicht in Mitgliederliste'}`,
+            ErrorCategory.UNKNOWN,
+            { screenshotPath: draftResult.screenshotPath }
+          );
+        }
+
+        regLogger.info(
+          `Save-Verifikation OK: Mitglied "${verifyResult.searchedNachname}" gefunden` +
+            (verifyResult.mitgliedsnummer ? ` (Nr: ${verifyResult.mitgliedsnummer})` : '')
+        );
+      }
 
       // 9. Upload screenshots to Supabase Storage
       let screenshotActualPath: string | undefined;
