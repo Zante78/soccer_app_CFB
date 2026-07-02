@@ -23,6 +23,13 @@ export const config = {
   // DFBnet
   DFBNET_USERNAME: process.env.DFBNET_USERNAME || "",
   DFBNET_PASSWORD: process.env.DFBNET_PASSWORD || "",
+  /**
+   * DFBnet Verein Kundennummer (drittes Login-Feld, `strShortKey`).
+   * Bei CfB Ford Niehl: 23010320. Wird nur ausgefüllt wenn das Feld auf der
+   * Login-Seite tatsächlich sichtbar ist (unterscheidet DFBnet-Verein vom
+   * DFBnet-Spielbetrieb-Login).
+   */
+  DFBNET_CUSTOMER_NUMBER: process.env.DFBNET_CUSTOMER_NUMBER || "",
   DFBNET_BASE_URL:
     process.env.DFBNET_BASE_URL || "https://www.dfbnet.org",
 

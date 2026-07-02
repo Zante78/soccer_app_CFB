@@ -263,9 +263,33 @@ export class DFBnetBot {
       // Prüft ob alle kritischen Selektoren existieren BEVOR wir Formulare
       // auszufüllen versuchen. Kritischer Miss → Bot bricht sofort ab mit
       // klarem Fehler statt später mitten im Flow zu scheitern.
+      //
+      // DFBnet-URLs sind session-encoded (base64 in `?ul=...`). Hardcoded
+      // Pfade funktionieren NICHT — wir müssen die Form-URL aus dem geladenen
+      // MegaMenu extrahieren. Für die Mitgliederliste ebenso (falls L2
+      // Success-Verification einen Miss-Check macht).
       regLogger.info('Running DOM health-check...');
+      const healthMenuUrls: { neuesMitglied?: string; mitgliederliste?: string } = await page.evaluate(() => {
+        const links = Array.from(document.querySelectorAll('#mgmenu1 a[href*="index.php"]')) as HTMLAnchorElement[];
+        let neuesMitglied: string | undefined;
+        let mitgliederliste: string | undefined;
+        for (const a of links) {
+          const text = (a.textContent || '').trim();
+          if (text === 'Neues Mitglied') neuesMitglied = a.href;
+          if (text === 'Mitglieder') mitgliederliste = a.href;
+        }
+        return { neuesMitglied, mitgliederliste };
+      });
+
+      if (!healthMenuUrls.neuesMitglied) {
+        regLogger.warn(
+          'MegaMenu-Link "Neues Mitglied" nicht gefunden — Health-Check der Form-Selektoren wird übersprungen'
+        );
+      }
+
       const healthReport = await runDomHealthCheck(page, {
-        formUrl: `${config.DFBNET_BASE_URL}${SELECTORS.dashboard.spielerpassFormPath}`,
+        formUrl: healthMenuUrls.neuesMitglied,
+        mitgliederlistenUrl: healthMenuUrls.mitgliederliste,
       });
 
       if (healthReport.failedCritical.length > 0) {
@@ -524,6 +548,7 @@ export class DFBnetBot {
       baseUrl: config.DFBNET_BASE_URL,
       username: config.DFBNET_USERNAME,
       password: config.DFBNET_PASSWORD,
+      customerNumber: config.DFBNET_CUSTOMER_NUMBER || undefined,
       screenshotDir: this.botConfig.screenshotDir,
       registrationId,
       headless: this.botConfig.headless,

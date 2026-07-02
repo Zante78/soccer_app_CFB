@@ -13,6 +13,12 @@ export type LoginConfig = {
   baseUrl: string;
   username: string;
   password: string;
+  /**
+   * DFBnet Verein Kundennummer (drittes Login-Feld, `strShortKey`).
+   * Bei CfB Ford Niehl: '23010320'. Optional, damit der Flow für DFBnet-Endpoints
+   * ohne 3-Feld-Login weiterhin passt.
+   */
+  customerNumber?: string;
   screenshotDir: string;
   registrationId: string;
   headless: boolean;
@@ -49,7 +55,7 @@ export async function loginToDFBnet(
   page: Page,
   config: LoginConfig
 ): Promise<LoginResult> {
-  const { baseUrl, username, password, screenshotDir, registrationId } = config;
+  const { baseUrl, username, password, customerNumber, screenshotDir, registrationId } = config;
   const screenshotPath = `${screenshotDir}/${registrationId}_login.png`;
 
   try {
@@ -74,6 +80,28 @@ export async function loginToDFBnet(
     });
     await loginContext.fill(SELECTORS.login.usernameInput, username);
     await loginContext.fill(SELECTORS.login.passwordInput, password);
+
+    // 4b. Kundennummer (dritter Faktor bei DFBnet Verein).
+    // Nur ausfüllen wenn Feld sichtbar UND customerNumber konfiguriert.
+    if (customerNumber) {
+      const customerField = await loginContext.$(SELECTORS.login.customerNumberInput);
+      if (customerField) {
+        await loginContext.fill(SELECTORS.login.customerNumberInput, customerNumber);
+        logger.info('Kundennummer eingetragen');
+      } else {
+        logger.warn(
+          'customerNumber konfiguriert, aber Feld nicht sichtbar — überspringe (nicht-Verein-Portal?)'
+        );
+      }
+    } else {
+      // Warnung wenn Feld sichtbar ist aber wir keine Nummer haben — Login wird scheitern
+      const customerField = await loginContext.$(SELECTORS.login.customerNumberInput);
+      if (customerField) {
+        logger.warn(
+          'DFBnet zeigt Kundennummer-Feld, aber DFBNET_CUSTOMER_NUMBER ist nicht gesetzt — Login wird vermutlich scheitern'
+        );
+      }
+    }
 
     // 5. Submit login
     await loginContext.click(SELECTORS.login.submitButton);
