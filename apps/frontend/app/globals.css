@@ -2,86 +2,298 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ================================================================
+   CFB Brand Kit — CSS Custom Properties
+   Die einzige Wahrheitsquelle: docs/brand-kit-cfb.md
+   ================================================================ */
+
 :root {
-  /* CfB Brand Colors */
-  --color-primary: #0055a4;
-  --color-success: #34c759;
-  --color-warning: #ff9500;
-  --color-error: #ff3b30;
+  /* Vereinsblau — primäre Marken-Farbe */
+  --primary:    #004A9F;
+  --primary-d:  #003479;
+  --primary-l:  #1A6ACC;
 
-  /* Neutrals */
-  --color-gray-50: #f5f5f7;
-  --color-gray-100: #e5e5ea;
-  --color-gray-200: #d1d1d6;
-  --color-gray-300: #c7c7cc;
-  --color-gray-400: #aeaeb2;
-  --color-gray-500: #8e8e93;
-  --color-gray-600: #636366;
-  --color-gray-700: #48484a;
-  --color-gray-800: #3a3a3c;
-  --color-gray-900: #1c1c1e;
+  /* Rheingrün — Success/Health, max ~3% Farb-Ratio */
+  --accent-green:   #2D9B5A;
+  --accent-green-d: #1F7A45;
+  --accent-green-l: #3DB870;
 
-  --background: #f5f5f7;
-  --foreground: #1c1c1e;
+  /* Neutrals warm-Blau-Stich */
+  --surface-0: #F7F9FC;
+  --surface-1: #EDF1F7;
+  --surface-2: #DDE5F0;
+
+  /* Text-Farben */
+  --text:      #111820;
+  --text-soft: #4A5568;
+  --white:     #FFFFFF;
+
+  /* Zustands-Farben */
+  --dark:    #0A1520;
+  --dark-2:  #0F1F30;
+  --error:   #B91C1C;
+  --amber:   #D97706;
+  --amber-l: #FEF3C7;
+  --amber-d: #92400E;
+  --amber-bg:#FFFBEB;
+
+  /* Nav-Höhe */
+  --nav-h: 72px;
 }
 
 * {
-  @apply border-gray-200;
+  border-color: theme('colors.surface.2');
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  @apply bg-gray-50 text-gray-900;
+  background: var(--surface-0);
+  color: var(--text);
+  font-family: var(--font-body), system-ui, sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-/* Card styles */
-.card {
-  @apply bg-white rounded-[20px] shadow-[0_2px_20px_rgba(0,0,0,0.06)] p-10;
-  max-width: 640px;
-  margin: 0 auto;
+/* ================================================================
+   Utility-Klassen für wiederkehrende Wizard-Elemente
+   ================================================================ */
+
+@layer components {
+
+  /* Eyebrow-Label (Barlow Condensed uppercase mit blauem Strich) */
+  .eyebrow {
+    font-family: var(--font-accent), sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--primary);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 32px;
+    height: 2px;
+    background: var(--primary);
+  }
+
+  /* Headline — Bebas Neue Impact */
+  .headline {
+    font-family: var(--font-display), sans-serif;
+    font-weight: 400;
+    font-size: clamp(40px, 6vw, 72px);
+    line-height: 0.95;
+    letter-spacing: 1px;
+    color: var(--primary);
+    margin: 0 0 20px;
+  }
+
+  /* Sub-Text unter Headline */
+  .headline-sub {
+    font-family: var(--font-body), sans-serif;
+    font-size: clamp(15px, 1.6vw, 18px);
+    color: var(--text-soft);
+    max-width: 580px;
+    line-height: 1.55;
+  }
+
+  /* Section-Titel (Barlow Condensed klein) */
+  .section-title {
+    font-family: var(--font-accent), sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-soft);
+    margin: 0 0 16px;
+  }
+
+  /* Progress-Marker in Nav */
+  .progress-marker {
+    font-family: var(--font-accent), sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.7);
+  }
+  .progress-marker strong {
+    color: var(--white);
+    font-weight: 700;
+  }
+
+  /* Kontext-Chip (was in vorherigen Steps gewählt wurde) */
+  .context-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: var(--surface-1);
+    border-radius: 999px;
+    font-family: var(--font-accent), sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--primary);
+  }
+
+  /* Primary Button — Vereinsblau (nicht Grün) */
+  .btn-primary {
+    font-family: var(--font-accent), sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    background: var(--primary);
+    color: var(--white);
+    border: none;
+    cursor: pointer;
+    padding: 16px 32px;
+    border-radius: 4px;
+    transition: background 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: var(--primary-d);
+    transform: translateY(-2px);
+  }
+  .btn-primary:focus-visible {
+    outline: 3px solid rgba(0, 74, 159, 0.4);
+    outline-offset: 2px;
+  }
+  .btn-primary:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  /* Back-Button (Text-Link mit Underline-Hover) */
+  .btn-back {
+    all: unset;
+    font-family: var(--font-accent), sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-soft);
+    cursor: pointer;
+    padding: 12px 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    border-bottom: 1px solid transparent;
+  }
+  .btn-back:hover {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+  }
+  .btn-back:focus-visible {
+    outline: 3px solid rgba(0, 74, 159, 0.4);
+    outline-offset: 4px;
+  }
+
+  /* Form-Inputs */
+  .input {
+    font-family: var(--font-body), sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--text);
+    background: var(--white);
+    border: 1.5px solid var(--surface-2);
+    border-radius: 4px;
+    padding: 14px 16px;
+    width: 100%;
+    transition: border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    line-height: 1.4;
+    min-height: 52px;
+  }
+  .input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0, 74, 159, 0.15);
+  }
+  .input:hover:not(:focus) {
+    border-color: var(--primary-l);
+  }
+  .input::placeholder {
+    color: var(--text-soft);
+    opacity: 0.6;
+  }
+
+  /* Form-Label (Barlow Condensed klein uppercase) */
+  .form-label {
+    font-family: var(--font-accent), sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-soft);
+  }
+  .form-label-req {
+    color: var(--primary);
+    margin-left: 2px;
+  }
+
+  /* Field-Hint (unter Input) */
+  .field-hint {
+    font-family: var(--font-body), sans-serif;
+    font-size: 13px;
+    color: var(--text-soft);
+    line-height: 1.4;
+    margin-top: 2px;
+  }
+
+  /* Info-Box (blaue Border-Left mit Icon) */
+  .info-box {
+    display: flex;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--surface-1);
+    border-left: 3px solid var(--primary);
+    border-radius: 4px;
+    font-family: var(--font-body), sans-serif;
+    font-size: 13px;
+    color: var(--text-soft);
+    line-height: 1.55;
+  }
+  .info-box strong {
+    color: var(--primary-d);
+    font-weight: 600;
+  }
 }
 
-/* Button styles */
-.btn-primary {
-  @apply bg-primary text-white font-medium px-6 py-3 rounded-xl
-         hover:bg-[#004080] transition-colors duration-200
-         disabled:opacity-50 disabled:cursor-not-allowed
-         shadow-[0_1px_3px_rgba(0,0,0,0.1)];
+/* Reduced-Motion respektieren */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
-.btn-secondary {
-  @apply bg-blue-50 text-primary font-medium px-6 py-3 rounded-xl
-         hover:bg-blue-100 transition-colors duration-200
-         disabled:opacity-50 disabled:cursor-not-allowed;
-}
-
-/* Form inputs */
-.input {
-  @apply w-full px-4 py-3 rounded-xl border border-gray-300
-         focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent
-         disabled:bg-gray-100 disabled:cursor-not-allowed;
-}
-
-/* Progress bar */
-.progress-bar {
-  @apply h-1 bg-gray-200 rounded-full overflow-hidden;
-}
-
-.progress-bar-fill {
-  @apply h-full bg-primary transition-all duration-300;
-}
-
-/* Status badges */
-.badge-success {
-  @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
-         bg-green-50 text-green-700;
-}
-
-.badge-warning {
-  @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
-         bg-orange-50 text-orange-700;
-}
-
-.badge-error {
-  @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
-         bg-red-50 text-red-700;
+/* Global fade-up animation für Content-Blöcke */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

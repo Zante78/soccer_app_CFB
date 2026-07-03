@@ -1,11 +1,28 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Bebas_Neue, Barlow_Condensed, DM_Sans } from "next/font/google";
 import "./globals.css";
 import { AppProviders } from "@/components/providers/app-providers";
 
-const inter = Inter({
+// Brand-Kit Fonts (docs/brand-kit-cfb.md §2)
+// Display: Bebas Neue — Headlines, Impact-Zahlen
+const bebasNeue = Bebas_Neue({
   subsets: ["latin"],
-  variable: "--font-inter",
+  weight: ["400"],
+  variable: "--font-display",
+});
+
+// Accent: Barlow Condensed — Eyebrows, Buttons, Nav, Labels
+const barlowCondensed = Barlow_Condensed({
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  variable: "--font-accent",
+});
+
+// Body: DM Sans — Fließtext, Forms, alles Lange
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-body",
 });
 
 export const metadata: Metadata = {
@@ -62,7 +79,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="de">
-      <body className={`${inter.variable} font-sans antialiased bg-gray-50`}>
+      <body className={`${bebasNeue.variable} ${barlowCondensed.variable} ${dmSans.variable} font-body antialiased`}>
         <AppProviders>{children}</AppProviders>
       </body>
     </html>
