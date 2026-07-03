@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import SignatureCanvas from 'react-signature-canvas';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { WizardShell, WizardActions } from './wizard-shell';
 
 interface Step6ConsentProps {
   onNext: (data: { consents: Record<string, boolean>; signature_data: string }) => void;
@@ -14,215 +13,318 @@ interface Step6ConsentProps {
     birth_date: string;
     team_id: string;
   };
+  registrationReason?: 'NEW_PLAYER' | 'TRANSFER' | 'RE_REGISTRATION';
 }
 
-export function Step6Consent({ onNext, onBack, playerData }: Step6ConsentProps) {
-  const [consents, setConsents] = useState({
+type ConsentKey = 'membership' | 'dsgvo' | 'playing' | 'photo';
+type ConsentState = Record<ConsentKey, boolean>;
+
+interface ConsentDef {
+  key: ConsentKey;
+  title: string;
+  required: boolean;
+  desc: React.ReactNode;
+  link?: { href: string; label: string };
+}
+
+const CONSENTS: ConsentDef[] = [
+  {
+    key: 'membership',
+    title: 'Aufnahme in den Verein & Vereinssatzung',
+    required: true,
+    desc: 'Ich beantrage die Aufnahme in den CfB Ford Köln-Niehl 09/52 e.V. und erkenne die Vereinssatzung und Beitragsordnung an.',
+    link: { href: 'https://cfb-fordniehl.de/j/satzung', label: 'Satzung & Beitragsordnung ansehen' },
+  },
+  {
+    key: 'dsgvo',
+    title: 'Datenschutz (DSGVO)',
+    required: true,
+    desc: 'Ich stimme der Verarbeitung der personenbezogenen Daten für die Spielerpass-Beantragung zu. Sensible Dokumente (Foto, Geburtsurkunde) werden 48 Stunden nach der DFBnet-Freigabe automatisch gelöscht.',
+    link: { href: 'https://cfb-fordniehl.de/j/datenschutz', label: 'Datenschutzerklärung ansehen' },
+  },
+  {
+    key: 'playing',
+    title: 'Einverständnis Spielbetrieb',
+    required: true,
+    desc: 'Der Spieler darf am offiziellen Trainings- und Spielbetrieb des Vereins sowie an Freundschaftsspielen, Turnieren und Punktspielen teilnehmen.',
+  },
+  {
+    key: 'photo',
+    title: 'Fotoerlaubnis',
+    required: false,
+    desc: 'Ich bin damit einverstanden, dass Fotos und Videos aus dem Trainings- und Spielbetrieb zu Vereinszwecken (Website, Instagram, Vereinszeitung) verwendet werden dürfen. Kann jederzeit widerrufen werden.',
+  },
+];
+
+function isJunior(birthDateIso: string): boolean {
+  if (!birthDateIso) return false;
+  const bd = new Date(birthDateIso);
+  if (Number.isNaN(bd.getTime())) return false;
+  const now = new Date();
+  let age = now.getFullYear() - bd.getFullYear();
+  const m = now.getMonth() - bd.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < bd.getDate())) age--;
+  return age < 18;
+}
+
+export function Step6Consent({
+  onNext,
+  onBack,
+  playerData,
+  registrationReason,
+}: Step6ConsentProps) {
+  const junior = isJunior(playerData.birth_date);
+  const [consents, setConsents] = useState<ConsentState>({
+    membership: false,
     dsgvo: false,
-    accuracy: false,
-    eligibility: false,
+    playing: false,
+    photo: false,
   });
   const [signatureError, setSignatureError] = useState<string | null>(null);
-  const signatureRef = useRef<SignatureCanvas>(null);
+  const [hasSignature, setHasSignature] = useState(false);
+  const sigRef = useRef<SignatureCanvas | null>(null);
 
-  const handleConsentChange = (key: string, value: boolean) => {
-    setConsents((prev) => ({ ...prev, [key]: value }));
+  const requiredAllChecked = useMemo(() => {
+    return CONSENTS.filter((c) => c.required).every((c) => consents[c.key]);
+  }, [consents]);
+
+  const toggleConsent = (key: ConsentKey) => {
+    setConsents((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   const clearSignature = () => {
-    signatureRef.current?.clear();
+    sigRef.current?.clear();
+    setHasSignature(false);
     setSignatureError(null);
   };
 
   const handleContinue = () => {
-    // Validate all consents
-    if (!consents.dsgvo || !consents.accuracy || !consents.eligibility) {
-      alert('Bitte akzeptieren Sie alle erforderlichen Erklärungen');
+    if (!requiredAllChecked) return;
+    if (!sigRef.current || sigRef.current.isEmpty()) {
+      setSignatureError('Bitte digital unterschreiben.');
       return;
     }
-
-    // Validate signature
-    if (signatureRef.current?.isEmpty()) {
-      setSignatureError('Bitte unterschreiben Sie das Formular');
-      return;
-    }
-
-    // Get signature as base64
-    const signatureData = signatureRef.current?.toDataURL('image/png') || '';
-
-    onNext({ consents, signature_data: signatureData });
+    const signature_data = sigRef.current.toDataURL('image/png');
+    onNext({
+      consents: consents as Record<string, boolean>,
+      signature_data,
+    });
   };
 
-  const allConsentsGiven = consents.dsgvo && consents.accuracy && consents.eligibility;
+  const canContinue = requiredAllChecked && hasSignature;
+
+  const contextChips: React.ReactNode[] = [];
+  if (registrationReason === 'TRANSFER') {
+    contextChips.push(
+      <span key="reason" className="context-chip">Vereinswechsel</span>
+    );
+  } else if (registrationReason === 'RE_REGISTRATION') {
+    contextChips.push(
+      <span key="reason" className="context-chip">Wiederanmeldung</span>
+    );
+  } else if (registrationReason === 'NEW_PLAYER') {
+    contextChips.push(
+      <span key="reason" className="context-chip">Erstanmeldung</span>
+    );
+  }
+  if (playerData.team_id) {
+    contextChips.push(
+      <span key="team" className="context-chip">
+        {junior ? 'Junior' : 'Senior'} · {playerData.team_id.toUpperCase()}
+      </span>
+    );
+  }
 
   return (
-    <Card>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Erklärungen & Unterschrift
-          </h2>
-          <p className="text-gray-600">
-            Bitte lesen und akzeptieren Sie die folgenden Erklärungen
-          </p>
-        </div>
+    <WizardShell step={6}>
+      <section className="animate-[fadeUp_400ms_100ms_both_ease-out] mb-10">
+        <span className="eyebrow">Erklärungen &amp; Unterschrift</span>
+        <h1 className="headline">Erklärungen &amp; Unterschrift.</h1>
+        <p className="headline-sub">
+          Vier Erklärungen, ohne die keine Vereinsmitgliedschaft läuft. Bitte einmal lesen und
+          bestätigen — danach digital unterschreiben.
+        </p>
+      </section>
 
-        {/* Data Summary */}
-        <div className="bg-gray-50 rounded-xl p-4">
-          <h4 className="text-sm font-semibold text-gray-700 mb-3">Zusammenfassung Ihrer Angaben</h4>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-gray-600">Spieler:</span>
-              <span className="font-medium text-gray-900">
-                {playerData.first_name} {playerData.last_name}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Geburtsdatum:</span>
-              <span className="font-medium text-gray-900">
-                {new Date(playerData.birth_date).toLocaleDateString('de-DE')}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Mannschaft:</span>
-              <span className="font-medium text-gray-900">{playerData.team_id}</span>
-            </div>
-          </div>
+      {contextChips.length > 0 && (
+        <div className="flex gap-2.5 flex-wrap mb-8 animate-[fadeUp_400ms_160ms_both_ease-out]">
+          {contextChips}
         </div>
+      )}
 
-        {/* Consent Checkboxes */}
-        <div className="space-y-4">
-          {/* DSGVO Consent */}
-          <label className="flex items-start cursor-pointer group">
-            <input
-              type="checkbox"
-              checked={consents.dsgvo}
-              onChange={(e) => handleConsentChange('dsgvo', e.target.checked)}
-              className="mt-1 w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary focus:ring-2"
+      {/* Consents */}
+      <div className="animate-[fadeUp_400ms_220ms_both_ease-out]">
+        <p className="section-title">Erklärungen</p>
+        <ul className="list-none p-0 mb-10 flex flex-col gap-3" role="group">
+          {CONSENTS.map((consent) => (
+            <ConsentItem
+              key={consent.key}
+              consent={consent}
+              checked={consents[consent.key]}
+              onToggle={() => toggleConsent(consent.key)}
             />
-            <div className="ml-3 flex-1">
-              <span className="text-sm font-medium text-gray-900 group-hover:text-primary transition-colors">
-                DSGVO-Einwilligung *
-              </span>
-              <p className="text-xs text-gray-600 mt-1">
-                Ich willige ein, dass meine personenbezogenen Daten zum Zweck der Spielerpass-Beantragung
-                verarbeitet werden. Die Daten werden nach 48 Stunden automatisch gelöscht.
-              </p>
-            </div>
-          </label>
-
-          {/* Accuracy Declaration */}
-          <label className="flex items-start cursor-pointer group">
-            <input
-              type="checkbox"
-              checked={consents.accuracy}
-              onChange={(e) => handleConsentChange('accuracy', e.target.checked)}
-              className="mt-1 w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary focus:ring-2"
-            />
-            <div className="ml-3 flex-1">
-              <span className="text-sm font-medium text-gray-900 group-hover:text-primary transition-colors">
-                Richtigkeit der Angaben *
-              </span>
-              <p className="text-xs text-gray-600 mt-1">
-                Ich bestätige, dass alle gemachten Angaben wahrheitsgemäß und vollständig sind.
-                Mir ist bekannt, dass falsche Angaben zu Sanktionen führen können.
-              </p>
-            </div>
-          </label>
-
-          {/* Eligibility Declaration */}
-          <label className="flex items-start cursor-pointer group">
-            <input
-              type="checkbox"
-              checked={consents.eligibility}
-              onChange={(e) => handleConsentChange('eligibility', e.target.checked)}
-              className="mt-1 w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary focus:ring-2"
-            />
-            <div className="ml-3 flex-1">
-              <span className="text-sm font-medium text-gray-900 group-hover:text-primary transition-colors">
-                Kenntnisnahme Spielberechtigung *
-              </span>
-              <p className="text-xs text-gray-600 mt-1">
-                Ich habe die berechnete Spielberechtigung zur Kenntnis genommen und bin mir bewusst,
-                dass ein Einsatz vor Ablauf der Sperrfrist zu Bußgeldern führen kann.
-              </p>
-            </div>
-          </label>
-        </div>
-
-        {/* Signature Canvas */}
-        <div className="pt-4 border-t border-gray-200">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Unterschrift * (mit Maus oder Touch)
-          </label>
-
-          <div className="border-2 border-gray-300 rounded-xl overflow-hidden">
-            <SignatureCanvas
-              ref={signatureRef}
-              canvasProps={{
-                className: 'w-full h-40 bg-white',
-                style: { touchAction: 'none' },
-              }}
-              backgroundColor="white"
-              penColor="black"
-            />
-          </div>
-
-          <div className="flex justify-between items-center mt-2">
-            {signatureError && (
-              <p className="text-sm text-error">{signatureError}</p>
-            )}
-            <button
-              type="button"
-              onClick={clearSignature}
-              className="ml-auto text-sm text-gray-600 hover:text-primary transition-colors"
-            >
-              Unterschrift löschen
-            </button>
-          </div>
-        </div>
-
-        {/* Info Box */}
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-          <div className="flex items-start">
-            <svg
-              className="w-5 h-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                clipRule="evenodd"
-              />
-            </svg>
-            <p className="text-sm text-blue-800">
-              Ihre Unterschrift wird digital gespeichert und zusammen mit dem Antrag
-              an den Passwart übermittelt. Sie können Ihren Antragsstatus jederzeit
-              über den Magic Link verfolgen.
-            </p>
-          </div>
-        </div>
-
-        {/* Navigation */}
-        <div className="flex gap-4 pt-4">
-          <Button
-            variant="secondary"
-            onClick={onBack}
-            className="flex-1"
-          >
-            Zurück
-          </Button>
-          <Button
-            onClick={handleContinue}
-            disabled={!allConsentsGiven}
-            className="flex-1"
-          >
-            Weiter zur Zahlung
-          </Button>
-        </div>
+          ))}
+        </ul>
       </div>
-    </Card>
+
+      {/* Signature */}
+      <div className="animate-[fadeUp_400ms_320ms_both_ease-out]">
+        <p className="section-title">Unterschrift</p>
+
+        <div className="flex gap-3 p-3.5 px-4 bg-primary/[0.06] rounded-sm mb-4 font-body text-[13px] text-primary-dark leading-relaxed">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 w-4 h-4 text-primary mt-0.5">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          </svg>
+          <div>
+            <strong className="font-semibold">Rechtsgültige digitale Unterschrift.</strong>{' '}
+            Deine digitale Unterschrift ist verbindlich — keine zusätzliche Papier-Unterschrift nötig.
+            Wir speichern sie zusammen mit dem Antrag und einem Zeitstempel als Nachweis.
+          </div>
+        </div>
+
+        <div
+          className={`relative w-full h-[180px] bg-white rounded-md overflow-hidden cursor-crosshair transition-colors ${
+            hasSignature ? 'border-[1.5px] border-primary' : 'border-[1.5px] border-surface-2 hover:border-primary-light'
+          }`}
+        >
+          <SignatureCanvas
+            ref={(ref) => {
+              sigRef.current = ref;
+            }}
+            penColor="#003479"
+            canvasProps={{
+              className: 'w-full h-full block',
+              'aria-label': 'Unterschriftfeld',
+            }}
+            onBegin={() => {
+              setHasSignature(true);
+              setSignatureError(null);
+            }}
+          />
+          {!hasSignature && (
+            <div className="absolute bottom-10 left-8 right-8 flex items-center gap-3 pointer-events-none">
+              <div className="flex-1 h-px bg-surface-2" />
+              <span className="font-body text-[13px] text-ink-soft italic whitespace-nowrap">
+                hier unterschreiben
+              </span>
+            </div>
+          )}
+        </div>
+
+        <div className="flex justify-between items-center mt-3 gap-3 flex-wrap">
+          <span className="font-body text-xs text-ink-soft leading-tight">
+            Unterschrift {junior && <strong className="font-semibold">des Erziehungsberechtigten</strong>} — mit Maus oder Finger.
+          </span>
+          <button
+            type="button"
+            onClick={clearSignature}
+            className="cursor-pointer font-accent font-semibold text-xs tracking-widest uppercase text-ink-soft px-3 py-2 rounded-sm transition-colors hover:text-[var(--error)] hover:bg-surface-1 inline-flex items-center gap-1.5"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
+              <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+            </svg>
+            Neu unterschreiben
+          </button>
+        </div>
+
+        {signatureError && (
+          <p className="mt-2 text-[13px] font-medium text-[var(--error)]">{signatureError}</p>
+        )}
+
+        {junior && (
+          <div className="info-box mt-6" role="note">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 w-[18px] h-[18px] text-primary mt-0.5">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+            <div>
+              <strong className="block font-accent font-bold text-xs tracking-widest uppercase text-primary mb-1">
+                Warum Erziehungsberechtigte/r?
+              </strong>
+              Der WDFV verlangt bei Junioren unter 18 Jahren die Unterschrift eines Erziehungsberechtigten —
+              damit wird auch die sportgesundheitliche Eignung des Spielers bestätigt.
+            </div>
+          </div>
+        )}
+      </div>
+
+      <WizardActions
+        onBack={onBack}
+        onNext={handleContinue}
+        nextDisabled={!canContinue}
+        nextLabel="Zur Zahlung"
+      />
+    </WizardShell>
+  );
+}
+
+function ConsentItem({
+  consent,
+  checked,
+  onToggle,
+}: {
+  consent: ConsentDef;
+  checked: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <li>
+      <button
+        type="button"
+        role="checkbox"
+        aria-checked={checked}
+        onClick={onToggle}
+        className={`w-full grid grid-cols-[28px_1fr] gap-4 p-5 md:p-6 bg-white text-left rounded-md cursor-pointer transition-all items-start ${
+          checked ? 'border-[1.5px] border-primary' : 'border-[1.5px] border-surface-2 hover:border-primary-light'
+        } focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-primary/40`}
+      >
+        <span
+          className={`w-6 h-6 mt-0.5 rounded-sm border-2 grid place-items-center bg-white transition-colors ${
+            checked ? 'bg-primary border-primary' : 'border-surface-2'
+          }`}
+          aria-hidden="true"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={3}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className={`w-3.5 h-3.5 text-white transition-opacity ${checked ? 'opacity-100' : 'opacity-0'}`}
+          >
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        </span>
+        <span className="flex flex-col gap-1 min-w-0">
+          <span className="font-body font-semibold text-base text-ink tracking-tight flex items-center gap-2 flex-wrap">
+            {consent.title}
+            {consent.required ? (
+              <span className="font-accent text-[11px] font-semibold tracking-wider uppercase text-primary px-2 py-0.5 bg-primary/10 rounded-full">
+                Pflicht
+              </span>
+            ) : (
+              <span className="font-accent text-[11px] font-semibold tracking-wider uppercase text-ink-soft px-2 py-0.5 bg-surface-1 rounded-full">
+                Optional
+              </span>
+            )}
+          </span>
+          <span className="font-body text-sm text-ink-soft leading-relaxed">{consent.desc}</span>
+          {consent.link && (
+            <a
+              href={consent.link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="inline-flex items-center gap-1.5 mt-1.5 font-body text-[13px] font-medium text-primary underline decoration-primary-light underline-offset-2 hover:text-primary-dark hover:decoration-primary self-start"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
+                <path d="M14 3h7v7M10 14L21 3M21 14v7H3V3h7" />
+              </svg>
+              {consent.link.label}
+            </a>
+          )}
+        </span>
+      </button>
+    </li>
   );
 }
