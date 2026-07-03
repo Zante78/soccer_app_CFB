@@ -533,6 +533,19 @@
     .btn-next { width: 100%; justify-content: center; }
     .btn-back { justify-content: center; }
   }
+
+  /* ============ CONTEXT-CHIP ============ */
+  .context-row {
+    display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 32px;
+    animation: fadeUp 400ms 160ms both ease-out;
+  }
+  .context-chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 14px; background: var(--surface-1); border-radius: 999px;
+    font-family: var(--font-accent); font-size: 12px; font-weight: 600;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--primary);
+  }
+  .context-chip svg { width: 12px; height: 12px; color: var(--primary); }
 </style>
 </head>
 <body>
@@ -561,6 +574,11 @@
         Der Jahresbeitrag wird über SEPA-Lastschrift eingezogen &mdash; einmalig oder halbjährlich, wie du magst.
       </p>
     </section>
+
+    <div class="context-row">
+      <span class="context-chip">U15 · C1-Junior</span>
+      <span class="context-chip">Aktives Mitglied</span>
+    </div>
 
     <!-- =============================================================
          SEKTION 1 — AUFNAHMEGEBÜHR (einmalig)

@@ -496,6 +496,19 @@
     .btn-next { width: 100%; justify-content: center; }
     .btn-back { justify-content: center; }
   }
+
+  /* ============ CONTEXT-CHIP ============ */
+  .context-row {
+    display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 32px;
+    animation: fadeUp 400ms 160ms both ease-out;
+  }
+  .context-chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 14px; background: var(--surface-1); border-radius: 999px;
+    font-family: var(--font-accent); font-size: 12px; font-weight: 600;
+    letter-spacing: 1.2px; text-transform: uppercase; color: var(--primary);
+  }
+  .context-chip svg { width: 12px; height: 12px; color: var(--primary); }
 </style>
 </head>
 <body>
@@ -518,12 +531,22 @@
 
     <section class="hero">
       <span class="eyebrow">Erklärungen & Unterschrift</span>
-      <h1 class="headline">Kurz durchgehen. Häkchen setzen.</h1>
+      <h1 class="headline">Erklärungen &amp; Unterschrift.</h1>
       <p class="sub">
         Vier Erklärungen, ohne die keine Vereinsmitgliedschaft läuft. Bitte einmal lesen und
         bestätigen &mdash; danach digital unterschreiben.
       </p>
     </section>
+
+    <div class="context-row">
+      <span class="context-chip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 1l4 4-4 4M3 11V9a4 4 0 014-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 01-4 4H3"/>
+        </svg>
+        Vereinswechsel
+      </span>
+      <span class="context-chip">U15 · C1-Junior</span>
+    </div>
 
     <div class="consent-block">
       <p class="section-title">Erklärungen</p>
