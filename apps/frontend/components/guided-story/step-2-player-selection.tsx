@@ -189,7 +189,4 @@ function OptionCard({
   );
 }
 
-// Legacy-Alias — die register/page.tsx nutzt noch den alten Namen.
-// Wird beim komplett-Refactor der register/page.tsx entfernt.
-export { Step2Anmeldegrund as Step2PlayerSelection };
 
