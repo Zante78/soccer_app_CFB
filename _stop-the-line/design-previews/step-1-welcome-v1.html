@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CfB Digitale Passstelle · Willkommen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary:  #004A9F;         /* Vereinsblau */
+    --accent:   #2D9B5A;         /* Rheingrün */
+    --accent-h: #257E48;         /* Rheingrün Hover */
+    --surface:  #FAFAF7;         /* warmes Off-White */
+    --paper:    #FFFFFF;
+    --ink:      #0F1B2E;         /* tiefes Blau-Schwarz */
+    --muted:    #4A5568;
+    --line:     #E5E4DE;
+    --focus:    rgba(45, 155, 90, 0.4);
+    --radius-card: 12px;
+    --radius-btn: 8px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--surface);
+    color: var(--ink);
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    font-size: 17px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .page {
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+  }
+
+  /* ============ HEADER ============ */
+  .header {
+    padding: 32px 40px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1120px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .brand-mark {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--primary);
+    display: grid;
+    place-items: center;
+    color: white;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 0.02em;
+  }
+  .brand-text {
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+  .brand-text span {
+    color: var(--muted);
+    font-weight: 400;
+    display: block;
+    font-size: 12px;
+    margin-top: 2px;
+  }
+
+  .security-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .security-chip svg {
+    width: 14px;
+    height: 14px;
+    color: var(--accent);
+  }
+
+  /* ============ MAIN ============ */
+  .main {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 80px 40px 40px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 64px;
+    align-content: start;
+  }
+
+  @media (min-width: 900px) {
+    .main {
+      grid-template-columns: 1.15fr 1fr;
+      gap: 80px;
+      padding-top: 120px;
+      align-items: start;
+    }
+  }
+
+  /* ============ LEFT: Hero ============ */
+  .hero {
+    animation: fadeUp 400ms 100ms both ease-out;
+  }
+
+  .eyebrow {
+    display: inline-block;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    margin-bottom: 24px;
+  }
+
+  .headline {
+    font-family: 'Bebas Neue', sans-serif;
+    font-weight: 400;
+    font-size: clamp(56px, 10vw, 120px);
+    line-height: 0.92;
+    letter-spacing: -0.005em;
+    color: var(--primary);
+    margin: 0 0 32px;
+  }
+  .headline .accent-line {
+    color: var(--accent);
+    display: block;
+  }
+
+  .sender {
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--ink);
+    margin: 0 0 40px;
+    max-width: 460px;
+  }
+  .sender strong {
+    font-weight: 600;
+    color: var(--primary);
+  }
+
+  .cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 32px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius-btn);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 17px;
+    letter-spacing: -0.005em;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 160ms ease, transform 160ms ease;
+  }
+  .cta:hover {
+    background: var(--accent-h);
+    transform: translateY(-1px);
+  }
+  .cta:active {
+    transform: translateY(0);
+  }
+  .cta:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+  }
+  .cta svg {
+    width: 20px;
+    height: 20px;
+    transition: transform 160ms ease;
+  }
+  .cta:hover svg { transform: translateX(3px); }
+
+  .cta-hint {
+    display: block;
+    margin-top: 16px;
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  /* ============ RIGHT: Expectations ============ */
+  .expectations {
+    animation: fadeUp 400ms 220ms both ease-out;
+  }
+
+  .expect-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-weight: 400;
+    font-size: 20px;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin: 0 0 24px;
+  }
+
+  .expect-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--line);
+  }
+  .expect-item {
+    display: grid;
+    grid-template-columns: 60px 1fr auto;
+    align-items: baseline;
+    padding: 24px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .expect-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    line-height: 1;
+    color: var(--accent);
+  }
+  .expect-body {
+    padding-right: 16px;
+  }
+  .expect-body strong {
+    display: block;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 4px;
+    letter-spacing: -0.01em;
+  }
+  .expect-body span {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .expect-time {
+    font-family: 'DM Sans', sans-serif;
+    font-variant-numeric: tabular-nums;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  /* ============ FOOTER ============ */
+  .footer {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 32px 40px 40px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--line);
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .footer a {
+    color: var(--muted);
+    text-decoration: underline;
+    text-decoration-color: var(--line);
+    text-underline-offset: 3px;
+  }
+  .footer a:hover { color: var(--ink); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero, .expectations { animation: none; }
+    .cta, .cta svg { transition: none; }
+  }
+
+  @media (max-width: 640px) {
+    .header, .main, .footer { padding-left: 24px; padding-right: 24px; }
+    .main { padding-top: 48px; gap: 48px; }
+    .footer { flex-direction: column; gap: 12px; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="header">
+    <div class="brand">
+      <div class="brand-mark">CFB</div>
+      <div class="brand-text">
+        CfB Ford Köln-Niehl 09/52
+        <span>Digitale Passstelle</span>
+      </div>
+    </div>
+    <div class="security-chip">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+      DSGVO-konform · Verschlüsselt
+    </div>
+  </header>
+
+  <main class="main">
+
+    <section class="hero">
+      <span class="eyebrow">Willkommen</span>
+      <h1 class="headline">
+        Hallo.<br>
+        <span class="accent-line">Los geht's.</span>
+      </h1>
+      <p class="sender">
+        Du wurdest von <strong>Salvatore Abate (U17-1)</strong> eingeladen dein Kind
+        offiziell anzumelden. Wir führen dich in wenigen Schritten durch alles was
+        der DFB dafür braucht.
+      </p>
+      <a href="#" class="cta">
+        Anmeldung starten
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14M13 6l6 6-6 6"/>
+        </svg>
+      </a>
+      <span class="cta-hint">Dauert etwa 8 Minuten · Du kannst jederzeit pausieren</span>
+    </section>
+
+    <aside class="expectations">
+      <h2 class="expect-title">Was dich erwartet</h2>
+      <ol class="expect-list">
+        <li class="expect-item">
+          <span class="expect-num">01</span>
+          <div class="expect-body">
+            <strong>Deine Angaben</strong>
+            <span>Name, Geburtsdatum, Mannschaft. Wir prüfen die Sperrfrist automatisch.</span>
+          </div>
+          <span class="expect-time">2 min</span>
+        </li>
+        <li class="expect-item">
+          <span class="expect-num">02</span>
+          <div class="expect-body">
+            <strong>Foto &amp; Dokumente</strong>
+            <span>Ein Passfoto vom Handy. Falls Vereinswechsel: Abmeldung des alten Vereins.</span>
+          </div>
+          <span class="expect-time">3 min</span>
+        </li>
+        <li class="expect-item">
+          <span class="expect-num">03</span>
+          <div class="expect-body">
+            <strong>Unterschrift &amp; Beitrag</strong>
+            <span>Digital unterschreiben, Beitrag per PayPal oder QR-Code beim Trainer.</span>
+          </div>
+          <span class="expect-time">3 min</span>
+        </li>
+      </ol>
+    </aside>
+
+  </main>
+
+  <footer class="footer">
+    <div>© CfB Ford Köln-Niehl 09/52 e.V.</div>
+    <div>
+      <a href="#">Datenschutz</a>
+      &nbsp;·&nbsp;
+      <a href="#">Impressum</a>
+      &nbsp;·&nbsp;
+      <a href="mailto:michael.dobiat@cfbfordniehl.de">Kontakt</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

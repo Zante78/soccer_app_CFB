@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@700&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: transparent; }
+  /* apple-touch-icon: 180x180, muss NICHT transparent sein, iOS mag rounded corners selbst nicht */
+  .icon {
+    width: 180px;
+    height: 180px;
+    background: #004A9F;
+    display: grid;
+    place-items: center;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    color: #FFFFFF;
+    line-height: 1;
+    /* iOS croppt selbst, wir liefern quadratisch flat */
+  }
+  .icon-inner {
+    width: 140px;
+    height: 140px;
+    background: #FFFFFF;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    color: #004A9F;
+    font-size: 56px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+</style>
+</head>
+<body>
+<div class="icon">
+  <div class="icon-inner">CfB</div>
+</div>
+</body>
+</html>
