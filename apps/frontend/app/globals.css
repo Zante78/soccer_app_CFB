@@ -297,3 +297,29 @@ body {
     transform: translateY(0);
   }
 }
+
+/* Success-Mark Pop-Animation (Step 8) */
+@keyframes pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Pulse für aktive Timeline-Dots (Step 8) + Sperrfrist-Countdown (Step 5) */
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(0, 74, 159, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgba(0, 74, 159, 0);
+  }
+}

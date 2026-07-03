@@ -1,253 +1,471 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { useCallback, useState } from 'react';
+import { WizardShell, WizardActions } from './wizard-shell';
+
+type RegistrationReason = 'NEW_PLAYER' | 'TRANSFER' | 'RE_REGISTRATION';
 
 interface Step4UploadProps {
-  onNext: (data: { photo_file: File | null; document_files: File[] }) => void;
+  onNext: (data: {
+    photo_file: File | null;
+    birth_proof_file?: File | null;
+    deregistration_file?: File | null;
+    document_files: File[]; // Legacy — Aggregat aus benannten Slots
+  }) => void;
   onBack: () => void;
+  registrationReason?: RegistrationReason;
+  birthDate?: string; // ISO YYYY-MM-DD — bestimmt Junior-Status
+  teamId?: string;
 }
 
-export function Step4Upload({ onNext, onBack }: Step4UploadProps) {
-  const [photoFile, setPhotoFile] = useState<File | null>(null);
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
-  const [photoError, setPhotoError] = useState<string | null>(null);
-  const [documentFiles, setDocumentFiles] = useState<File[]>([]);
+interface SlotState {
+  file: File | null;
+  preview: string | null;
+  error: string | null;
+}
 
-  // Photo Upload Handler
+const emptySlot: SlotState = { file: null, preview: null, error: null };
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+const IMAGE_MIN_WIDTH = 600;
+const IMAGE_MIN_HEIGHT = 800;
+
+function isJunior(birthDateIso?: string): boolean {
+  if (!birthDateIso) return true; // fail-safe: bei unbekanntem Alter Junior annehmen (mehr Nachweise)
+  const bd = new Date(birthDateIso);
+  if (Number.isNaN(bd.getTime())) return true;
+  const now = new Date();
+  let age = now.getFullYear() - bd.getFullYear();
+  const m = now.getMonth() - bd.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < bd.getDate())) age--;
+  return age < 18;
+}
+
+export function Step4Upload({
+  onNext,
+  onBack,
+  registrationReason,
+  birthDate,
+  teamId,
+}: Step4UploadProps) {
+  const junior = isJunior(birthDate);
+  const showBirthProof = junior;
+  const showDeregistration = registrationReason === 'TRANSFER';
+
+  const [photo, setPhoto] = useState<SlotState>(emptySlot);
+  const [birthProof, setBirthProof] = useState<SlotState>(emptySlot);
+  const [deregistration, setDeregistration] = useState<SlotState>(emptySlot);
+
   const handlePhotoUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith('image/')) {
-      setPhotoError('Bitte nur Bilddateien (JPG, PNG, WebP) hochladen');
+      setPhoto({ ...emptySlot, error: 'Bitte nur Bilddateien (JPG, PNG, WebP) hochladen.' });
+      return;
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      setPhoto({ ...emptySlot, error: 'Datei zu groß (max. 10 MB).' });
       return;
     }
 
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      setPhotoError('Datei zu groß (max. 5MB)');
-      return;
-    }
-
-    // Check image dimensions
-    const img = new Image();
     const objectUrl = URL.createObjectURL(file);
+    const img = new Image();
     img.onload = () => {
-      if (img.width < 600 || img.height < 800) {
-        setPhotoError('Bild zu klein (min. 600x800px)');
+      if (img.width < IMAGE_MIN_WIDTH || img.height < IMAGE_MIN_HEIGHT) {
         URL.revokeObjectURL(objectUrl);
+        setPhoto({ ...emptySlot, error: `Bild zu klein (min. ${IMAGE_MIN_WIDTH}×${IMAGE_MIN_HEIGHT} px).` });
         return;
       }
-
-      // Valid image
-      setPhotoFile(file);
-      setPhotoPreview(objectUrl);
-      setPhotoError(null);
+      setPhoto({ file, preview: objectUrl, error: null });
     };
     img.src = objectUrl;
   }, []);
 
-  // Document Upload Handler
-  const handleDocumentUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    setDocumentFiles((prev) => [...prev, ...files]);
-  }, []);
+  const handleDocumentUpload =
+    (setter: React.Dispatch<React.SetStateAction<SlotState>>) =>
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
 
-  // Remove Document
-  const removeDocument = (index: number) => {
-    setDocumentFiles((prev) => prev.filter((_, i) => i !== index));
+      if (file.size > MAX_FILE_SIZE) {
+        setter({ ...emptySlot, error: 'Datei zu groß (max. 10 MB).' });
+        return;
+      }
+      const isImg = file.type.startsWith('image/');
+      const isPdf = file.type === 'application/pdf';
+      if (!isImg && !isPdf) {
+        setter({ ...emptySlot, error: 'Bitte nur JPG, PNG, WebP oder PDF hochladen.' });
+        return;
+      }
+      setter({ file, preview: null, error: null });
+    };
+
+  const removeSlot = (setter: React.Dispatch<React.SetStateAction<SlotState>>, current: SlotState) => {
+    if (current.preview) URL.revokeObjectURL(current.preview);
+    setter(emptySlot);
   };
 
-  // Submit
+  const canContinue = Boolean(photo.file) && (!showBirthProof || Boolean(birthProof.file));
+
   const handleContinue = () => {
-    if (!photoFile) {
-      setPhotoError('Bitte Passfoto hochladen');
-      return;
-    }
-    onNext({ photo_file: photoFile, document_files: documentFiles });
+    if (!canContinue) return;
+    const document_files: File[] = [];
+    if (birthProof.file) document_files.push(birthProof.file);
+    if (deregistration.file) document_files.push(deregistration.file);
+    onNext({
+      photo_file: photo.file,
+      birth_proof_file: birthProof.file,
+      deregistration_file: deregistration.file,
+      document_files,
+    });
   };
+
+  const contextChips: React.ReactNode[] = [];
+  if (registrationReason === 'TRANSFER') {
+    contextChips.push(
+      <span key="reason" className="context-chip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
+          <path d="M17 1l4 4-4 4M3 11V9a4 4 0 014-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 01-4 4H3" />
+        </svg>
+        Vereinswechsel
+      </span>
+    );
+  } else if (registrationReason === 'RE_REGISTRATION') {
+    contextChips.push(
+      <span key="reason" className="context-chip">
+        Wiederanmeldung
+      </span>
+    );
+  } else if (registrationReason === 'NEW_PLAYER') {
+    contextChips.push(
+      <span key="reason" className="context-chip">
+        Erstanmeldung
+      </span>
+    );
+  }
+  if (teamId) {
+    contextChips.push(
+      <span key="team" className="context-chip">
+        {junior ? 'Junior' : 'Senior'} · {teamId.toUpperCase()}
+      </span>
+    );
+  }
 
   return (
-    <Card>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Dokumente & Passfoto
-          </h2>
-          <p className="text-gray-600">
-            Laden Sie ein Passfoto und ggf. weitere Dokumente hoch
-          </p>
+    <WizardShell step={4}>
+      <section className="animate-[fadeUp_400ms_100ms_both_ease-out] mb-10">
+        <span className="eyebrow">Foto &amp; Dokumente</span>
+        <h1 className="headline">Ein Foto, ein Nachweis.</h1>
+        <p className="headline-sub">
+          Wir brauchen ein aktuelles Passfoto für den Spielerpass{showBirthProof && ' und — wenn der Spieler unter 18 ist — einen Nachweis des Geburtsdatums'}.
+          Alles vom Handy fotografiert reicht, keine Original-Post nötig.
+        </p>
+      </section>
+
+      {contextChips.length > 0 && (
+        <div className="flex gap-2.5 flex-wrap mb-8 animate-[fadeUp_400ms_160ms_both_ease-out]">
+          {contextChips}
         </div>
+      )}
 
-        {/* Photo Upload */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Passfoto * (600x800px min., max. 5MB)
-          </label>
+      <div className="animate-[fadeUp_400ms_220ms_both_ease-out]">
+        {/* Slot 1: Photo (immer Pflicht) */}
+        <PhotoSlot state={photo} onUpload={handlePhotoUpload} onRemove={() => removeSlot(setPhoto, photo)} />
 
-          {!photoPreview ? (
-            <label
-              htmlFor="photo-upload"
-              className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer hover:bg-gray-50 transition-colors"
-            >
-              <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                <svg
-                  className="w-12 h-12 text-gray-400 mb-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                  />
-                </svg>
-                <p className="mb-2 text-sm text-gray-500">
-                  <span className="font-semibold">Klicken zum Hochladen</span> oder Drag & Drop
-                </p>
-                <p className="text-xs text-gray-500">JPG, PNG oder WebP (max. 5MB)</p>
-              </div>
-              <input
-                id="photo-upload"
-                type="file"
-                className="hidden"
-                accept="image/jpeg,image/png,image/webp"
-                onChange={handlePhotoUpload}
-              />
-            </label>
-          ) : (
-            <div className="relative">
-              <img
-                src={photoPreview}
-                alt="Passfoto Vorschau"
-                className="w-full max-w-xs mx-auto rounded-xl shadow-lg"
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  setPhotoFile(null);
-                  setPhotoPreview(null);
-                  setPhotoError(null);
-                }}
-                className="absolute top-2 right-2 bg-error text-white rounded-full p-2 hover:bg-red-600 transition-colors"
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path
-                    fillRule="evenodd"
-                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </button>
+        {/* Slot 2: Geburtsnachweis (Pflicht bei Junior) */}
+        {showBirthProof && (
+          <DocumentSlot
+            title="Nachweis des Geburtsdatums"
+            required
+            tagLabel="Pflicht bei Junioren"
+            description={
+              <>
+                Foto oder Scan der <strong className="text-primary-dark font-semibold">Geburtsurkunde</strong> oder
+                einer <strong className="text-primary-dark font-semibold">Meldebescheinigung</strong>. Der WDFV verlangt
+                den Nachweis für die Altersklasse.
+              </>
+            }
+            state={birthProof}
+            onUpload={handleDocumentUpload(setBirthProof)}
+            onRemove={() => removeSlot(setBirthProof, birthProof)}
+            inputId="upload-birth"
+          >
+            <div className="flex flex-wrap gap-x-4 gap-y-2 mt-3 pt-3 border-t border-surface-2 font-body text-[13px] text-ink-soft">
+              <SlotOk>Geburtsurkunde</SlotOk>
+              <SlotOk>Meldebescheinigung</SlotOk>
+              <SlotOk>beides ist gleichwertig</SlotOk>
             </div>
-          )}
+          </DocumentSlot>
+        )}
 
-          {photoError && (
-            <p className="text-sm text-error mt-2">{photoError}</p>
-          )}
-        </div>
+        {/* Slot 3: Abmeldebestätigung (Optional bei Vereinswechsel) */}
+        {showDeregistration && (
+          <DocumentSlot
+            title="Abmeldebestätigung vom Vorverein"
+            tagLabel="Optional"
+            tagIsOptional
+            description={
+              <>
+                Falls dir die Bestätigung vom alten Verein vorliegt, lade sie hoch — das beschleunigt die
+                Prüfung. Wenn nicht: kein Problem, wir arbeiten mit den Angaben aus dem letzten Schritt.
+              </>
+            }
+            state={deregistration}
+            onUpload={handleDocumentUpload(setDeregistration)}
+            onRemove={() => removeSlot(setDeregistration, deregistration)}
+            inputId="upload-deregistration"
+          />
+        )}
 
-        {/* Document Upload */}
-        <div className="pt-4 border-t border-gray-200">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Weitere Dokumente (optional)
-          </label>
-          <p className="text-xs text-gray-500 mb-3">
-            z.B. Ausweis, Geburtsurkunde, Spielerlaubnis
-          </p>
-
-          <label
-            htmlFor="document-upload"
-            className="flex items-center justify-center w-full px-4 py-3 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer hover:bg-gray-50 transition-colors"
-          >
-            <svg
-              className="w-5 h-5 text-gray-400 mr-2"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-            <span className="text-sm text-gray-600">Dokument hinzufügen</span>
-            <input
-              id="document-upload"
-              type="file"
-              className="hidden"
-              multiple
-              onChange={handleDocumentUpload}
-            />
-          </label>
-
-          {/* Document List */}
-          {documentFiles.length > 0 && (
-            <div className="mt-4 space-y-2">
-              {documentFiles.map((file, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                >
-                  <div className="flex items-center">
-                    <svg
-                      className="w-5 h-5 text-gray-400 mr-2"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    <span className="text-sm text-gray-700">{file.name}</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => removeDocument(index)}
-                    className="text-error hover:text-red-700 transition-colors"
-                  >
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                      <path
-                        fillRule="evenodd"
-                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Navigation */}
-        <div className="flex gap-4 pt-4">
-          <Button
-            variant="secondary"
-            onClick={onBack}
-            className="flex-1"
-          >
-            Zurück
-          </Button>
-          <Button
-            onClick={handleContinue}
-            disabled={!photoFile}
-            className="flex-1"
-          >
-            Weiter
-          </Button>
+        {/* Vertrauens-Note */}
+        <div className="info-box mt-8" role="note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 w-4 h-4 text-primary mt-0.5">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          </svg>
+          <div>
+            <strong>Was passiert mit den Dokumenten?</strong>
+            <br />
+            Alles landet verschlüsselt bei uns und wird <strong>48 Stunden nach der DFBnet-Freigabe automatisch gelöscht</strong>.
+            Der Passwart nutzt sie nur zur Vorbereitung des offiziellen Papier-Antrags.
+          </div>
         </div>
       </div>
-    </Card>
+
+      <WizardActions
+        onBack={onBack}
+        onNext={handleContinue}
+        nextDisabled={!canContinue}
+        nextLabel="Zur Spielberechtigung"
+      />
+    </WizardShell>
+  );
+}
+
+/* ============================================================
+   SLOTS
+   ============================================================ */
+
+function PhotoSlot({
+  state,
+  onUpload,
+  onRemove,
+}: {
+  state: SlotState;
+  onUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onRemove: () => void;
+}) {
+  const hasFile = Boolean(state.file);
+  return (
+    <div className={`bg-white rounded-md p-6 md:p-7 mb-5 transition-colors ${
+      hasFile ? 'border-[1.5px] border-solid border-surface-2' : 'border-[1.5px] border-dashed border-surface-2 hover:border-primary-light'
+    }`}>
+      <div className="flex items-baseline justify-between gap-3 mb-1.5">
+        <span className="font-body font-semibold text-[17px] text-ink tracking-tight">
+          Passfoto <span className="text-primary ml-0.5">*</span>
+        </span>
+        {hasFile ? (
+          <SlotTag variant="done">Hochgeladen</SlotTag>
+        ) : (
+          <SlotTag variant="required">Pflicht</SlotTag>
+        )}
+      </div>
+      <p className="font-body text-sm text-ink-soft leading-relaxed mb-5">
+        Ein aktuelles Foto vom Gesicht, geradeaus, heller Hintergrund. Kein Selfie mit Sonnenbrille.
+        Landet direkt auf dem späteren Spielerpass.
+      </p>
+
+      {hasFile && state.file ? (
+        <UploadedFileRow
+          file={state.file}
+          preview={state.preview}
+          onRemove={onRemove}
+          isImage
+        />
+      ) : (
+        <label htmlFor="upload-photo" className="flex items-center gap-4.5 p-4.5 bg-surface-0 rounded-sm cursor-pointer transition-colors hover:bg-surface-1">
+          <span className="flex-shrink-0 w-12 h-12 grid place-items-center bg-surface-1 rounded-full text-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+              <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
+              <circle cx="12" cy="13" r="4" />
+            </svg>
+          </span>
+          <span className="flex flex-col gap-0.5">
+            <span className="font-body font-semibold text-[15px] text-primary">Foto auswählen</span>
+            <span className="font-body text-[13px] text-ink-soft">Foto vom Handy · max 10 MB</span>
+          </span>
+          <input
+            id="upload-photo"
+            type="file"
+            className="hidden"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={onUpload}
+          />
+        </label>
+      )}
+
+      {state.error && <p className="mt-2 text-[13px] font-medium text-[var(--error)]">{state.error}</p>}
+    </div>
+  );
+}
+
+function DocumentSlot({
+  title,
+  required,
+  tagLabel,
+  tagIsOptional,
+  description,
+  state,
+  onUpload,
+  onRemove,
+  inputId,
+  children,
+}: {
+  title: string;
+  required?: boolean;
+  tagLabel: string;
+  tagIsOptional?: boolean;
+  description: React.ReactNode;
+  state: SlotState;
+  onUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onRemove: () => void;
+  inputId: string;
+  children?: React.ReactNode;
+}) {
+  const hasFile = Boolean(state.file);
+  return (
+    <div className={`bg-white rounded-md p-6 md:p-7 mb-5 transition-colors ${
+      hasFile ? 'border-[1.5px] border-solid border-surface-2' : 'border-[1.5px] border-dashed border-surface-2 hover:border-primary-light'
+    }`}>
+      <div className="flex items-baseline justify-between gap-3 mb-1.5">
+        <span className="font-body font-semibold text-[17px] text-ink tracking-tight">
+          {title}
+          {required && <span className="text-primary ml-0.5">*</span>}
+        </span>
+        {hasFile ? (
+          <SlotTag variant="done">Hochgeladen</SlotTag>
+        ) : tagIsOptional ? (
+          <SlotTag variant="optional">{tagLabel}</SlotTag>
+        ) : (
+          <SlotTag variant="required">{tagLabel}</SlotTag>
+        )}
+      </div>
+      <p className="font-body text-sm text-ink-soft leading-relaxed mb-5">{description}</p>
+
+      {hasFile && state.file ? (
+        <UploadedFileRow file={state.file} preview={null} onRemove={onRemove} />
+      ) : (
+        <label
+          htmlFor={inputId}
+          className="flex items-center gap-4.5 p-4.5 bg-surface-0 rounded-sm cursor-pointer transition-colors hover:bg-surface-1"
+        >
+          <span className="flex-shrink-0 w-12 h-12 grid place-items-center bg-surface-1 rounded-full text-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+            </svg>
+          </span>
+          <span className="flex flex-col gap-0.5">
+            <span className="font-body font-semibold text-[15px] text-primary">Datei auswählen</span>
+            <span className="font-body text-[13px] text-ink-soft">JPG, PNG, WebP oder PDF · max 10 MB</span>
+          </span>
+          <input
+            id={inputId}
+            type="file"
+            className="hidden"
+            accept="image/jpeg,image/png,image/webp,application/pdf"
+            onChange={onUpload}
+          />
+        </label>
+      )}
+
+      {state.error && <p className="mt-2 text-[13px] font-medium text-[var(--error)]">{state.error}</p>}
+      {children}
+    </div>
+  );
+}
+
+function UploadedFileRow({
+  file,
+  preview,
+  onRemove,
+  isImage,
+}: {
+  file: File;
+  preview: string | null;
+  onRemove: () => void;
+  isImage?: boolean;
+}) {
+  const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+  return (
+    <div className="grid grid-cols-[56px_1fr_auto] gap-4 items-center p-3.5 px-4 bg-surface-0 rounded-sm">
+      <div className="w-14 h-[72px] rounded-sm bg-surface-2 grid place-items-center overflow-hidden text-primary">
+        {preview && isImage ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={preview} alt="Vorschau" className="w-full h-full object-cover" />
+        ) : (
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+          </svg>
+        )}
+      </div>
+      <div className="flex flex-col gap-0.5 min-w-0">
+        <span className="font-body font-medium text-sm text-ink whitespace-nowrap overflow-hidden text-ellipsis">
+          {file.name}
+        </span>
+        <span className="font-body text-xs text-ink-soft">{sizeMB} MB</span>
+      </div>
+      <button
+        type="button"
+        onClick={onRemove}
+        aria-label="Datei entfernen"
+        className="p-2 text-ink-soft rounded-sm transition-colors hover:text-[var(--error)] hover:bg-surface-1 focus-visible:outline focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-primary/40"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-[18px] h-[18px] block">
+          <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+        </svg>
+      </button>
+    </div>
+  );
+}
+
+function SlotTag({
+  variant,
+  children,
+}: {
+  variant: 'required' | 'optional' | 'done';
+  children: React.ReactNode;
+}) {
+  const classes = {
+    required: 'bg-primary/10 text-primary',
+    optional: 'bg-surface-1 text-ink-soft',
+    done: 'text-accent inline-flex items-center gap-1.5',
+  }[variant];
+
+  return (
+    <span
+      className={`font-accent font-semibold text-[11px] tracking-widest uppercase px-2.5 py-0.5 rounded-full ${classes} ${
+        variant === 'done' ? 'bg-accent/10' : ''
+      }`}
+    >
+      {variant === 'done' && (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      )}
+      {children}
+    </span>
+  );
+}
+
+function SlotOk({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 text-accent">
+        <polyline points="20 6 9 17 4 12" />
+      </svg>
+      {children}
+    </span>
   );
 }
