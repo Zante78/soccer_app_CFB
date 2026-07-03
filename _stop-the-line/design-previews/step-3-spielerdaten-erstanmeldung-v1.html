@@ -1,0 +1,536 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CfB Digitale Passstelle · Spielerdaten</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary:     #004A9F;
+    --primary-d:   #003479;
+    --primary-l:   #1A6ACC;
+    --accent-green:#2D9B5A;
+    --surface-0:   #F7F9FC;
+    --surface-1:   #EDF1F7;
+    --surface-2:   #DDE5F0;
+    --text:        #111820;
+    --text-soft:   #4A5568;
+    --white:       #FFFFFF;
+    --error:       #B91C1C;
+
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-accent:  'Barlow Condensed', sans-serif;
+    --font-body:    'DM Sans', sans-serif;
+
+    --radius-sm: 4px;
+    --radius-md: 8px;
+
+    --nav-h: 72px;
+    --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--surface-0);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+  }
+
+  /* ============ NAV ============ */
+  .wiz-nav {
+    height: var(--nav-h);
+    background: rgba(0, 74, 159, 0.96);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    display: flex; align-items: center;
+    padding: 0 clamp(16px, 5vw, 80px);
+    color: var(--white);
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .logo-mark {
+    width: 44px; height: 44px;
+    background: var(--white);
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--primary);
+    letter-spacing: -0.02em;
+  }
+  .brand-text {
+    font-family: var(--font-accent);
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.5px;
+    line-height: 1.2;
+  }
+  .brand-text span {
+    display: block;
+    font-weight: 400;
+    font-size: 11px;
+    opacity: 0.7;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .nav-right { margin-left: auto; }
+  .progress-marker {
+    font-family: var(--font-accent);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.7);
+  }
+  .progress-marker strong { color: var(--white); font-weight: 700; }
+
+  /* ============ MAIN ============ */
+  .main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: clamp(48px, 8vh, 96px) clamp(16px, 5vw, 80px) 40px;
+    width: 100%;
+  }
+
+  .hero {
+    animation: fadeUp 400ms 100ms both ease-out;
+    margin-bottom: 48px;
+  }
+
+  .eyebrow {
+    font-family: var(--font-accent);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--primary);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 32px;
+    height: 2px;
+    background: var(--primary);
+  }
+
+  .headline {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(40px, 6vw, 72px);
+    line-height: 0.95;
+    letter-spacing: 1px;
+    color: var(--primary);
+    margin: 0 0 20px;
+  }
+  .sub {
+    font-family: var(--font-body);
+    font-size: clamp(15px, 1.6vw, 18px);
+    color: var(--text-soft);
+    max-width: 560px;
+    line-height: 1.55;
+  }
+
+  /* ============ FORM ============ */
+  .form-block {
+    animation: fadeUp 400ms 220ms both ease-out;
+  }
+
+  .field {
+    margin-bottom: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  @media (min-width: 640px) {
+    .field-row {
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .field-row .field { margin-bottom: 0; }
+  }
+  .field.is-full { grid-column: 1 / -1; }
+
+  label {
+    font-family: var(--font-accent);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-soft);
+  }
+  label .req {
+    color: var(--primary);
+    margin-left: 2px;
+  }
+
+  input[type="text"],
+  input[type="date"],
+  select {
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--text);
+    background: var(--white);
+    border: 1.5px solid var(--surface-2);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    width: 100%;
+    transition: border-color var(--transition), box-shadow var(--transition);
+    line-height: 1.4;
+    min-height: 52px;
+  }
+  input:focus, select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0, 74, 159, 0.15);
+  }
+  input:hover:not(:focus), select:hover:not(:focus) {
+    border-color: var(--primary-l);
+  }
+  input::placeholder {
+    color: var(--text-soft);
+    opacity: 0.6;
+  }
+
+  /* Custom select arrow */
+  select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23004A9F' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    padding-right: 44px;
+    cursor: pointer;
+  }
+
+  .field-hint {
+    font-family: var(--font-body);
+    font-size: 13px;
+    color: var(--text-soft);
+    line-height: 1.4;
+    margin-top: 2px;
+  }
+  .field-error {
+    font-family: var(--font-body);
+    font-size: 13px;
+    color: var(--error);
+    font-weight: 500;
+    margin-top: 2px;
+  }
+
+  /* Info-Box: warum wir Nationalität fragen */
+  .info-box {
+    display: flex;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--surface-1);
+    border-left: 3px solid var(--primary);
+    border-radius: var(--radius-sm);
+    margin-top: 8px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    color: var(--text-soft);
+    line-height: 1.5;
+  }
+  .info-box svg {
+    flex-shrink: 0;
+    width: 16px; height: 16px;
+    color: var(--primary);
+    margin-top: 2px;
+  }
+
+  /* ============ CONTEXT-CHIP (was Step 2 gewählt wurde) ============ */
+  .context-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px;
+    background: var(--surface-1);
+    border-radius: 999px;
+    font-family: var(--font-accent);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-bottom: 24px;
+  }
+  .context-chip svg {
+    width: 14px; height: 14px;
+    color: var(--accent-green);
+  }
+  .context-chip button {
+    all: unset;
+    cursor: pointer;
+    font-size: 11px;
+    color: var(--text-soft);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    margin-left: 8px;
+    letter-spacing: 0.5px;
+  }
+  .context-chip button:hover { color: var(--primary); }
+
+  /* ============ NAV ACTIONS ============ */
+  .actions {
+    margin-top: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    animation: fadeUp 400ms 340ms both ease-out;
+  }
+  .btn-back {
+    all: unset;
+    font-family: var(--font-accent);
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-soft);
+    cursor: pointer;
+    padding: 12px 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: color var(--transition);
+    border-bottom: 1px solid transparent;
+  }
+  .btn-back:hover { color: var(--primary); border-bottom-color: var(--primary); }
+  .btn-back:focus-visible {
+    outline: 3px solid rgba(0, 74, 159, 0.4);
+    outline-offset: 4px;
+  }
+  .btn-back svg { width: 14px; height: 14px; }
+
+  .btn-next {
+    font-family: var(--font-accent);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    background: var(--primary);
+    color: var(--white);
+    border: none; cursor: pointer;
+    padding: 16px 32px;
+    border-radius: var(--radius-sm);
+    transition: background var(--transition), transform var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .btn-next:hover {
+    background: var(--primary-d);
+    transform: translateY(-2px);
+  }
+  .btn-next:focus-visible {
+    outline: 3px solid rgba(0, 74, 159, 0.4);
+    outline-offset: 2px;
+  }
+  .btn-next svg {
+    width: 16px; height: 16px;
+    transition: transform var(--transition);
+  }
+  .btn-next:hover svg { transform: translateX(3px); }
+
+  /* ============ FOOTER ============ */
+  .footer {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px clamp(16px, 5vw, 80px) 40px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--surface-2);
+    font-family: var(--font-body);
+    font-size: 13px;
+    color: var(--text-soft);
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .footer a {
+    color: var(--text-soft);
+    text-decoration: underline;
+    text-decoration-color: var(--surface-2);
+    text-underline-offset: 3px;
+  }
+  .footer a:hover { color: var(--text); text-decoration-color: currentColor; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero, .form-block, .actions { animation: none; }
+    .btn-next, .btn-back, input, select { transition: none; }
+    .btn-next:hover { transform: none; }
+  }
+
+  @media (max-width: 640px) {
+    .main { padding-top: 40px; }
+    .actions { flex-direction: column-reverse; align-items: stretch; }
+    .btn-next { width: 100%; justify-content: center; }
+    .btn-back { justify-content: center; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <nav class="wiz-nav" role="navigation" aria-label="Wizard-Navigation">
+    <div class="brand">
+      <div class="logo-mark">CfB</div>
+      <div class="brand-text">
+        CfB Ford Köln-Niehl 09/52
+        <span>Digitale Passstelle</span>
+      </div>
+    </div>
+    <div class="nav-right">
+      <span class="progress-marker">Schritt <strong>03</strong> von <strong>08</strong></span>
+    </div>
+  </nav>
+
+  <main class="main">
+
+    <section class="hero">
+      <span class="eyebrow">Spielerdaten</span>
+      <h1 class="headline">Wer wird angemeldet?</h1>
+      <p class="sub">
+        Die wichtigsten Daten des neuen Spielers. Wir übernehmen sie 1:1 ins DFBnet — bitte prüfe
+        die Schreibweise (spätere Änderungen sind aufwendig).
+      </p>
+    </section>
+
+    <div class="context-chip">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 6L9 17l-5-5"/>
+      </svg>
+      Erstanmeldung
+      <button type="button" aria-label="Auswahl aus Schritt 2 ändern">ändern</button>
+    </div>
+
+    <form class="form-block" novalidate>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="first_name">Vorname <span class="req">*</span></label>
+          <input type="text" id="first_name" name="first_name" autocomplete="given-name" placeholder="Wie im Ausweis" required />
+        </div>
+        <div class="field">
+          <label for="last_name">Nachname <span class="req">*</span></label>
+          <input type="text" id="last_name" name="last_name" autocomplete="family-name" placeholder="Wie im Ausweis" required />
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label for="birth_date">Geburtsdatum <span class="req">*</span></label>
+          <input type="date" id="birth_date" name="birth_date" required />
+          <span class="field-hint">Wichtig für die Altersklasse — U11, U13, U15, ...</span>
+        </div>
+        <div class="field">
+          <label for="nationality">Nationalität <span class="req">*</span></label>
+          <input type="text" id="nationality" name="nationality" value="Deutschland" autocomplete="country-name" required />
+        </div>
+      </div>
+
+      <div class="field is-full">
+        <label for="team_id">Mannschaft <span class="req">*</span></label>
+        <select id="team_id" name="team_id" required>
+          <option value="">Bitte wählen</option>
+          <option value="1-herren">1. Mannschaft (Senioren)</option>
+          <option value="2-herren">2. Mannschaft (Senioren)</option>
+          <option value="ah">Alte Herren</option>
+          <option value="u19">U19 A-Junioren</option>
+          <option value="u17-1">U17-1 B1-Junioren</option>
+          <option value="u17-2">U17-2 B2-Junioren</option>
+          <option value="u15-1">U15-1 C1-Junioren</option>
+          <option value="u15-2">U15-2 C3-Junioren</option>
+          <option value="u14">U14 C2-Junioren</option>
+          <option value="u13-1">U13-1 D1-Junioren</option>
+          <option value="u13-2">U13-2 D2-Junioren</option>
+          <option value="u12-1">U12-1 D3-Junioren</option>
+          <option value="u12-2">U12-2 D4-Junioren</option>
+          <option value="u12-3">U12-3 D5-Junioren</option>
+          <option value="u10">U10-1 E3-Junioren</option>
+          <option value="u9-1">U9-1 F1-Junioren</option>
+          <option value="u9-2">U9-2 F2-Junioren</option>
+          <option value="u8">U8-1 F3-Junioren</option>
+          <option value="u7">U7-1 Bambini</option>
+          <option value="ballschule">Ballschule (3-5 Jahre)</option>
+        </select>
+        <span class="field-hint">Wenn du unsicher bist, sag uns Bescheid — der Passwart hilft.</span>
+      </div>
+
+      <div class="info-box" role="note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="16" x2="12" y2="12"/>
+          <line x1="12" y1="8" x2="12.01" y2="8"/>
+        </svg>
+        <div>
+          <strong>Warum diese Daten?</strong> Vorname, Nachname und Geburtsdatum landen 1:1 im DFB-Spielerpass.
+          Die Mannschaft entscheidet über die Altersklasse und den Beitrag.
+        </div>
+      </div>
+
+    </form>
+
+    <div class="actions">
+      <button type="button" class="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M11 18l-6-6 6-6"/>
+        </svg>
+        Zurück
+      </button>
+      <button type="button" class="btn-next">
+        Weiter
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14M13 6l6 6-6 6"/>
+        </svg>
+      </button>
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    <div>© CfB Ford Köln-Niehl 09/52 e.V.</div>
+    <div>
+      <a href="#">Datenschutz</a>
+      &nbsp;·&nbsp;
+      <a href="#">Impressum</a>
+      &nbsp;·&nbsp;
+      <a href="mailto:michael.dobiat@cfbfordniehl.de">Kontakt</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>
