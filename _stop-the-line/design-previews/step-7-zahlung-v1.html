@@ -1,0 +1,694 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CfB Digitale Passstelle · Zahlung</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary:     #004A9F;
+    --primary-d:   #003479;
+    --primary-l:   #1A6ACC;
+    --accent-green:#2D9B5A;
+    --accent-green-d:#1F7A45;
+    --surface-0:   #F7F9FC;
+    --surface-1:   #EDF1F7;
+    --surface-2:   #DDE5F0;
+    --text:        #111820;
+    --text-soft:   #4A5568;
+    --white:       #FFFFFF;
+
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-accent:  'Barlow Condensed', sans-serif;
+    --font-body:    'DM Sans', sans-serif;
+
+    --radius-sm: 4px;
+    --radius-md: 8px;
+
+    --nav-h: 72px;
+    --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font-body);
+    background: var(--surface-0);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { min-height: 100vh; display: grid; grid-template-rows: auto 1fr auto; }
+
+  /* NAV */
+  .wiz-nav {
+    height: var(--nav-h);
+    background: rgba(0, 74, 159, 0.96);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    display: flex; align-items: center;
+    padding: 0 clamp(16px, 5vw, 80px);
+    color: var(--white);
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .logo-mark {
+    width: 44px; height: 44px;
+    background: var(--white);
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--primary);
+    letter-spacing: -0.02em;
+  }
+  .brand-text {
+    font-family: var(--font-accent);
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.5px;
+    line-height: 1.2;
+  }
+  .brand-text span {
+    display: block;
+    font-weight: 400;
+    font-size: 11px;
+    opacity: 0.7;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .nav-right { margin-left: auto; }
+  .progress-marker {
+    font-family: var(--font-accent);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.7);
+  }
+  .progress-marker strong { color: var(--white); font-weight: 700; }
+
+  /* MAIN */
+  .main {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: clamp(48px, 8vh, 96px) clamp(16px, 5vw, 80px) 40px;
+    width: 100%;
+  }
+  .hero { animation: fadeUp 400ms 100ms both ease-out; margin-bottom: 32px; }
+  .eyebrow {
+    font-family: var(--font-accent);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--primary);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 32px; height: 2px;
+    background: var(--primary);
+  }
+  .headline {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(40px, 6vw, 72px);
+    line-height: 0.95;
+    letter-spacing: 1px;
+    color: var(--primary);
+    margin: 0 0 20px;
+  }
+  .sub {
+    font-family: var(--font-body);
+    font-size: clamp(15px, 1.6vw, 18px);
+    color: var(--text-soft);
+    max-width: 580px;
+    line-height: 1.55;
+  }
+
+  /* ============ BETRAG-CARD ============ */
+  .amount-card {
+    animation: fadeUp 400ms 180ms both ease-out;
+    background: var(--white);
+    border: 1px solid var(--surface-2);
+    border-radius: var(--radius-md);
+    padding: 24px 28px;
+    margin-bottom: 32px;
+  }
+  .amount-title {
+    font-family: var(--font-accent);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-soft);
+    margin-bottom: 16px;
+  }
+  .amount-lines { display: flex; flex-direction: column; gap: 10px; }
+  .amount-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-family: var(--font-body);
+    font-size: 15px;
+    color: var(--text);
+    gap: 12px;
+  }
+  .amount-line-label { color: var(--text-soft); }
+  .amount-line-value { font-weight: 500; font-variant-numeric: tabular-nums; }
+
+  .amount-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-top: 16px;
+    margin-top: 12px;
+    border-top: 1px solid var(--surface-2);
+    gap: 12px;
+  }
+  .amount-total-label {
+    font-family: var(--font-accent);
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--primary);
+  }
+  .amount-total-value {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(32px, 5vw, 44px);
+    line-height: 1;
+    letter-spacing: 0.5px;
+    color: var(--primary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ============ SECTION TITLE ============ */
+  .section-title {
+    font-family: var(--font-accent);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-soft);
+    margin: 0 0 16px;
+  }
+
+  /* ============ ZAHLUNGSART CARDS ============ */
+  .method-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 32px;
+    animation: fadeUp 400ms 260ms both ease-out;
+  }
+  .method-card {
+    all: unset;
+    display: grid;
+    grid-template-columns: 22px 48px 1fr auto;
+    gap: 16px;
+    padding: 20px 24px;
+    background: var(--white);
+    border: 1.5px solid var(--surface-2);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: border-color var(--transition), background var(--transition);
+    align-items: center;
+  }
+  .method-card:hover { border-color: var(--primary-l); }
+  .method-card:focus-visible {
+    outline: 3px solid rgba(0, 74, 159, 0.4);
+    outline-offset: 2px;
+  }
+  .method-card.is-selected {
+    border-color: var(--primary);
+    background: linear-gradient(0deg, rgba(0, 74, 159, 0.03), rgba(0, 74, 159, 0.03)), var(--white);
+  }
+
+  .method-radio {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--surface-2);
+    background: var(--white);
+    display: grid; place-items: center;
+    transition: border-color var(--transition);
+    flex-shrink: 0;
+  }
+  .method-radio::after {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--primary);
+    opacity: 0;
+    transition: opacity var(--transition);
+  }
+  .method-card.is-selected .method-radio { border-color: var(--primary); }
+  .method-card.is-selected .method-radio::after { opacity: 1; }
+
+  .method-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-sm);
+    display: grid; place-items: center;
+    background: var(--surface-1);
+    color: var(--primary);
+    flex-shrink: 0;
+  }
+  .method-icon svg { width: 24px; height: 24px; }
+
+  .method-body { min-width: 0; }
+  .method-title {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--text);
+    letter-spacing: -0.005em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .method-tag {
+    font-family: var(--font-accent);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--accent-green);
+    padding: 2px 8px;
+    background: rgba(45, 155, 90, 0.1);
+    border-radius: 999px;
+  }
+  .method-desc {
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--text-soft);
+    line-height: 1.5;
+    margin-top: 2px;
+  }
+  .method-time {
+    font-family: var(--font-accent);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-soft);
+    white-space: nowrap;
+  }
+
+  /* ============ IBAN-BLOCK ============ */
+  .iban-block {
+    background: var(--white);
+    border: 1px solid var(--surface-2);
+    border-radius: var(--radius-md);
+    padding: 24px 28px;
+    animation: fadeUp 400ms 340ms both ease-out;
+  }
+  .iban-lead {
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--text-soft);
+    line-height: 1.55;
+    margin-bottom: 20px;
+    max-width: 560px;
+  }
+  .iban-lead strong { color: var(--primary-d); font-weight: 600; }
+
+  .iban-fields {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  @media (min-width: 640px) {
+    .iban-fields { grid-template-columns: 2fr 1fr; }
+  }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  label {
+    font-family: var(--font-accent);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-soft);
+  }
+  label .req { color: var(--primary); margin-left: 2px; }
+
+  input[type="text"] {
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--text);
+    background: var(--surface-0);
+    border: 1.5px solid var(--surface-2);
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    width: 100%;
+    transition: border-color var(--transition), box-shadow var(--transition);
+    line-height: 1.4;
+    min-height: 52px;
+  }
+  input[type="text"].iban-input {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 1px;
+  }
+  input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0, 74, 159, 0.15);
+    background: var(--white);
+  }
+  input:hover:not(:focus) { border-color: var(--primary-l); }
+  input::placeholder { color: var(--text-soft); opacity: 0.6; }
+
+  .iban-hint {
+    display: flex;
+    gap: 12px;
+    padding: 14px 16px;
+    margin-top: 20px;
+    background: var(--surface-1);
+    border-left: 3px solid var(--primary);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    font-size: 13px;
+    color: var(--text-soft);
+    line-height: 1.55;
+  }
+  .iban-hint svg {
+    flex-shrink: 0;
+    width: 16px; height: 16px;
+    color: var(--primary);
+    margin-top: 2px;
+  }
+  .iban-hint strong { color: var(--primary-d); font-weight: 600; }
+
+  /* ============ NAV ACTIONS ============ */
+  .actions {
+    margin-top: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    animation: fadeUp 400ms 440ms both ease-out;
+  }
+  .btn-back {
+    all: unset;
+    font-family: var(--font-accent);
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-soft);
+    cursor: pointer;
+    padding: 12px 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: color var(--transition);
+    border-bottom: 1px solid transparent;
+  }
+  .btn-back:hover { color: var(--primary); border-bottom-color: var(--primary); }
+  .btn-back:focus-visible { outline: 3px solid rgba(0, 74, 159, 0.4); outline-offset: 4px; }
+  .btn-back svg { width: 14px; height: 14px; }
+
+  .btn-next {
+    font-family: var(--font-accent);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    background: var(--primary);
+    color: var(--white);
+    border: none; cursor: pointer;
+    padding: 16px 32px;
+    border-radius: var(--radius-sm);
+    transition: background var(--transition), transform var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .btn-next:hover { background: var(--primary-d); transform: translateY(-2px); }
+  .btn-next:focus-visible { outline: 3px solid rgba(0, 74, 159, 0.4); outline-offset: 2px; }
+  .btn-next svg { width: 16px; height: 16px; transition: transform var(--transition); }
+  .btn-next:hover svg { transform: translateX(3px); }
+
+  /* Footer */
+  .footer {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 24px clamp(16px, 5vw, 80px) 40px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--surface-2);
+    font-family: var(--font-body);
+    font-size: 13px;
+    color: var(--text-soft);
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .footer a {
+    color: var(--text-soft);
+    text-decoration: underline;
+    text-decoration-color: var(--surface-2);
+    text-underline-offset: 3px;
+  }
+  .footer a:hover { color: var(--text); text-decoration-color: currentColor; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero, .amount-card, .method-list, .iban-block, .actions { animation: none; }
+    .btn-next, .btn-back, .method-card, input { transition: none; }
+    .btn-next:hover { transform: none; }
+  }
+
+  @media (max-width: 640px) {
+    .main { padding-top: 40px; }
+    .method-card { grid-template-columns: 22px 40px 1fr; padding: 16px 18px; }
+    .method-icon { width: 40px; height: 40px; }
+    .method-icon svg { width: 20px; height: 20px; }
+    .method-time { grid-column: 3; padding-top: 4px; }
+    .actions { flex-direction: column-reverse; align-items: stretch; }
+    .btn-next { width: 100%; justify-content: center; }
+    .btn-back { justify-content: center; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <nav class="wiz-nav" role="navigation" aria-label="Wizard-Navigation">
+    <div class="brand">
+      <div class="logo-mark">CfB</div>
+      <div class="brand-text">
+        CfB Ford Köln-Niehl 09/52
+        <span>Digitale Passstelle</span>
+      </div>
+    </div>
+    <div class="nav-right">
+      <span class="progress-marker">Schritt <strong>07</strong> von <strong>08</strong></span>
+    </div>
+  </nav>
+
+  <main class="main">
+
+    <section class="hero">
+      <span class="eyebrow">Zahlung</span>
+      <h1 class="headline">Beitrag &amp; Kontodaten.</h1>
+      <p class="sub">
+        Jahresbeitrag entsprechend der Mannschaft. Zahlungsart wählen, Bankdaten für spätere
+        Einzüge angeben &mdash; das war's.
+      </p>
+    </section>
+
+    <section class="amount-card">
+      <div class="amount-title">Dein Beitrag</div>
+      <div class="amount-lines">
+        <div class="amount-line">
+          <span class="amount-line-label">Jahresbeitrag &middot; Aktives Mitglied (U15)</span>
+          <span class="amount-line-value">300,00 €</span>
+        </div>
+        <div class="amount-line">
+          <span class="amount-line-label">Aufnahmegebühr &middot; einmalig</span>
+          <span class="amount-line-value">20,00 €</span>
+        </div>
+      </div>
+      <div class="amount-total">
+        <span class="amount-total-label">Gesamt einmalig</span>
+        <span class="amount-total-value">320,00 €</span>
+      </div>
+    </section>
+
+    <p class="section-title">Zahlungsart</p>
+
+    <div class="method-list" role="radiogroup" aria-label="Zahlungsart">
+
+      <button type="button" class="method-card is-selected" role="radio" aria-checked="true" data-method="PAYPAL">
+        <span class="method-radio" aria-hidden="true"></span>
+        <span class="method-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="6" width="20" height="14" rx="2"/>
+            <line x1="2" y1="10" x2="22" y2="10"/>
+            <line x1="6" y1="16" x2="10" y2="16"/>
+          </svg>
+        </span>
+        <span class="method-body">
+          <span class="method-title">
+            PayPal
+            <span class="method-tag">Empfohlen</span>
+          </span>
+          <span class="method-desc">Sofortige Zahlung über dein PayPal-Konto. Antrag geht direkt in die Bearbeitung.</span>
+        </span>
+        <span class="method-time">Sofort</span>
+      </button>
+
+      <button type="button" class="method-card" role="radio" aria-checked="false" data-method="CASH">
+        <span class="method-radio" aria-hidden="true"></span>
+        <span class="method-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <rect x="7" y="7" width="4" height="4"/>
+            <rect x="13" y="7" width="4" height="4"/>
+            <rect x="7" y="13" width="4" height="4"/>
+            <line x1="13" y1="13" x2="13" y2="17"/>
+            <line x1="17" y1="13" x2="17" y2="17"/>
+            <line x1="13" y1="17" x2="17" y2="17"/>
+          </svg>
+        </span>
+        <span class="method-body">
+          <span class="method-title">Barzahlung</span>
+          <span class="method-desc">Beim nächsten Training beim Trainer &mdash; wir generieren einen QR-Code, den der Trainer scannt.</span>
+        </span>
+        <span class="method-time">2–5 Tage</span>
+      </button>
+
+      <button type="button" class="method-card" role="radio" aria-checked="false" data-method="SEPA">
+        <span class="method-radio" aria-hidden="true"></span>
+        <span class="method-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3"/>
+          </svg>
+        </span>
+        <span class="method-body">
+          <span class="method-title">Überweisung / Rechnung</span>
+          <span class="method-desc">Passwart schickt dir eine Rechnung. Du überweist innerhalb von 14 Tagen.</span>
+        </span>
+        <span class="method-time">Bis 14 Tage</span>
+      </button>
+
+    </div>
+
+    <p class="section-title">Bankdaten für Jahresbeiträge</p>
+
+    <section class="iban-block">
+      <p class="iban-lead">
+        Ab dem nächsten Vereinsjahr <strong>zieht der Verein den Beitrag per SEPA-Lastschrift ein</strong> &mdash;
+        einmal jährlich. Du brauchst dich um nichts weiter zu kümmern.
+      </p>
+
+      <div class="iban-fields">
+        <div class="field">
+          <label for="iban">IBAN <span class="req">*</span></label>
+          <input
+            type="text"
+            id="iban"
+            name="iban"
+            class="iban-input"
+            placeholder="DE00 0000 0000 0000 0000 00"
+            autocomplete="off"
+            inputmode="text"
+            required
+          />
+        </div>
+        <div class="field">
+          <label for="account_holder">Kontoinhaber <span class="req">*</span></label>
+          <input
+            type="text"
+            id="account_holder"
+            name="account_holder"
+            placeholder="Vor- und Nachname"
+            autocomplete="cc-name"
+            required
+          />
+        </div>
+      </div>
+
+      <div class="iban-hint" role="note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        <div>
+          <strong>Was passiert mit der IBAN?</strong>
+          Die Bankverbindung wird ausschließlich für Vereinsbeiträge genutzt und im DFBnet
+          hinterlegt. Widerruf der Einzugsermächtigung jederzeit per Email an den Passwart möglich.
+        </div>
+      </div>
+    </section>
+
+    <div class="actions">
+      <button type="button" class="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M11 18l-6-6 6-6"/>
+        </svg>
+        Zurück
+      </button>
+      <button type="button" class="btn-next">
+        Jetzt bezahlen &middot; 320,00 €
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14M13 6l6 6-6 6"/>
+        </svg>
+      </button>
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    <div>© CfB Ford Köln-Niehl 09/52 e.V.</div>
+    <div>
+      <a href="#">Datenschutz</a>
+      &nbsp;·&nbsp;
+      <a href="#">Impressum</a>
+      &nbsp;·&nbsp;
+      <a href="mailto:michael.dobiat@cfbfordniehl.de">Kontakt</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  const methodCards = document.querySelectorAll('.method-card');
+  const btnNext = document.querySelector('.btn-next');
+  const btnLabels = {
+    PAYPAL: 'Jetzt bezahlen · 320,00 €',
+    CASH:   'QR-Code anzeigen',
+    SEPA:   'Rechnung anfordern',
+  };
+  methodCards.forEach(card => {
+    card.addEventListener('click', () => {
+      methodCards.forEach(c => { c.classList.remove('is-selected'); c.setAttribute('aria-checked', 'false'); });
+      card.classList.add('is-selected');
+      card.setAttribute('aria-checked', 'true');
+      const method = card.dataset.method;
+      btnNext.firstChild.textContent = btnLabels[method] + ' ';
+    });
+  });
+</script>
+
+</body>
+</html>
