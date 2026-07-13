@@ -1,0 +1,549 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CfB Digitale Passstelle · Schritt 4a · DFB-Anmeldung starten</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary:     #004A9F;
+    --primary-d:   #003479;
+    --primary-l:   #1A6ACC;
+    --accent-green:#2D9B5A;
+    --dark:        #0A1520;
+    --surface-0:   #F7F9FC;
+    --surface-1:   #EDF1F7;
+    --surface-2:   #DDE5F0;
+    --text:        #111820;
+    --text-soft:   #4A5568;
+    --white:       #FFFFFF;
+
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-accent:  'Barlow Condensed', sans-serif;
+    --font-body:    'DM Sans', sans-serif;
+
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 16px;
+
+    --nav-h: 72px;
+    --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--surface-0);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page { min-height: 100vh; display: grid; grid-template-rows: auto 1fr auto; }
+
+  /* NAV */
+  .wiz-nav {
+    height: var(--nav-h);
+    background: rgba(0, 74, 159, 0.96);
+    display: flex; align-items: center;
+    padding: 0 clamp(16px, 5vw, 80px);
+    color: var(--white);
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .logo-mark {
+    width: 44px; height: 44px;
+    background: var(--white);
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-family: var(--font-display);
+    font-size: 18px;
+    color: var(--primary);
+  }
+  .brand-text {
+    font-family: var(--font-accent);
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.6px;
+    color: var(--white);
+    line-height: 1.1;
+  }
+  .brand-text span {
+    display: block;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.75);
+  }
+  .nav-right {
+    margin-left: auto;
+    font-family: var(--font-accent);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.85);
+  }
+
+  .main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 64px clamp(16px, 5vw, 80px) 40px;
+    width: 100%;
+  }
+
+  .hero {
+    animation: fadeUp 400ms both ease-out;
+    margin-bottom: 32px;
+  }
+  .eyebrow {
+    font-family: var(--font-accent);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--primary);
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .eyebrow::before {
+    content: '';
+    width: 32px;
+    height: 2px;
+    background: var(--primary);
+  }
+  .headline {
+    font-family: var(--font-display);
+    font-size: clamp(42px, 6vw, 68px);
+    line-height: 0.95;
+    color: var(--text);
+    margin: 18px 0 20px;
+    letter-spacing: -0.005em;
+  }
+  .sub {
+    font-family: var(--font-body);
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--text-soft);
+    max-width: 640px;
+  }
+  .sub strong { color: var(--text); font-weight: 600; }
+
+  /* Info-Panel: Was passiert im nächsten Tab */
+  .plan-box {
+    background: var(--surface-1);
+    border-radius: var(--radius-md);
+    padding: 28px 32px;
+    margin: 32px 0;
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: 20px 24px;
+    animation: fadeUp 400ms 120ms both ease-out;
+  }
+  .plan-step {
+    display: contents;
+  }
+  .plan-num {
+    font-family: var(--font-display);
+    font-size: 28px;
+    line-height: 1;
+    color: var(--primary);
+    text-align: center;
+    padding-top: 2px;
+  }
+  .plan-content {
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--surface-2);
+  }
+  .plan-content:last-child { border-bottom: none; padding-bottom: 0; }
+  .plan-title {
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .plan-desc {
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--text-soft);
+    line-height: 1.55;
+  }
+  .plan-desc code {
+    background: var(--surface-2);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 13px;
+    font-family: monospace;
+  }
+
+  /* CTA-Section */
+  .cta-block {
+    background: var(--primary);
+    color: var(--white);
+    padding: 40px 32px;
+    border-radius: var(--radius-md);
+    text-align: center;
+    animation: fadeUp 400ms 240ms both ease-out;
+  }
+  .cta-title {
+    font-family: var(--font-display);
+    font-size: 32px;
+    line-height: 1;
+    margin-bottom: 12px;
+    letter-spacing: -0.005em;
+  }
+  .cta-desc {
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.55;
+    color: rgba(255,255,255,0.88);
+    margin-bottom: 24px;
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .btn-dfbnet {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--font-accent);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    background: var(--white);
+    color: var(--primary);
+    border: none;
+    cursor: pointer;
+    padding: 18px 34px;
+    border-radius: var(--radius-sm);
+    transition: transform var(--transition);
+    text-decoration: none;
+  }
+  .btn-dfbnet:hover { transform: translateY(-2px); }
+  .btn-dfbnet svg { width: 18px; height: 18px; }
+
+  /* Copy-Panel */
+  .copy-panel {
+    margin-top: 40px;
+    animation: fadeUp 400ms 360ms both ease-out;
+  }
+  .copy-panel-head {
+    font-family: var(--font-accent);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--text-soft);
+    margin-bottom: 14px;
+  }
+  .copy-panel-desc {
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--text-soft);
+    margin-bottom: 20px;
+  }
+  .copy-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border: 1px solid var(--surface-2);
+    border-radius: var(--radius-md);
+    background: var(--white);
+    overflow: hidden;
+  }
+  .copy-row {
+    display: grid;
+    grid-template-columns: 160px 1fr auto;
+    gap: 20px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--surface-1);
+    align-items: center;
+  }
+  .copy-row:last-child { border-bottom: none; }
+  .copy-label {
+    font-family: var(--font-accent);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-soft);
+  }
+  .copy-value {
+    font-family: var(--font-body);
+    font-size: 15px;
+    color: var(--text);
+    font-weight: 500;
+  }
+  .copy-btn {
+    font-family: var(--font-accent);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    background: transparent;
+    color: var(--primary);
+    border: 1px solid var(--surface-2);
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: border-color var(--transition), background var(--transition);
+  }
+  .copy-btn:hover {
+    border-color: var(--primary);
+    background: var(--surface-1);
+  }
+
+  /* Return-Check */
+  .return-check {
+    margin-top: 40px;
+    padding: 28px 32px;
+    background: var(--surface-1);
+    border-left: 4px solid var(--accent-green);
+    border-radius: var(--radius-md);
+    animation: fadeUp 400ms 480ms both ease-out;
+  }
+  .return-check-title {
+    font-family: var(--font-body);
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .return-check-desc {
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--text-soft);
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+
+  /* Actions */
+  .actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 48px;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .btn-back {
+    all: unset;
+    font-family: var(--font-accent);
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-soft);
+    cursor: pointer;
+    padding: 12px 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: color var(--transition);
+    border-bottom: 1px solid transparent;
+  }
+  .btn-back:hover { color: var(--primary); border-bottom-color: var(--primary); }
+  .btn-back svg { width: 14px; height: 14px; }
+
+  .btn-next {
+    font-family: var(--font-accent);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    background: var(--accent-green);
+    color: var(--white);
+    border: none;
+    cursor: pointer;
+    padding: 16px 32px;
+    border-radius: var(--radius-sm);
+    transition: transform var(--transition), background var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .btn-next:hover { transform: translateY(-2px); background: #26834A; }
+  .btn-next svg { width: 16px; height: 16px; }
+
+  /* Footer */
+  .footer {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px clamp(16px, 5vw, 80px) 40px;
+    width: 100%;
+    border-top: 1px solid var(--surface-2);
+    font-family: var(--font-body);
+    font-size: 13px;
+    color: var(--text-soft);
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+  @media (max-width: 640px) {
+    .plan-box { padding: 24px; }
+    .copy-row { grid-template-columns: 1fr; gap: 8px; padding: 16px 20px; }
+    .actions { flex-direction: column-reverse; align-items: stretch; }
+    .btn-next { justify-content: center; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <nav class="wiz-nav" role="navigation" aria-label="Wizard-Navigation">
+    <div class="brand">
+      <div class="logo-mark">CfB</div>
+      <div class="brand-text">
+        CfB Ford Köln-Niehl 09/52
+        <span>Digitale Passstelle</span>
+      </div>
+    </div>
+    <div class="nav-right">Schritt <strong>05</strong> von <strong>08</strong> · DFB-Übergabe</div>
+  </nav>
+
+  <main class="main">
+
+    <section class="hero">
+      <span class="eyebrow">Übergabe an den DFB</span>
+      <h1 class="headline">Deine Daten liegen bereit.</h1>
+      <p class="sub">
+        Damit dein Kind in einer offiziellen Mannschaft spielen kann, muss die Anmeldung
+        auch beim <strong>Deutschen Fußball-Bund</strong> ankommen. Wir öffnen dafür jetzt
+        das offizielle DFB-Formular in einem neuen Tab und zeigen dir hier deine Daten
+        zum bequemen Reinkopieren.
+      </p>
+    </section>
+
+    <div class="plan-box">
+      <div class="plan-step">
+        <div class="plan-num">01</div>
+        <div class="plan-content">
+          <div class="plan-title">Neuer Tab öffnet sich</div>
+          <div class="plan-desc">
+            Klick auf den grünen Button unten. Wir öffnen <code>verein.dfbnet.org/mitgliedsantrag/cfbfordniehl</code>
+            in einem neuen Tab. Dieser Tab hier bleibt offen mit deinem Kopier-Panel.
+          </div>
+        </div>
+      </div>
+      <div class="plan-step">
+        <div class="plan-num">02</div>
+        <div class="plan-content">
+          <div class="plan-title">DFB-Formular ausfüllen (5 Schritte, ca. 4 Min.)</div>
+          <div class="plan-desc">
+            Antragsteller · Mitgliedsdaten · Zahlungsart (hier gibst Du IBAN + SEPA an) ·
+            Zusatzdaten · Kontrolle. Nutze das Kopier-Panel unten, um Zeile für Zeile
+            reinzupasten. Am Ende Anti-Roboter-Check und Absenden.
+          </div>
+        </div>
+      </div>
+      <div class="plan-step">
+        <div class="plan-num">03</div>
+        <div class="plan-content">
+          <div class="plan-title">Bestätigungsmail vom DFB</div>
+          <div class="plan-desc">
+            Nach dem Absenden bekommst Du eine E-Mail vom DFB mit einem
+            <strong>Bestätigungslink</strong>. Erst wenn Du den Link klickst, geht die
+            Anmeldung an den Verein. Ohne diesen Klick passiert nichts.
+          </div>
+        </div>
+      </div>
+      <div class="plan-step">
+        <div class="plan-num">04</div>
+        <div class="plan-content">
+          <div class="plan-title">Zurück zu uns</div>
+          <div class="plan-desc">
+            Sobald der DFB-Teil durch ist, komm zurück in diesen Tab und klick unten
+            &bdquo;DFB-Anmeldung fertig&ldquo;. Wir prüfen im Hintergrund, ob dein
+            Antrag angekommen ist, und führen Dich zu den letzten Schritten.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section class="cta-block">
+      <div class="cta-title">Jetzt DFB-Anmeldung starten</div>
+      <p class="cta-desc">
+        Öffnet einen neuen Tab. Halte das Kopier-Panel darunter offen &mdash;
+        Feld für Feld einfach klicken und einfügen.
+      </p>
+      <a href="https://verein.dfbnet.org/mitgliedsantrag/cfbfordniehl" target="_blank" rel="noopener" class="btn-dfbnet">
+        DFB-Formular öffnen
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/>
+        </svg>
+      </a>
+    </section>
+
+    <section class="copy-panel">
+      <div class="copy-panel-head">Dein Kopier-Panel</div>
+      <p class="copy-panel-desc">
+        Alle Werte klicken zum Kopieren, dann im DFB-Tab einfügen.
+        Reihenfolge entspricht dem DFB-Formular.
+      </p>
+      <div class="copy-list" role="list">
+        <div class="copy-row"><span class="copy-label">Vorname</span><span class="copy-value">Max</span><button class="copy-btn" type="button">Kopieren</button></div>
+        <div class="copy-row"><span class="copy-label">Nachname</span><span class="copy-value">Mustermann</span><button class="copy-btn" type="button">Kopieren</button></div>
+        <div class="copy-row"><span class="copy-label">E-Mail</span><span class="copy-value">max.mustermann@example.de</span><button class="copy-btn" type="button">Kopieren</button></div>
+        <div class="copy-row"><span class="copy-label">Telefon</span><span class="copy-value">0221 123 4567</span><button class="copy-btn" type="button">Kopieren</button></div>
+        <div class="copy-row"><span class="copy-label">Straße</span><span class="copy-value">Testerstraße 42</span><button class="copy-btn" type="button">Kopieren</button></div>
+        <div class="copy-row"><span class="copy-label">PLZ / Ort</span><span class="copy-value">50767 Köln</span><button class="copy-btn" type="button">Kopieren</button></div>
+        <div class="copy-row"><span class="copy-label">Geburtsdatum</span><span class="copy-value">15.03.2010</span><button class="copy-btn" type="button">Kopieren</button></div>
+        <div class="copy-row"><span class="copy-label">Geschlecht</span><span class="copy-value">männlich</span><button class="copy-btn" type="button">Auswahl merken</button></div>
+        <div class="copy-row"><span class="copy-label">Nationalität</span><span class="copy-value">Deutschland</span><button class="copy-btn" type="button">Auswahl merken</button></div>
+        <div class="copy-row"><span class="copy-label">Beitragsart</span><span class="copy-value">300&thinsp;&euro; · Aktives Mitglied Jugend</span><button class="copy-btn" type="button">Auswahl merken</button></div>
+        <div class="copy-row"><span class="copy-label">Mannschaft</span><span class="copy-value">U15-1 C1-Junioren Salvatore Abate</span><button class="copy-btn" type="button">Auswahl merken</button></div>
+      </div>
+    </section>
+
+    <div class="return-check">
+      <div class="return-check-title">Bist Du mit dem DFB-Antrag fertig?</div>
+      <p class="return-check-desc">
+        Klick unten erst, wenn Du im DFB-Tab die Kontroll-Seite gesehen und den
+        <strong>Anti-Roboter-Check</strong> plus <strong>Absenden</strong> geklickt
+        hast &mdash; und danach den <strong>Bestätigungslink aus der DFB-Mail</strong>
+        angeklickt hast. Wir prüfen dann im Hintergrund, ob dein Antrag im
+        DFB-System sichtbar ist.
+      </p>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M11 18l-6-6 6-6"/>
+        </svg>
+        Zurück zu Nachweisen
+      </button>
+      <button type="button" class="btn-next">
+        DFB-Anmeldung fertig · Weiter
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14M13 6l6 6-6 6"/>
+        </svg>
+      </button>
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    <span>CfB Ford Köln-Niehl 09/52 e.V. &middot; Digitale Passstelle</span>
+    <span><a href="#" style="color:inherit; text-decoration:underline; text-decoration-color: var(--surface-2); text-underline-offset: 3px;">Hilfe brauchst Du?</a></span>
+  </footer>
+
+</div>
+</body>
+</html>

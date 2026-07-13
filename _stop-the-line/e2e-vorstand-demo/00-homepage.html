@@ -1,0 +1,2164 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CfB Ford Köln-Niehl 09/52 · Mehr als ein Verein.</title>
+<meta name="description" content="Fußballverein im Kölner Norden seit 1909. 19 Jugendmannschaften, 400 Mitglieder, drei Kunstrasenplätze. Dein Zuhause im Herzen von Niehl." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   CFB Homepage v4 · Editorial-Sport WOW
+   2026-07-08 · design-suite 4-Phasen
+   Tone: editorial-sport-tabloid
+   Unforgettable: Kick-off-Kreis-Overlap + Sequential Section-Numbering
+   Dials: VARIANCE 8 · MOTION 6 · DENSITY 4
+   ============================================================ */
+
+:root {
+  --primary: #004A9F;
+  --primary-d: #003479;
+  --primary-l: #1A6ACC;
+  --primary-glow: rgba(0, 74, 159, 0.5);
+  --white: #FFFFFF;
+  --success: #2D9B5A;
+  --success-glow: #4EFF9C;
+  --ink: #0A1520;
+  --ink-2: #0F1F30;
+  --text: #111820;
+  --text-soft: #4A5568;
+  --paper: #F7F9FC;
+  --paper-1: #EDF1F7;
+  --paper-2: #DDE5F0;
+
+  --r-sm: 4px;
+  --r-md: 8px;
+  --r-lg: 16px;
+
+  --transition: 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  --transition-slow: 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+
+  --nav-h: 76px;
+  --page-x: clamp(20px, 6vw, 96px);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--text);
+  background: var(--paper);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+img { max-width: 100%; display: block; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; cursor: pointer; }
+
+/* ============ REUSABLE ============ */
+
+.eyebrow {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 3.5px;
+  text-transform: uppercase;
+  color: var(--primary);
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+}
+.eyebrow::before {
+  content: '';
+  width: 40px;
+  height: 2px;
+  background: var(--primary);
+}
+.eyebrow--on-dark { color: rgba(255,255,255,0.9); }
+.eyebrow--on-dark::before { background: rgba(255,255,255,0.85); }
+.eyebrow--ok::before { background: var(--success); }
+
+.section-num {
+  position: absolute;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(180px, 22vw, 320px);
+  line-height: 0.8;
+  color: var(--paper-1);
+  z-index: 0;
+  user-select: none;
+  pointer-events: none;
+  letter-spacing: -0.02em;
+}
+.section-num--dark { color: rgba(255,255,255,0.04); }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  padding: 16px 34px;
+  border-radius: var(--r-sm);
+  border: none;
+  transition: var(--transition);
+  text-decoration: none;
+  white-space: nowrap;
+  position: relative;
+}
+.btn-primary { background: var(--primary); color: var(--white); border: 2px solid var(--primary); }
+.btn-primary:hover { background: var(--primary-d); border-color: var(--primary-d); transform: translateY(-2px); }
+.btn-white { background: var(--white); color: var(--primary); border: 2px solid var(--white); }
+.btn-white:hover { background: transparent; color: var(--white); }
+.btn-outline { background: transparent; color: var(--white); border: 2px solid rgba(255,255,255,0.55); }
+.btn-outline:hover { border-color: var(--white); background: rgba(255,255,255,0.08); }
+.btn-ghost { background: transparent; color: var(--primary); padding: 16px 24px; }
+.btn-ghost:hover { text-decoration: underline; text-underline-offset: 4px; }
+.btn-arrow::after { content: '→'; font-size: 20px; margin-left: 4px; transition: transform var(--transition); }
+.btn-arrow:hover::after { transform: translateX(4px); }
+
+/* Custom SVG-Icon-Set (kein Emoji) */
+.icon {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  vertical-align: middle;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ============ REVEAL ANIMATION ============ */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1), transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal.is-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal--delay-1 { transition-delay: 0.12s; }
+.reveal--delay-2 { transition-delay: 0.24s; }
+.reveal--delay-3 { transition-delay: 0.36s; }
+
+/* ============ NAV ============ */
+
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--nav-h);
+  background: rgba(0, 74, 159, 0.97);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--page-x);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.nav-inner {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: var(--white);
+}
+.nav-logo {
+  width: 52px;
+  height: 52px;
+  background: var(--white);
+  border-radius: 50%;
+  padding: 4px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+}
+.nav-logo img { width: 100%; height: 100%; object-fit: contain; }
+.nav-brand-text { display: flex; flex-direction: column; line-height: 1; }
+.nav-brand-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  letter-spacing: 0.5px;
+  color: var(--white);
+}
+.nav-brand-sub {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.65);
+  margin-top: 2px;
+}
+.nav-menu {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+  list-style: none;
+}
+.nav-menu a {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.85);
+  transition: color var(--transition);
+  position: relative;
+}
+.nav-menu a::after {
+  content: '';
+  position: absolute;
+  bottom: -6px; left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--white);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--transition);
+}
+.nav-menu a:hover { color: var(--white); }
+.nav-menu a:hover::after { transform: scaleX(1); }
+.nav-cta {
+  background: var(--white);
+  color: var(--primary);
+  padding: 11px 22px;
+  border-radius: var(--r-sm);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  transition: var(--transition);
+  border: 2px solid var(--white);
+}
+.nav-cta:hover { background: transparent; color: var(--white) !important; }
+@media (max-width: 940px) { .nav-menu { display: none; } }
+
+/* ============ SOCIAL RAIL ============ */
+
+.social-rail {
+  position: fixed;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.social-rail a {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(0, 74, 159, 0.92);
+  color: var(--white);
+  display: grid;
+  place-items: center;
+  transition: var(--transition);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.14);
+}
+.social-rail a:hover {
+  background: var(--white);
+  color: var(--primary);
+  transform: translateY(-2px);
+}
+.social-rail svg { width: 18px; height: 18px; fill: currentColor; }
+@media (max-width: 1200px) { .social-rail { display: none; } }
+
+/* ============ HERO ============ */
+
+.hero {
+  position: relative;
+  min-height: 100vh;
+  padding: calc(var(--nav-h) + 60px) var(--page-x) 100px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--ink);
+}
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background:
+    linear-gradient(120deg, rgba(0, 52, 121, 0.85) 0%, rgba(0, 74, 159, 0.55) 45%, rgba(10, 21, 32, 0.75) 100%),
+    url('https://images.unsplash.com/photo-1526232761682-d26e03ac148e?auto=format&fit=crop&w=2400&q=88') center/cover no-repeat;
+  animation: heroZoom 24s ease-in-out infinite alternate;
+}
+@keyframes heroZoom {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.08); }
+}
+.hero-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 40%, rgba(10, 21, 32, 0.55) 100%);
+}
+
+/* Grid overlay */
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 80px 80px;
+  pointer-events: none;
+}
+
+/* Watermark logo */
+.hero-watermark {
+  position: absolute;
+  right: -12vw;
+  bottom: -14vh;
+  width: min(60vw, 820px);
+  height: min(60vw, 820px);
+  z-index: -1;
+  opacity: 0.055;
+  filter: brightness(0) invert(1);
+  pointer-events: none;
+  user-select: none;
+}
+
+.hero-inner {
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.55fr 1fr;
+  gap: 72px;
+  align-items: center;
+}
+@media (max-width: 1000px) {
+  .hero-inner { grid-template-columns: 1fr; gap: 48px; }
+}
+
+.hero-content { color: var(--white); max-width: 780px; }
+
+.hero-topline {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 40px;
+}
+.hero-crest {
+  width: 84px;
+  height: 84px;
+  background: var(--white);
+  border-radius: 50%;
+  padding: 7px;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 0 48px rgba(78, 255, 156, 0.12), 0 12px 32px rgba(0,0,0,0.32);
+  flex-shrink: 0;
+}
+.hero-crest img { width: 100%; height: 100%; object-fit: contain; }
+.hero-motto-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  line-height: 1.2;
+}
+.hero-motto {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: clamp(14px, 1.5vw, 17px);
+  font-weight: 700;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: var(--success-glow);
+}
+.hero-since {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+}
+
+.hero-headline {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(64px, 11vw, 152px);
+  line-height: 0.86;
+  letter-spacing: -0.01em;
+  color: var(--white);
+  margin-bottom: 12px;
+}
+.hero-headline .line { display: block; }
+.hero-headline .line-quiet {
+  color: rgba(255,255,255,0.45);
+  font-size: 0.85em;
+}
+.hero-headline .line-strike {
+  position: relative;
+  display: inline-block;
+}
+.hero-headline .line-strike::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 92px;
+  height: 6px;
+  background: var(--success-glow);
+  border-radius: 3px;
+  box-shadow: 0 0 24px rgba(78, 255, 156, 0.5);
+}
+
+.hero-sub {
+  font-family: 'DM Sans', sans-serif;
+  font-size: clamp(17px, 1.6vw, 19px);
+  line-height: 1.6;
+  color: rgba(255,255,255,0.92);
+  max-width: 620px;
+  margin: 32px 0 40px;
+}
+.hero-sub strong { color: var(--white); font-weight: 600; }
+
+.hero-actions { display: flex; flex-wrap: wrap; gap: 14px; }
+
+/* Fixture Card (3 games) */
+.fixture-card {
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: var(--r-lg);
+  padding: 28px;
+  color: var(--white);
+  box-shadow: 0 32px 80px rgba(0,0,0,0.32);
+}
+.fixture-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  margin-bottom: 4px;
+}
+.fixture-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.75);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.fixture-title::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--success-glow);
+  animation: pulse 2.2s ease-in-out infinite;
+  box-shadow: 0 0 10px var(--success-glow);
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.4); }
+}
+.fixture-count {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  color: var(--white);
+  letter-spacing: 0.5px;
+}
+.fixture-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+.fixture-item {
+  display: grid;
+  grid-template-columns: 52px 1fr auto;
+  gap: 16px;
+  align-items: center;
+  padding: 18px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.fixture-item:last-child { border-bottom: none; padding-bottom: 4px; }
+.fixture-date {
+  text-align: center;
+  padding: 6px 4px;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: var(--r-sm);
+}
+.fixture-date-day {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--white);
+}
+.fixture-date-mo {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+  margin-top: 2px;
+}
+.fixture-info-team {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--white);
+  line-height: 1.3;
+}
+.fixture-info-meta {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+  margin-top: 3px;
+}
+.fixture-time {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  color: var(--white);
+  letter-spacing: 0.5px;
+}
+.fixture-tag {
+  display: inline-block;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  margin-left: 6px;
+  border-radius: 2px;
+  vertical-align: middle;
+}
+.fixture-tag--home { background: var(--success-glow); color: var(--primary-d); }
+.fixture-tag--away { background: rgba(255,255,255,0.14); color: var(--white); border: 1px solid rgba(255,255,255,0.2); }
+
+/* Hero pitch line */
+.pitch-signature {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 90px;
+  z-index: 1;
+  pointer-events: none;
+}
+.pitch-signature svg { width: 100%; height: 100%; }
+.pitch-signature line { stroke: rgba(255,255,255,0.28); }
+.pitch-signature circle { stroke: rgba(255,255,255,0.32); }
+
+/* Scroll hint */
+.scroll-hint {
+  position: absolute;
+  bottom: 32px;
+  left: var(--page-x);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  z-index: 2;
+}
+.scroll-hint::before {
+  content: '';
+  width: 40px;
+  height: 1px;
+  background: rgba(255,255,255,0.35);
+}
+
+/* ============ STATS RIBBON ============ */
+
+.stats-ribbon {
+  background: var(--primary);
+  color: var(--white);
+  padding: 48px var(--page-x);
+  position: relative;
+  overflow: hidden;
+}
+.stats-ribbon::before {
+  content: '';
+  position: absolute;
+  right: -80px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.06);
+  pointer-events: none;
+}
+.stats-ribbon::after {
+  content: '';
+  position: absolute;
+  left: -60px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.05);
+  pointer-events: none;
+}
+.stats-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 24px;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+.stat { text-align: center; }
+.stat-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(46px, 5.5vw, 68px);
+  line-height: 1;
+  color: var(--white);
+  display: block;
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+.stat-num--accent { color: var(--success-glow); }
+.stat-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.82);
+}
+
+/* ============ SECTION BASE ============ */
+
+.section {
+  padding: clamp(80px, 12vh, 140px) var(--page-x);
+  position: relative;
+  overflow: hidden;
+}
+.section-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+.section-marker {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.section-marker-num {
+  /* Redundant zur großen Watermark-Nummer — versteckt in v4.1 */
+  display: none;
+}
+.section-marker-num--dark { color: var(--success-glow); }
+.section-marker-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-soft);
+  padding-bottom: 6px;
+  position: relative;
+}
+.section-marker-label::before {
+  content: '';
+  position: absolute;
+  left: 0; bottom: 0;
+  width: 32px;
+  height: 2px;
+  background: var(--primary);
+}
+.section-marker--on-dark .section-marker-label {
+  color: rgba(255,255,255,0.7);
+}
+.section-marker--on-dark .section-marker-label::before {
+  background: var(--success-glow);
+}
+
+/* ============ STORY (Was für eine Saison) ============ */
+
+.story {
+  background: var(--paper);
+  position: relative;
+}
+.story .section-num {
+  top: -60px;
+  left: -50px;
+  right: auto;
+}
+.story-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 72px;
+  align-items: center;
+}
+@media (max-width: 900px) {
+  .story-grid { grid-template-columns: 1fr; gap: 40px; }
+}
+
+.story-media {
+  position: relative;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  aspect-ratio: 4/3;
+  box-shadow: 0 32px 80px rgba(0, 74, 159, 0.22);
+}
+.story-media img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-slow);
+}
+.story-media:hover img { transform: scale(1.04); }
+
+/* Kick-off circle overlap */
+.story-circle {
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  border: 3px solid var(--primary);
+  background: var(--paper);
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 20px 48px rgba(0, 74, 159, 0.22);
+}
+.story-circle-inner {
+  text-align: center;
+}
+.story-circle-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 72px;
+  line-height: 0.85;
+  color: var(--primary);
+  letter-spacing: -0.02em;
+}
+.story-circle-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-soft);
+  margin-top: 4px;
+}
+.story-circle-dot {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary);
+  opacity: 0;
+}
+
+.story-content { position: relative; }
+.story-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(48px, 6.5vw, 88px);
+  line-height: 0.92;
+  color: var(--text);
+  margin-bottom: 24px;
+  letter-spacing: -0.005em;
+}
+.story-title .accent { color: var(--primary); display: block; }
+.story-text {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 17px;
+  line-height: 1.68;
+  color: var(--text-soft);
+  margin-bottom: 28px;
+}
+.story-text strong { color: var(--text); font-weight: 600; }
+.story-quote {
+  border-left: 4px solid var(--primary);
+  padding: 8px 0 8px 24px;
+  margin: 28px 0;
+}
+.story-quote-text {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 21px;
+  font-weight: 500;
+  font-style: italic;
+  line-height: 1.45;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+.story-quote-attr {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+.story-mini-stats {
+  display: flex;
+  gap: 40px;
+  padding-top: 28px;
+  border-top: 1px solid var(--paper-2);
+}
+.mini-stat-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 48px;
+  line-height: 1;
+  color: var(--primary);
+  display: block;
+  letter-spacing: -0.01em;
+}
+.mini-stat-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: var(--text-soft);
+  margin-top: 6px;
+  display: block;
+}
+
+/* ============ ZIELGRUPPEN — Asymmetrisch ============ */
+
+.roster {
+  background: var(--paper);
+  position: relative;
+}
+.roster .section-num {
+  top: -40px;
+  left: -80px;
+}
+.roster-head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 40px;
+  align-items: end;
+  margin-bottom: 56px;
+}
+@media (max-width: 800px) {
+  .roster-head { grid-template-columns: 1fr; gap: 20px; }
+}
+.roster-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(44px, 6vw, 80px);
+  line-height: 0.92;
+  color: var(--text);
+  max-width: 720px;
+  letter-spacing: -0.005em;
+}
+.roster-title .accent { color: var(--primary); }
+.roster-lead {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  color: var(--text-soft);
+  line-height: 1.6;
+  max-width: 380px;
+}
+
+/* Grid: hero (large left) + 3 stacked right */
+.roster-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  grid-template-rows: repeat(3, 1fr);
+  gap: 20px;
+  min-height: 640px;
+}
+.roster-hero {
+  grid-row: 1 / span 3;
+}
+@media (max-width: 900px) {
+  .roster-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    min-height: 0;
+  }
+  .roster-hero { grid-row: auto; aspect-ratio: 4/5; }
+  .roster-card { aspect-ratio: 4/3; }
+}
+
+.roster-card {
+  position: relative;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform var(--transition);
+  isolation: isolate;
+  min-height: 220px;
+}
+.roster-card:hover { transform: translateY(-4px); }
+.roster-card-img {
+  position: absolute;
+  inset: 0; z-index: -2;
+  background-position: center;
+  background-size: cover;
+  transition: transform var(--transition-slow);
+}
+.roster-card:hover .roster-card-img { transform: scale(1.07); }
+.roster-card-overlay {
+  position: absolute;
+  inset: 0; z-index: -1;
+  background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0, 52, 121, 0.88) 88%);
+}
+.roster-card-content {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 26px 28px 28px;
+  color: var(--white);
+}
+.roster-hero .roster-card-content { padding: 36px 40px 40px; }
+
+.roster-card-tag {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.82);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.roster-card-tag::before {
+  content: '';
+  width: 24px;
+  height: 1px;
+  background: rgba(255,255,255,0.55);
+}
+.roster-card-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px;
+  line-height: 0.95;
+  margin-bottom: 6px;
+  letter-spacing: 0;
+}
+.roster-hero .roster-card-title {
+  font-size: clamp(44px, 4.5vw, 64px);
+}
+.roster-card-sub {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: rgba(255,255,255,0.85);
+  line-height: 1.5;
+  max-width: 300px;
+}
+.roster-hero .roster-card-sub {
+  font-size: 16px;
+  max-width: 460px;
+}
+.roster-card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--white);
+  transition: gap var(--transition);
+}
+.roster-card:hover .roster-card-cta { gap: 14px; }
+.roster-card-cta::after { content: '→'; font-size: 16px; }
+
+.roster-card--kids .roster-card-img {
+  background-image: url('https://images.unsplash.com/photo-1526232761682-d26e03ac148e?auto=format&fit=crop&w=1200&q=85');
+}
+.roster-card--ballschule .roster-card-img {
+  background-image: url('https://images.unsplash.com/photo-1553778263-73a83bab9b0c?auto=format&fit=crop&w=800&q=80');
+}
+.roster-card--senioren .roster-card-img {
+  background-image: url('https://image.jimcdn.com/app/cms/image/transf/none/path/s7f65e8dbcf84d618/image/ibe17a7c2852b3c2c/version/1783073816/bissai-bi-batoum-goes-cfb-ford-niehl.jpg');
+}
+.roster-card--althh .roster-card-img {
+  background-image: url('https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&w=800&q=80');
+}
+
+/* ============ ANLAGE — Full-Bleed Dark ============ */
+
+.anlage {
+  background: var(--ink);
+  color: var(--white);
+  padding: clamp(80px, 12vh, 140px) var(--page-x);
+  position: relative;
+  overflow: hidden;
+}
+.anlage .section-num {
+  top: -40px;
+  right: -40px;
+  color: rgba(255,255,255,0.04);
+}
+.anlage-grid {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1.35fr;
+  gap: 72px;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+@media (max-width: 900px) {
+  .anlage-grid { grid-template-columns: 1fr; }
+}
+.anlage-content { max-width: 480px; }
+.anlage-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(48px, 6vw, 84px);
+  line-height: 0.9;
+  color: var(--white);
+  margin-bottom: 24px;
+  letter-spacing: -0.005em;
+}
+.anlage-title .accent { color: var(--success-glow); display: block; }
+.anlage-text {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 17px;
+  line-height: 1.68;
+  color: rgba(255,255,255,0.85);
+  margin-bottom: 32px;
+}
+.anlage-facts { display: flex; flex-direction: column; gap: 14px; margin-bottom: 36px; }
+.anlage-fact {
+  display: grid;
+  grid-template-columns: 68px 1fr;
+  gap: 20px;
+  align-items: start;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.anlage-fact:last-child { border-bottom: none; padding-bottom: 0; }
+.anlage-fact-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 34px;
+  line-height: 1;
+  color: var(--success-glow);
+  letter-spacing: -0.01em;
+}
+.anlage-fact-label {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: rgba(255,255,255,0.85);
+  line-height: 1.55;
+  padding-top: 4px;
+}
+.anlage-fact-label strong { color: var(--white); font-weight: 600; display: block; margin-bottom: 3px; }
+
+.anlage-map {
+  position: relative;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  aspect-ratio: 4/3;
+  border: 1px solid rgba(255,255,255,0.15);
+  box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+}
+.anlage-map iframe { width: 100%; height: 100%; border: none; display: block; }
+.anlage-map-pin {
+  position: absolute;
+  top: 24px; left: 24px;
+  background: rgba(0, 74, 159, 0.96);
+  color: var(--white);
+  padding: 14px 20px;
+  border-radius: var(--r-md);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+  z-index: 2;
+  pointer-events: none;
+}
+.anlage-map-pin-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  line-height: 1;
+  margin-bottom: 5px;
+  letter-spacing: 0;
+}
+.anlage-map-pin-addr {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  color: rgba(255,255,255,0.82);
+}
+
+/* ============ CTA BREAKER ============ */
+
+.cta-breaker {
+  padding: clamp(96px, 14vh, 180px) var(--page-x);
+  color: var(--white);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  text-align: center;
+}
+.cta-breaker-bg {
+  position: absolute;
+  inset: 0; z-index: -2;
+  background:
+    linear-gradient(135deg, rgba(0, 52, 121, 0.9) 0%, rgba(0, 74, 159, 0.78) 100%),
+    url('https://image.jimcdn.com/app/cms/image/transf/none/path/s7f65e8dbcf84d618/image/iaf7016e19c8612c8/version/1781892870/nico-brandenburger-goes-cfb-ford-niehl.jpg') center/cover no-repeat;
+}
+.cta-breaker-circle {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.08);
+  pointer-events: none;
+  z-index: 0;
+}
+.cta-breaker-circle::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.24);
+}
+.cta-breaker-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+.cta-breaker-eyebrow {
+  justify-content: center;
+  display: inline-flex;
+  margin-bottom: 24px;
+}
+.cta-breaker-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(56px, 9vw, 116px);
+  line-height: 0.92;
+  color: var(--white);
+  margin-bottom: 24px;
+  letter-spacing: -0.01em;
+}
+.cta-breaker-title .accent { color: rgba(255,255,255,0.45); display: block; }
+.cta-breaker-sub {
+  font-family: 'DM Sans', sans-serif;
+  font-size: clamp(17px, 1.7vw, 19px);
+  color: rgba(255,255,255,0.92);
+  margin: 0 auto 40px;
+  max-width: 640px;
+  line-height: 1.6;
+}
+.cta-breaker-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+}
+
+/* ============ NEWS ============ */
+
+.news {
+  background: var(--paper-1);
+  position: relative;
+}
+.news .section-num {
+  top: -40px;
+  left: -40px;
+}
+.news-head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 40px;
+  align-items: end;
+  margin-bottom: 48px;
+}
+@media (max-width: 700px) {
+  .news-head { grid-template-columns: 1fr; }
+}
+.news-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(44px, 6vw, 80px);
+  line-height: 0.92;
+  color: var(--text);
+  letter-spacing: -0.005em;
+}
+.news-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+}
+.news-card {
+  background: var(--white);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  transition: var(--transition);
+  border: 1px solid var(--paper-2);
+  display: flex;
+  flex-direction: column;
+}
+.news-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 44px rgba(0, 74, 159, 0.15);
+}
+.news-card-img {
+  aspect-ratio: 16/10;
+  background-position: center;
+  background-size: cover;
+  background-color: var(--primary);
+  overflow: hidden;
+  position: relative;
+}
+.news-card-img::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.35) 100%);
+}
+.news-card-body { padding: 24px; flex: 1; display: flex; flex-direction: column; }
+.news-card-tag {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin-bottom: 12px;
+}
+.news-card-title {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+.news-card-desc {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  color: var(--text-soft);
+  line-height: 1.55;
+  margin-bottom: 18px;
+  flex: 1;
+}
+.news-card-link {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--primary);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: gap var(--transition);
+}
+.news-card-link:hover { gap: 12px; }
+.news-card-link::after { content: '→'; font-size: 16px; }
+
+/* ============ SOCIAL ============ */
+
+.social-section {
+  background: var(--paper);
+  padding: clamp(80px, 10vh, 120px) var(--page-x);
+  text-align: center;
+  position: relative;
+}
+.social-section .section-num {
+  top: -40px;
+  right: -40px;
+}
+.social-inner { max-width: 900px; margin: 0 auto; position: relative; z-index: 1; }
+.social-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(44px, 6vw, 76px);
+  line-height: 0.92;
+  color: var(--text);
+  margin-bottom: 20px;
+  letter-spacing: -0.005em;
+}
+.social-title .accent { color: var(--primary); }
+.social-sub {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 17px;
+  color: var(--text-soft);
+  margin-bottom: 44px;
+  line-height: 1.6;
+  max-width: 620px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.social-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+.social-tile {
+  padding: 28px 20px;
+  border-radius: var(--r-md);
+  background: var(--white);
+  border: 1px solid var(--paper-2);
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.social-tile:hover {
+  transform: translateY(-4px);
+  border-color: var(--primary);
+  box-shadow: 0 20px 44px rgba(0, 74, 159, 0.15);
+}
+.social-tile-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--white);
+}
+.social-tile-icon svg { width: 24px; height: 24px; fill: currentColor; }
+.social-tile-icon--ig {
+  background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 45%, #fcb045 100%);
+}
+.social-tile-icon--fb { background: #1877f2; }
+.social-tile-icon--yt { background: #ff0000; }
+.social-tile-icon--tt { background: #010101; }
+.social-tile-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text);
+}
+.social-tile-handle {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: var(--text-soft);
+}
+
+/* ============ FOOTER CTA ============ */
+
+.footer-cta {
+  background: var(--white);
+  padding: clamp(80px, 10vh, 120px) var(--page-x);
+  text-align: center;
+  border-top: 1px solid var(--paper-2);
+}
+.footer-cta-inner { max-width: 780px; margin: 0 auto; }
+.footer-cta-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(48px, 7vw, 84px);
+  line-height: 0.9;
+  color: var(--text);
+  margin: 20px 0 20px;
+  letter-spacing: -0.005em;
+}
+.footer-cta-sub {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 18px;
+  color: var(--text-soft);
+  margin-bottom: 36px;
+  line-height: 1.6;
+}
+.trust-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 44px;
+  padding-top: 32px;
+  border-top: 1px solid var(--paper-2);
+}
+.trust-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: var(--text-soft);
+}
+.trust-check {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--success);
+  color: var(--white);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.trust-check svg { width: 12px; height: 12px; }
+
+/* ============ FOOTER ============ */
+
+footer {
+  background: var(--ink);
+  color: rgba(255,255,255,0.65);
+  padding: 72px var(--page-x) 32px;
+}
+.footer-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 48px;
+}
+@media (max-width: 900px) { .footer-inner { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 500px) { .footer-inner { grid-template-columns: 1fr; } }
+.footer-logo-line {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.footer-logo-mark {
+  width: 44px;
+  height: 44px;
+  background: var(--white);
+  border-radius: 50%;
+  padding: 3px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.footer-logo-mark img { width: 100%; height: 100%; object-fit: contain; }
+.footer-logo-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  color: var(--white);
+  letter-spacing: 0.5px;
+  line-height: 1;
+}
+.footer-logo-sub {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+  margin-top: 3px;
+}
+.footer-brand-desc {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  line-height: 1.65;
+  max-width: 340px;
+  margin-bottom: 22px;
+}
+.footer-social {
+  display: flex;
+  gap: 10px;
+}
+.footer-social a {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  color: var(--white);
+  display: grid;
+  place-items: center;
+  transition: var(--transition);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.footer-social a:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+.footer-social svg { width: 16px; height: 16px; fill: currentColor; }
+.footer-col-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--white);
+  margin-bottom: 20px;
+}
+.footer-col ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.footer-col a {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: rgba(255,255,255,0.65);
+  transition: color var(--transition);
+}
+.footer-col a:hover { color: var(--white); }
+.footer-bottom {
+  max-width: 1400px;
+  margin: 48px auto 0;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  color: rgba(255,255,255,0.45);
+  flex-wrap: wrap;
+}
+
+/* ============ REDUCED MOTION ============ */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .hero-bg { animation: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<nav class="nav" role="navigation">
+  <div class="nav-inner">
+    <a href="#" class="nav-brand">
+      <div class="nav-logo">
+        <img src="https://image.jimcdn.com/app/cms/image/transf/none/path/s7f65e8dbcf84d618/image/i3233d523018b26ef/version/1767342116/image.png" alt="CfB Ford Niehl Logo" />
+      </div>
+      <div class="nav-brand-text">
+        <span class="nav-brand-name">CfB Ford Niehl</span>
+        <span class="nav-brand-sub">09/52 e.V.</span>
+      </div>
+    </a>
+    <ul class="nav-menu">
+      <li><a href="#story">Story</a></li>
+      <li><a href="#mannschaften">Mannschaften</a></li>
+      <li><a href="#anlage">Anlage</a></li>
+      <li><a href="#news">News</a></li>
+    </ul>
+    <a href="01-welcome.html" class="nav-cta">Probetraining</a>
+  </div>
+</nav>
+
+<!-- ============ SOCIAL RAIL ============ -->
+<div class="social-rail" aria-label="Social Media">
+  <a href="#" title="Instagram" aria-label="Instagram">
+    <svg viewBox="0 0 24 24"><path d="M7.5 2h9C19.4 2 22 4.6 22 7.5v9c0 2.9-2.6 5.5-5.5 5.5h-9C4.6 22 2 19.4 2 16.5v-9C2 4.6 4.6 2 7.5 2Zm4.5 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm0 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm5.5-3.2a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4Z"/></svg>
+  </a>
+  <a href="#" title="Facebook" aria-label="Facebook">
+    <svg viewBox="0 0 24 24"><path d="M13.5 22v-8h2.7l.4-3.1h-3.1V8.9c0-.9.3-1.5 1.6-1.5h1.6V4.6c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4v2.4H7.8V14h2.7v8h3Z"/></svg>
+  </a>
+  <a href="#" title="YouTube" aria-label="YouTube">
+    <svg viewBox="0 0 24 24"><path d="M21.6 7.2c-.2-.9-.9-1.6-1.8-1.8C18.3 5 12 5 12 5s-6.3 0-7.8.4c-.9.2-1.6.9-1.8 1.8C2 8.7 2 12 2 12s0 3.3.4 4.8c.2.9.9 1.6 1.8 1.8C5.7 19 12 19 12 19s6.3 0 7.8-.4c.9-.2 1.6-.9 1.8-1.8.4-1.5.4-4.8.4-4.8s0-3.3-.4-4.8ZM10 15V9l5 3-5 3Z"/></svg>
+  </a>
+  <a href="#" title="TikTok" aria-label="TikTok">
+    <svg viewBox="0 0 24 24"><path d="M19.5 8.5c-1.8 0-3.5-1-4.4-2.4V15c0 2.8-2.2 5-5 5s-5-2.2-5-5 2.2-5 5-5v3c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2V3h2.9c.4 2 2.1 3.5 4.1 3.5v2Z"/></svg>
+  </a>
+</div>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <img class="hero-watermark" src="https://image.jimcdn.com/app/cms/image/transf/none/path/s7f65e8dbcf84d618/image/i3233d523018b26ef/version/1767342116/image.png" alt="" aria-hidden="true" />
+
+  <div class="hero-inner">
+    <div class="hero-content">
+      <div class="hero-topline reveal">
+        <div class="hero-crest">
+          <img src="https://image.jimcdn.com/app/cms/image/transf/none/path/s7f65e8dbcf84d618/image/i3233d523018b26ef/version/1767342116/image.png" alt="CfB Ford Niehl Wappen" />
+        </div>
+        <div class="hero-motto-block">
+          <span class="hero-motto">Mehr als ein Verein</span>
+          <span class="hero-since">Fußball im Kölner Norden · Seit 1909</span>
+        </div>
+      </div>
+
+      <h1 class="hero-headline reveal reveal--delay-1">
+        <span class="line">Ein Ball.</span>
+        <span class="line line-quiet">Ein Stadtteil.</span>
+        <span class="line line-strike">Ein CfB.</span>
+      </h1>
+
+      <p class="hero-sub reveal reveal--delay-2">
+        <strong>Dein Kind will kicken?</strong> Bring's Sonntag um 10 vorbei · wir kümmern uns um den Rest.
+        Von der Ballschule ab 3 bis zur A-Jugend: 19 Teams, lizenzierte Trainer, drei Kunstrasenplätze.
+        <strong>Ein Zuhause im Kölner Norden.</strong>
+      </p>
+
+      <div class="hero-actions reveal reveal--delay-3">
+        <a href="01-welcome.html" class="btn btn-white btn-arrow">Probetraining anmelden</a>
+        <a href="#story" class="btn btn-outline">Unsere Story</a>
+      </div>
+    </div>
+
+    <div class="fixture-card reveal reveal--delay-2">
+      <div class="fixture-head">
+        <span class="fixture-title">Nächste Spiele</span>
+        <span class="fixture-count">3</span>
+      </div>
+      <ul class="fixture-list">
+        <li class="fixture-item">
+          <div class="fixture-date">
+            <div class="fixture-date-day">06</div>
+            <div class="fixture-date-mo">Jul</div>
+          </div>
+          <div>
+            <div class="fixture-info-team">vs. FC Mühlheim <span class="fixture-tag fixture-tag--home">Heim</span></div>
+            <div class="fixture-info-meta">Kreisliga A · Pastor-Wolff-Str.</div>
+          </div>
+          <div class="fixture-time">15:00</div>
+        </li>
+        <li class="fixture-item">
+          <div class="fixture-date">
+            <div class="fixture-date-day">13</div>
+            <div class="fixture-date-mo">Jul</div>
+          </div>
+          <div>
+            <div class="fixture-info-team">bei SV Weiden <span class="fixture-tag fixture-tag--away">Ausw.</span></div>
+            <div class="fixture-info-meta">Kreisliga A · SV Weiden</div>
+          </div>
+          <div class="fixture-time">14:30</div>
+        </li>
+        <li class="fixture-item">
+          <div class="fixture-date">
+            <div class="fixture-date-day">20</div>
+            <div class="fixture-date-mo">Jul</div>
+          </div>
+          <div>
+            <div class="fixture-info-team">vs. Rheingold Poll <span class="fixture-tag fixture-tag--home">Heim</span></div>
+            <div class="fixture-info-meta">Kreisliga A · Pastor-Wolff-Str.</div>
+          </div>
+          <div class="fixture-time">15:00</div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="scroll-hint">Scroll</div>
+
+  <div class="pitch-signature" aria-hidden="true">
+    <svg viewBox="0 0 1400 90" preserveAspectRatio="none" fill="none">
+      <line x1="0" y1="70" x2="1400" y2="70" stroke-width="2"/>
+      <circle cx="700" cy="70" r="52" stroke-width="2" fill="none"/>
+      <circle cx="700" cy="70" r="3" fill="rgba(255,255,255,0.4)" stroke="none"/>
+      <line x1="700" y1="18" x2="700" y2="90" stroke-width="2" opacity="0.4"/>
+    </svg>
+  </div>
+</section>
+
+<!-- ============ STATS RIBBON ============ -->
+<section class="stats-ribbon">
+  <div class="stats-inner">
+    <div class="stat reveal">
+      <span class="stat-num" data-count="117">117</span>
+      <span class="stat-label">Jahre Geschichte</span>
+    </div>
+    <div class="stat reveal reveal--delay-1">
+      <span class="stat-num" data-count="19">19</span>
+      <span class="stat-label">Jugendteams</span>
+    </div>
+    <div class="stat reveal reveal--delay-2">
+      <span class="stat-num" data-count="400">400</span>
+      <span class="stat-label">Aktive Mitglieder</span>
+    </div>
+    <div class="stat reveal reveal--delay-3">
+      <span class="stat-num" data-count="3">3</span>
+      <span class="stat-label">Kunstrasenplätze</span>
+    </div>
+    <div class="stat reveal reveal--delay-3">
+      <span class="stat-num stat-num--accent" data-count="5">5</span>
+      <span class="stat-label">Titel U10 · 2026</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 01 STORY ============ -->
+<section class="section story" id="story">
+  <div class="section-num">01</div>
+  <div class="section-inner">
+    <div class="story-grid">
+      <div class="story-media reveal">
+        <img src="https://image.jimcdn.com/app/cms/image/transf/none/path/s7f65e8dbcf84d618/image/ieb0f0700d22da338/version/1783185648/image.png" alt="U10 Turniersieg" />
+        <div class="story-circle">
+          <div class="story-circle-inner">
+            <div class="story-circle-num">5×</div>
+            <div class="story-circle-label">Turnier · Titel</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="story-content reveal reveal--delay-1">
+        <div class="section-marker">
+          <span class="section-marker-num">01</span>
+          <span class="section-marker-label">Was für eine Saison</span>
+        </div>
+        <h2 class="story-title">
+          Unsere U10 hat
+          <span class="accent">alle abgeschossen.</span>
+        </h2>
+        <p class="story-text">
+          <strong>Fünf Turniersiege in Folge.</strong> Ein Jahrgang, ein Trainer-Team, ein Ziel.
+          Vom Niehler Kick bis zur Kreismeisterschaft · die Jungs haben gezeigt,
+          was aus einem Verein wird, wenn Kinder, Trainer und Eltern zusammen ziehen.
+        </p>
+        <div class="story-quote">
+          <div class="story-quote-text">
+            &bdquo;Wir haben eine Truppe, die einfach Bock hat. Der Rest kommt von alleine.&ldquo;
+          </div>
+          <div class="story-quote-attr">Trainer-Team U10 · CfB Ford Niehl</div>
+        </div>
+        <div class="story-mini-stats">
+          <div>
+            <span class="mini-stat-num">28</span>
+            <span class="mini-stat-label">Kinder im Kader</span>
+          </div>
+          <div>
+            <span class="mini-stat-num">44</span>
+            <span class="mini-stat-label">Siege gesamt</span>
+          </div>
+          <div>
+            <span class="mini-stat-num">0</span>
+            <span class="mini-stat-label">Absteiger</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 02 MANNSCHAFTEN — Asymmetric Roster ============ -->
+<section class="section roster" id="mannschaften">
+  <div class="section-num">02</div>
+  <div class="section-inner">
+    <div class="roster-head reveal">
+      <div>
+        <div class="section-marker">
+          <span class="section-marker-num">02</span>
+          <span class="section-marker-label">Dein Platz beim CfB</span>
+        </div>
+        <h2 class="roster-title">
+          Vom Ball an,
+          <span class="accent">bis in die Alte Herren.</span>
+        </h2>
+      </div>
+      <p class="roster-lead">
+        Kein Aufnahme-Casting. Kein Probejahr. Wer Bock hat, kommt vorbei ·
+        wir schauen wo Du am besten reinpasst.
+      </p>
+    </div>
+
+    <div class="roster-grid">
+      <a href="#" class="roster-card roster-hero roster-card--kids reveal">
+        <div class="roster-card-img"></div>
+        <div class="roster-card-overlay"></div>
+        <div class="roster-card-content">
+          <div class="roster-card-tag">U7 bis U19 · Kern-Programm</div>
+          <div class="roster-card-title">Jugend &amp; Nachwuchs</div>
+          <div class="roster-card-sub">
+            19 Mannschaften. Lizenzierte Trainer. Echtes Vereinsleben.
+            Vom ersten Ball bis zum Aufstieg in die Herren.
+          </div>
+          <span class="roster-card-cta">Alle Teams ansehen</span>
+        </div>
+      </a>
+
+      <a href="#" class="roster-card roster-card--senioren reveal reveal--delay-1">
+        <div class="roster-card-img"></div>
+        <div class="roster-card-overlay"></div>
+        <div class="roster-card-content">
+          <div class="roster-card-tag">Kreisliga A</div>
+          <div class="roster-card-title">1. Mannschaft</div>
+          <div class="roster-card-sub">Kreisliga mit Anspruch. Sonntag ist Match-Day.</div>
+        </div>
+      </a>
+
+      <a href="#" class="roster-card roster-card--ballschule reveal reveal--delay-2">
+        <div class="roster-card-img"></div>
+        <div class="roster-card-overlay"></div>
+        <div class="roster-card-content">
+          <div class="roster-card-tag">3 bis 5 Jahre</div>
+          <div class="roster-card-title">Ballschule</div>
+          <div class="roster-card-sub">Erste Ballkontakte. Sonntag-Familien-Programm.</div>
+        </div>
+      </a>
+
+      <a href="#" class="roster-card roster-card--althh reveal reveal--delay-3">
+        <div class="roster-card-img"></div>
+        <div class="roster-card-overlay"></div>
+        <div class="roster-card-content">
+          <div class="roster-card-tag">Ü35 bis Ü60</div>
+          <div class="roster-card-title">Alte Herren</div>
+          <div class="roster-card-sub">Weniger Sprint, mehr Bier danach.</div>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 03 ANLAGE ============ -->
+<section class="anlage" id="anlage">
+  <div class="section-num">03</div>
+  <div class="anlage-grid">
+    <div class="anlage-content reveal">
+      <div class="section-marker section-marker--on-dark">
+        <span class="section-marker-num section-marker-num--dark">03</span>
+        <span class="section-marker-label">Unsere Anlage</span>
+      </div>
+      <h2 class="anlage-title">
+        Pastor-Wolff-Straße
+        <span class="accent">seit 1985.</span>
+      </h2>
+      <p class="anlage-text">
+        Drei Kunstrasenplätze, ein Vereinsheim, das Ford-Werk in Sichtweite.
+        Von hier aus haben Generationen den Ball geführt. Und hier findest Du uns
+        heute noch · jeden Trainingstag.
+      </p>
+
+      <div class="anlage-facts">
+        <div class="anlage-fact">
+          <div class="anlage-fact-num">3</div>
+          <div class="anlage-fact-label">
+            <strong>Kunstrasenplätze</strong>
+            Zwei Voll- und ein Kleinfeld · komplett beleuchtet.
+          </div>
+        </div>
+        <div class="anlage-fact">
+          <div class="anlage-fact-num">24/7</div>
+          <div class="anlage-fact-label">
+            <strong>Vereinsheim mit Gaststätte</strong>
+            Nach dem Spiel ist vor dem Gespräch.
+          </div>
+        </div>
+        <div class="anlage-fact">
+          <div class="anlage-fact-num">5 min</div>
+          <div class="anlage-fact-label">
+            <strong>vom U-Bahnhof Niehl</strong>
+            Linie 12 bringt Dich direkt her.
+          </div>
+        </div>
+      </div>
+
+      <a href="https://maps.google.com/?q=Pastor-Wolff-Stra%C3%9Fe+11a+50735+K%C3%B6ln" target="_blank" rel="noopener" class="btn btn-white">In Google Maps öffnen</a>
+    </div>
+
+    <div class="anlage-map reveal reveal--delay-1">
+      <div class="anlage-map-pin">
+        <div class="anlage-map-pin-title">CfB Ford Niehl</div>
+        <div class="anlage-map-pin-addr">Pastor-Wolff-Str. 11a · 50735 Köln</div>
+      </div>
+      <iframe
+        loading="lazy"
+        title="CfB Ford Niehl Anlage"
+        src="https://www.openstreetmap.org/export/embed.html?bbox=6.9490%2C50.9835%2C6.9560%2C50.9880&layer=mapnik&marker=50.9857%2C6.9525"
+        aria-label="Anlagen-Karte"></iframe>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA BREAKER ============ -->
+<section class="cta-breaker" id="anmelden">
+  <div class="cta-breaker-bg"></div>
+  <div class="cta-breaker-circle"></div>
+  <div class="cta-breaker-inner">
+    <span class="eyebrow eyebrow--on-dark cta-breaker-eyebrow">Probetraining</span>
+    <h2 class="cta-breaker-title">
+      Einfach vorbeikommen.
+      <span class="accent">Bock mitbringen.</span>
+    </h2>
+    <p class="cta-breaker-sub">
+      Wir sind ehrlich: der Papierkram war früher der schwierige Teil.
+      Jetzt geht das in 8 Minuten online. Danach ist der Ball wichtiger als das Formular ·
+      wie es sein soll.
+    </p>
+    <div class="cta-breaker-actions">
+      <a href="#" class="btn btn-white btn-arrow">Probetraining anmelden</a>
+      <a href="#kontakt" class="btn btn-outline">Fragen? Ruf uns an</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 04 NEWS ============ -->
+<section class="section news" id="news">
+  <div class="section-num">04</div>
+  <div class="section-inner">
+    <div class="news-head reveal">
+      <div>
+        <div class="section-marker">
+          <span class="section-marker-num">04</span>
+          <span class="section-marker-label">Aus dem Verein</span>
+        </div>
+        <h2 class="news-title">Was gerade läuft.</h2>
+      </div>
+      <a href="#" class="btn btn-ghost btn-arrow">Alle Beiträge</a>
+    </div>
+
+    <div class="news-grid">
+      <article class="news-card reveal">
+        <div class="news-card-img" style="background-image: url('https://image.jimcdn.com/app/cms/image/transf/none/path/s7f65e8dbcf84d618/image/idde4dcf154ef567f/version/1782825474/image.png');"></div>
+        <div class="news-card-body">
+          <div class="news-card-tag">1. Mannschaft · Neuzugang</div>
+          <h3 class="news-card-title">Zizou verstärkt den CfB</h3>
+          <p class="news-card-desc">Ein Spieler, der offensiv flexibel einsetzbar ist. Willkommen im Team.</p>
+          <a href="#" class="news-card-link">Mehr lesen</a>
+        </div>
+      </article>
+
+      <article class="news-card reveal reveal--delay-1">
+        <div class="news-card-img" style="background-image: url('https://image.jimcdn.com/app/cms/image/transf/none/path/s7f65e8dbcf84d618/image/ic1d1a8f605bde7ef/version/1782101783/image.png');"></div>
+        <div class="news-card-body">
+          <div class="news-card-tag">U10 · Turnier</div>
+          <h3 class="news-card-title">Turniersieg Nummer 5</h3>
+          <p class="news-card-desc">Fünf Titel in Folge. Danke an die Jungs, Trainer und Eltern für diese Saison.</p>
+          <a href="#" class="news-card-link">Mehr lesen</a>
+        </div>
+      </article>
+
+      <article class="news-card reveal reveal--delay-2">
+        <div class="news-card-img" style="background-image: url('https://image.jimcdn.com/app/cms/image/transf/dimension=2000x1500:format=jpg/path/s7f65e8dbcf84d618/image/ib51dfd9f6af09ab3/version/1782547916/sommervorbereitungsplan-2026-der-1-mannschaft.jpg');"></div>
+        <div class="news-card-body">
+          <div class="news-card-tag">1. Mannschaft · Vorbereitung</div>
+          <h3 class="news-card-title">Sommervorbereitung 2026</h3>
+          <p class="news-card-desc">Der Fahrplan für die neue Saison. Termine, Trainingslager, Testspiele.</p>
+          <a href="#" class="news-card-link">Mehr lesen</a>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 05 SOCIAL ============ -->
+<section class="social-section" id="social">
+  <div class="section-num">05</div>
+  <div class="social-inner reveal">
+    <div class="section-marker" style="justify-content:center; display:inline-flex;">
+      <span class="section-marker-num">05</span>
+      <span class="section-marker-label">Folge dem CfB</span>
+    </div>
+    <h2 class="social-title">
+      Am nächsten Wochenende ·
+      <span class="accent">bist Du dabei?</span>
+    </h2>
+    <p class="social-sub">
+      Torjubel, Kabinen-Momente, Trainer-Sprüche, Turnier-Wochenenden · alles auf unseren Kanälen.
+      Erst folgen, dann Probetraining.
+    </p>
+
+    <div class="social-tiles">
+      <a href="#" class="social-tile">
+        <div class="social-tile-icon social-tile-icon--ig">
+          <svg viewBox="0 0 24 24"><path d="M7.5 2h9C19.4 2 22 4.6 22 7.5v9c0 2.9-2.6 5.5-5.5 5.5h-9C4.6 22 2 19.4 2 16.5v-9C2 4.6 4.6 2 7.5 2Zm4.5 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm0 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm5.5-3.2a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4Z"/></svg>
+        </div>
+        <div class="social-tile-label">Instagram</div>
+        <div class="social-tile-handle">@cfbfordniehl</div>
+      </a>
+      <a href="#" class="social-tile">
+        <div class="social-tile-icon social-tile-icon--fb">
+          <svg viewBox="0 0 24 24"><path d="M13.5 22v-8h2.7l.4-3.1h-3.1V8.9c0-.9.3-1.5 1.6-1.5h1.6V4.6c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4v2.4H7.8V14h2.7v8h3Z"/></svg>
+        </div>
+        <div class="social-tile-label">Facebook</div>
+        <div class="social-tile-handle">CfB Ford Niehl</div>
+      </a>
+      <a href="#" class="social-tile">
+        <div class="social-tile-icon social-tile-icon--yt">
+          <svg viewBox="0 0 24 24"><path d="M21.6 7.2c-.2-.9-.9-1.6-1.8-1.8C18.3 5 12 5 12 5s-6.3 0-7.8.4c-.9.2-1.6.9-1.8 1.8C2 8.7 2 12 2 12s0 3.3.4 4.8c.2.9.9 1.6 1.8 1.8C5.7 19 12 19 12 19s6.3 0 7.8-.4c.9-.2 1.6-.9 1.8-1.8.4-1.5.4-4.8.4-4.8s0-3.3-.4-4.8ZM10 15V9l5 3-5 3Z"/></svg>
+        </div>
+        <div class="social-tile-label">YouTube</div>
+        <div class="social-tile-handle">@cfbfordniehl</div>
+      </a>
+      <a href="#" class="social-tile">
+        <div class="social-tile-icon social-tile-icon--tt">
+          <svg viewBox="0 0 24 24"><path d="M19.5 8.5c-1.8 0-3.5-1-4.4-2.4V15c0 2.8-2.2 5-5 5s-5-2.2-5-5 2.2-5 5-5v3c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2V3h2.9c.4 2 2.1 3.5 4.1 3.5v2Z"/></svg>
+        </div>
+        <div class="social-tile-label">TikTok</div>
+        <div class="social-tile-handle">@cfbfordniehl</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER CTA ============ -->
+<section class="footer-cta" id="kontakt">
+  <div class="footer-cta-inner reveal">
+    <span class="eyebrow">Los geht's</span>
+    <h2 class="footer-cta-title">Dein Team wartet.</h2>
+    <p class="footer-cta-sub">
+      Probetraining ist kostenlos und unverbindlich. Melde Dich in 8 Minuten online an ·
+      oder komm einfach am nächsten Trainingstag vorbei.
+    </p>
+    <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:16px;">
+      <a href="#" class="btn btn-primary btn-arrow">Probetraining anmelden</a>
+      <a href="tel:+4922171211161" class="btn btn-ghost">0221 · 7121161</a>
+    </div>
+
+    <div class="trust-row">
+      <div class="trust-item">
+        <span class="trust-check">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        </span>
+        Kostenlos + unverbindlich
+      </div>
+      <div class="trust-item">
+        <span class="trust-check">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        </span>
+        Digital in 8 Minuten
+      </div>
+      <div class="trust-item">
+        <span class="trust-check">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        </span>
+        Passwart-Freigabe unter 48h
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-logo-line">
+        <div class="footer-logo-mark">
+          <img src="https://image.jimcdn.com/app/cms/image/transf/none/path/s7f65e8dbcf84d618/image/i3233d523018b26ef/version/1767342116/image.png" alt="CfB Logo" />
+        </div>
+        <div>
+          <div class="footer-logo-name">CfB Ford Köln-Niehl</div>
+          <div class="footer-logo-sub">09/52 e.V.</div>
+        </div>
+      </div>
+      <p class="footer-brand-desc">
+        Mehr als ein Verein. Fußball im Kölner Norden seit 1909.
+        Pastor-Wolff-Straße 11a · 50735 Köln.
+      </p>
+      <div class="footer-social">
+        <a href="#" aria-label="Instagram">
+          <svg viewBox="0 0 24 24"><path d="M7.5 2h9C19.4 2 22 4.6 22 7.5v9c0 2.9-2.6 5.5-5.5 5.5h-9C4.6 22 2 19.4 2 16.5v-9C2 4.6 4.6 2 7.5 2Zm4.5 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm0 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm5.5-3.2a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4Z"/></svg>
+        </a>
+        <a href="#" aria-label="Facebook">
+          <svg viewBox="0 0 24 24"><path d="M13.5 22v-8h2.7l.4-3.1h-3.1V8.9c0-.9.3-1.5 1.6-1.5h1.6V4.6c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4v2.4H7.8V14h2.7v8h3Z"/></svg>
+        </a>
+        <a href="#" aria-label="YouTube">
+          <svg viewBox="0 0 24 24"><path d="M21.6 7.2c-.2-.9-.9-1.6-1.8-1.8C18.3 5 12 5 12 5s-6.3 0-7.8.4c-.9.2-1.6.9-1.8 1.8C2 8.7 2 12 2 12s0 3.3.4 4.8c.2.9.9 1.6 1.8 1.8C5.7 19 12 19 12 19s6.3 0 7.8-.4c.9-.2 1.6-.9 1.8-1.8.4-1.5.4-4.8.4-4.8s0-3.3-.4-4.8ZM10 15V9l5 3-5 3Z"/></svg>
+        </a>
+        <a href="#" aria-label="TikTok">
+          <svg viewBox="0 0 24 24"><path d="M19.5 8.5c-1.8 0-3.5-1-4.4-2.4V15c0 2.8-2.2 5-5 5s-5-2.2-5-5 2.2-5 5-5v3c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2V3h2.9c.4 2 2.1 3.5 4.1 3.5v2Z"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <div class="footer-col">
+      <div class="footer-col-title">Verein</div>
+      <ul>
+        <li><a href="#">Vorstand</a></li>
+        <li><a href="#">Mannschaften</a></li>
+        <li><a href="#">Trainer</a></li>
+        <li><a href="#">Geschichte</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <div class="footer-col-title">Mitmachen</div>
+      <ul>
+        <li><a href="#">Probetraining</a></li>
+        <li><a href="#">Anmeldung</a></li>
+        <li><a href="#">Sponsoring</a></li>
+        <li><a href="#">Vereinsheim mieten</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <div class="footer-col-title">Rechtliches</div>
+      <ul>
+        <li><a href="#">Impressum</a></li>
+        <li><a href="#">Datenschutz</a></li>
+        <li><a href="#">Satzung</a></li>
+        <li><a href="#">Kontakt</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <span>© 2026 CfB Ford Köln-Niehl 09/52 e.V.</span>
+    <span>Mehr als ein Verein · Made with 💙🤍 in Köln-Niehl</span>
+  </div>
+</footer>
+
+<script>
+  // Reveal on scroll — IntersectionObserver
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('is-in');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // Number counter animation
+  const counter = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      const el = e.target;
+      const target = parseInt(el.dataset.count, 10);
+      const duration = 1600;
+      const start = performance.now();
+      const step = (now) => {
+        const p = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - p, 3);
+        el.textContent = Math.floor(target * eased);
+        if (p < 1) requestAnimationFrame(step);
+        else el.textContent = target;
+      };
+      requestAnimationFrame(step);
+      counter.unobserve(el);
+    });
+  }, { threshold: 0.4 });
+
+  document.querySelectorAll('[data-count]').forEach(el => counter.observe(el));
+</script>
+
+</body>
+</html>

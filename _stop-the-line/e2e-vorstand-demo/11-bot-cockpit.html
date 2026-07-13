@@ -1,0 +1,853 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CfB Bot-Cockpit · Spielerpass-Anlage [Simulation]</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary:     #004A9F;
+    --primary-d:   #003479;
+    --primary-l:   #1A6ACC;
+    --accent-green:#2D9B5A;
+    --accent-green-l:#3FBE72;
+    --surface-0:   #F7F9FC;
+    --surface-1:   #EDF1F7;
+    --surface-2:   #DDE5F0;
+    --text:        #111820;
+    --text-soft:   #4A5568;
+    --white:       #FFFFFF;
+    --terminal-bg: #0B1220;
+    --terminal-fg: #C7D2E0;
+    --terminal-green: #4ADE80;
+    --terminal-blue: #60A5FA;
+    --terminal-yellow: #FBBF24;
+
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-accent:  'Barlow Condensed', sans-serif;
+    --font-body:    'DM Sans', sans-serif;
+    --font-mono:    'JetBrains Mono', 'Consolas', monospace;
+
+    --radius-sm: 4px;
+    --radius-md: 8px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-body);
+    background: var(--surface-0);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* Demo-Banner */
+  .demo-banner {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #FFD233;
+    color: #7C5A00;
+    padding: 8px 20px;
+    font-family: var(--font-accent);
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #B48800;
+  }
+  .demo-banner a {
+    color: #7C5A00;
+    text-decoration: underline;
+  }
+
+  /* Header */
+  .cockpit-head {
+    background: var(--primary);
+    color: var(--white);
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .logo-mark {
+    width: 48px; height: 48px;
+    background: var(--white);
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-weight: 700;
+    color: var(--primary);
+    font-size: 15px;
+  }
+  .brand-text {
+    font-family: var(--font-accent);
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 0.5px;
+    line-height: 1.15;
+  }
+  .brand-text span {
+    display: block;
+    font-weight: 400;
+    font-size: 11px;
+    opacity: 0.75;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 3px;
+  }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.24);
+    border-radius: 999px;
+    font-family: var(--font-accent);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .status-pill .dot {
+    width: 8px; height: 8px;
+    background: var(--accent-green-l);
+    border-radius: 50%;
+    animation: pulse 1.6s ease-in-out infinite;
+    box-shadow: 0 0 0 0 var(--accent-green-l);
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(63,190,114,0.55); }
+    50%      { box-shadow: 0 0 0 8px rgba(63,190,114,0); }
+  }
+
+  /* Layout: 3-col */
+  .cockpit {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px clamp(16px, 3vw, 32px);
+    display: grid;
+    grid-template-columns: 320px 1fr 380px;
+    gap: 20px;
+    align-items: start;
+  }
+
+  @media (max-width: 1180px) {
+    .cockpit {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .panel {
+    background: var(--white);
+    border: 1px solid var(--surface-2);
+    border-radius: var(--radius-md);
+    padding: 20px;
+  }
+  .panel-title {
+    font-family: var(--font-accent);
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* LEFT: Steps */
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .step {
+    display: flex;
+    gap: 12px;
+    padding: 10px 10px;
+    border-radius: var(--radius-sm);
+    transition: background 0.2s;
+  }
+  .step-num {
+    flex-shrink: 0;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: var(--text-soft);
+    display: grid; place-items: center;
+    font-family: var(--font-accent);
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+  }
+  .step-body {
+    flex: 1;
+    min-width: 0;
+  }
+  .step-name {
+    font-family: var(--font-accent);
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-soft);
+  }
+  .step-time {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--text-soft);
+    opacity: 0.6;
+    margin-top: 2px;
+  }
+  .step.is-done .step-num { background: var(--accent-green); color: var(--white); }
+  .step.is-done .step-name { color: var(--text); }
+  .step.is-active {
+    background: linear-gradient(90deg, rgba(0,74,159,0.08), transparent);
+  }
+  .step.is-active .step-num {
+    background: var(--primary);
+    color: var(--white);
+    box-shadow: 0 0 0 4px rgba(0,74,159,0.15);
+    animation: pulse-blue 1.4s ease-in-out infinite;
+  }
+  .step.is-active .step-name { color: var(--primary); font-weight: 700; }
+  @keyframes pulse-blue {
+    0%,100% { box-shadow: 0 0 0 4px rgba(0,74,159,0.15); }
+    50%     { box-shadow: 0 0 0 8px rgba(0,74,159,0.05); }
+  }
+
+  /* MIDDLE: DFBnet Browser-Mock */
+  .browser {
+    background: var(--white);
+    border: 1px solid var(--surface-2);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+  .browser-chrome {
+    background: #2C3947;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .browser-dots {
+    display: flex;
+    gap: 5px;
+  }
+  .browser-dot {
+    width: 11px; height: 11px;
+    border-radius: 50%;
+    background: #5B6674;
+  }
+  .browser-dot.r { background: #EF4444; }
+  .browser-dot.y { background: #F59E0B; }
+  .browser-dot.g { background: #10B981; }
+  .browser-url {
+    flex: 1;
+    background: #1E2733;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: #B4BDC8;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .browser-url::before {
+    content: '🔒';
+    font-size: 10px;
+  }
+
+  .dfb-header-mock {
+    background: #00b050;
+    color: white;
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    letter-spacing: 0.3px;
+  }
+  .dfb-header-mock .h1 {
+    font-weight: 500;
+    font-size: 15px;
+  }
+  .dfb-header-mock .user {
+    font-size: 11px;
+    opacity: 0.9;
+  }
+
+  .dfb-body {
+    padding: 20px 24px;
+    background: #F4F4F4;
+    min-height: 480px;
+    position: relative;
+  }
+  .dfb-form-head {
+    font-family: 'Segoe UI', sans-serif;
+    color: #2c2c2c;
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #d0d0d0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .dfb-field-grid {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    row-gap: 12px;
+    column-gap: 16px;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 13px;
+  }
+  .dfb-field-label {
+    color: #4a5568;
+    padding-top: 8px;
+  }
+  .dfb-field-label .req { color: #d40000; }
+  .dfb-field-value {
+    padding: 8px 12px;
+    background: white;
+    border: 1px solid #d0d0d0;
+    border-radius: 3px;
+    color: #111820;
+    min-height: 34px;
+    position: relative;
+    overflow: hidden;
+  }
+  .dfb-field-value.is-typing {
+    border-color: #00b050;
+    box-shadow: 0 0 0 2px rgba(0,176,80,0.15);
+  }
+  .dfb-field-value.is-typing::after {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 14px;
+    background: #00b050;
+    margin-left: 2px;
+    vertical-align: middle;
+    animation: caret 0.85s steps(1) infinite;
+  }
+  @keyframes caret {
+    0%, 50% { opacity: 1; }
+    51%,100% { opacity: 0; }
+  }
+
+  .dfb-actions {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid #d0d0d0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+  .dfb-btn {
+    padding: 8px 20px;
+    background: #00b050;
+    color: white;
+    border: none;
+    font-weight: 700;
+    font-size: 13px;
+    border-radius: 3px;
+    font-family: 'Segoe UI', sans-serif;
+  }
+  .dfb-btn.secondary {
+    background: white;
+    color: #00b050;
+    border: 1px solid #00b050;
+  }
+
+  /* Success-Overlay */
+  .success-overlay {
+    margin-top: 20px;
+    background: linear-gradient(135deg, rgba(45,155,90,0.08), rgba(45,155,90,0.02));
+    border: 2px solid var(--accent-green);
+    border-radius: var(--radius-md);
+    padding: 24px 20px;
+    text-align: center;
+  }
+  .success-icon {
+    width: 56px;
+    height: 56px;
+    background: var(--accent-green);
+    color: white;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    margin: 0 auto 12px;
+    font-size: 30px;
+  }
+  .success-title {
+    font-family: var(--font-display);
+    font-size: 28px;
+    letter-spacing: 1px;
+    color: var(--accent-green);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .success-nr {
+    font-family: var(--font-mono);
+    font-size: 15px;
+    font-weight: 600;
+    background: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: 1px solid var(--surface-2);
+    display: inline-block;
+    margin-top: 8px;
+    color: var(--primary);
+    letter-spacing: 1px;
+  }
+  .success-note {
+    font-size: 12px;
+    color: var(--text-soft);
+    margin-top: 12px;
+    line-height: 1.5;
+  }
+
+  /* RIGHT: Terminal */
+  .terminal {
+    background: var(--terminal-bg);
+    border-radius: var(--radius-md);
+    padding: 18px 18px 12px;
+    color: var(--terminal-fg);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.65;
+    max-height: 620px;
+    overflow-y: auto;
+  }
+  .terminal-title {
+    color: var(--terminal-fg);
+    opacity: 0.6;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(199,210,224,0.15);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .terminal-title::before {
+    content: '';
+    display: inline-block;
+    width: 6px; height: 6px;
+    background: var(--terminal-green);
+    border-radius: 50%;
+  }
+  .log-line {
+    display: flex;
+    gap: 10px;
+    padding: 2px 0;
+  }
+  .log-time {
+    color: var(--terminal-fg);
+    opacity: 0.45;
+    flex-shrink: 0;
+  }
+  .log-tag {
+    flex-shrink: 0;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 10.5px;
+    padding-top: 1px;
+  }
+  .log-tag.info { color: var(--terminal-blue); }
+  .log-tag.act  { color: var(--terminal-yellow); }
+  .log-tag.ok   { color: var(--terminal-green); }
+  .log-tag.warn { color: #FCA5A5; }
+  .log-msg { flex: 1; }
+  .log-msg .em { color: var(--terminal-yellow); font-weight: 600; }
+  .log-msg .val { color: var(--terminal-green); }
+
+  /* Bottom summary */
+  .cockpit-summary {
+    max-width: 1400px;
+    margin: 0 auto 40px;
+    padding: 0 clamp(16px, 3vw, 32px);
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 900px) {
+    .cockpit-summary { grid-template-columns: 1fr; }
+  }
+  .stat {
+    background: var(--white);
+    border: 1px solid var(--surface-2);
+    border-radius: var(--radius-md);
+    padding: 20px 22px;
+  }
+  .stat-label {
+    font-family: var(--font-accent);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-soft);
+    margin-bottom: 6px;
+  }
+  .stat-value {
+    font-family: var(--font-display);
+    font-size: 40px;
+    color: var(--primary);
+    line-height: 1;
+    letter-spacing: 1px;
+  }
+  .stat-value .unit {
+    font-family: var(--font-accent);
+    font-size: 18px;
+    color: var(--text-soft);
+    font-weight: 600;
+    margin-left: 4px;
+    letter-spacing: 0.5px;
+  }
+  .stat-note {
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--text-soft);
+  }
+
+  /* Sim-Nav */
+  .sim-nav {
+    max-width: 1400px;
+    margin: 0 auto 40px;
+    padding: 20px clamp(16px, 3vw, 32px);
+    background: white;
+    border: 2px dashed #FFD233;
+    border-radius: var(--radius-md);
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-soft);
+  }
+  .sim-nav strong { display: block; margin-bottom: 8px; color: var(--text); font-family: var(--font-accent); letter-spacing: 1.5px; text-transform: uppercase; font-size: 12px; }
+  .sim-nav a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 700;
+  }
+  .sim-nav a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<div class="demo-banner">
+  <span>🎬 Bot-Cockpit-Simulation · Für Vorstands-Demo</span>
+  <a href="10-erfolg.html">← Zurück zum Erfolg-Screen</a>
+</div>
+
+<header class="cockpit-head">
+  <div class="brand">
+    <div class="logo-mark">CfB</div>
+    <div class="brand-text">
+      CfB Passstellen-Bot
+      <span>Spielerpass-Anlage · DFBnet</span>
+    </div>
+  </div>
+  <div class="status-pill">
+    <span class="dot"></span>
+    Bot läuft · Session 2026-07-13-01
+  </div>
+</header>
+
+<div class="cockpit">
+
+  <!-- LEFT: Steps -->
+  <aside class="panel">
+    <div class="panel-title">📋 Ablauf</div>
+    <div class="steps">
+      <div class="step is-done">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-name">Login DFBnet</div>
+          <div class="step-time">14:32:04 · 2,1 s</div>
+        </div>
+      </div>
+      <div class="step is-done">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-name">Passstelle öffnen</div>
+          <div class="step-time">14:32:06 · 0,8 s</div>
+        </div>
+      </div>
+      <div class="step is-done">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-name">Erstausstellung starten</div>
+          <div class="step-time">14:32:07 · 0,4 s</div>
+        </div>
+      </div>
+      <div class="step is-active">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="step-name">Formular ausfüllen</div>
+          <div class="step-time">läuft · 6 / 11 Felder</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <div class="step-name">Adressprüfung</div>
+          <div class="step-time">wartet</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">6</div>
+        <div class="step-body">
+          <div class="step-name">Antrag speichern</div>
+          <div class="step-time">wartet</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">7</div>
+        <div class="step-body">
+          <div class="step-name">Antragsnummer ablegen</div>
+          <div class="step-time">wartet</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MIDDLE: DFBnet Browser-Mock -->
+  <section class="browser">
+    <div class="browser-chrome">
+      <div class="browser-dots">
+        <div class="browser-dot r"></div>
+        <div class="browser-dot y"></div>
+        <div class="browser-dot g"></div>
+      </div>
+      <div class="browser-url">
+        www.dfbnet.org/paesse/mod_po/webflow.do?event=neuAntragErstausstellung
+      </div>
+    </div>
+
+    <div class="dfb-header-mock">
+      <div class="h1">Passstelle · Antragsstellung · Erstausstellung</div>
+      <div class="user">👤 AO23irion · CfB Ford Köln-Niehl</div>
+    </div>
+
+    <div class="dfb-body">
+      <div class="dfb-form-head">Bereich A · Adressdaten des Spielers</div>
+
+      <div class="dfb-field-grid">
+        <div class="dfb-field-label">Anrede</div>
+        <div class="dfb-field-value">Herr</div>
+
+        <div class="dfb-field-label">Vorname <span class="req">*</span></div>
+        <div class="dfb-field-value">Ben</div>
+
+        <div class="dfb-field-label">Nachname <span class="req">*</span></div>
+        <div class="dfb-field-value">Mustermann</div>
+
+        <div class="dfb-field-label">Geburtsdatum <span class="req">*</span></div>
+        <div class="dfb-field-value">15.03.2013</div>
+
+        <div class="dfb-field-label">Nationalität <span class="req">*</span></div>
+        <div class="dfb-field-value">Deutschland</div>
+
+        <div class="dfb-field-label">Straße <span class="req">*</span></div>
+        <div class="dfb-field-value is-typing">Testerstraße 42</div>
+
+        <div class="dfb-field-label">PLZ · Ort</div>
+        <div class="dfb-field-value" style="opacity:0.4">—</div>
+
+        <div class="dfb-field-label">Vereinseintritt</div>
+        <div class="dfb-field-value" style="opacity:0.4">—</div>
+
+        <div class="dfb-field-label">Passfoto</div>
+        <div class="dfb-field-value" style="opacity:0.4">— (folgt vom Trainer)</div>
+      </div>
+
+      <div class="dfb-actions">
+        <button class="dfb-btn secondary" disabled>Abbrechen</button>
+        <button class="dfb-btn" disabled>Weiter →</button>
+      </div>
+
+      <div class="success-overlay" style="opacity: 0.5;">
+        <div style="font-family: var(--font-accent); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-soft); margin-bottom: 6px;">
+          Vorschau · in ~4 Sekunden
+        </div>
+        <div class="success-icon">✓</div>
+        <div class="success-title">Antrag angelegt</div>
+        <div class="success-nr">LO-26-049499</div>
+        <div class="success-note">
+          Draft im DFBnet gespeichert · wartet auf Passwart-Freigabe
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- RIGHT: Terminal -->
+  <aside>
+    <div class="terminal" role="log" aria-label="Bot-Log">
+      <div class="terminal-title">🖥 Bot-Log · Live</div>
+
+      <div class="log-line">
+        <span class="log-time">14:32:04</span>
+        <span class="log-tag info">INFO</span>
+        <span class="log-msg">Bot gestartet · <span class="em">CfB-Passstellen-Bot v0.4</span></span>
+      </div>
+      <div class="log-line">
+        <span class="log-time">14:32:04</span>
+        <span class="log-tag act">→</span>
+        <span class="log-msg">POST /login.do · user=<span class="val">AO23irion</span></span>
+      </div>
+      <div class="log-line">
+        <span class="log-time">14:32:06</span>
+        <span class="log-tag ok">OK</span>
+        <span class="log-msg">Login erfolgreich · JSESSIONID gesetzt · 302 → home</span>
+      </div>
+      <div class="log-line">
+        <span class="log-time">14:32:06</span>
+        <span class="log-tag act">→</span>
+        <span class="log-msg">GET /paesse/mod_po/webflow.do?event=start</span>
+      </div>
+      <div class="log-line">
+        <span class="log-time">14:32:07</span>
+        <span class="log-tag ok">OK</span>
+        <span class="log-msg">Passstellen-Modul aktiv · Rolle: <span class="val">PASSWART</span></span>
+      </div>
+      <div class="log-line">
+        <span class="log-time">14:32:07</span>
+        <span class="log-tag act">→</span>
+        <span class="log-msg">Navigate: <span class="em">Antragsstellung → Erstausstellung</span></span>
+      </div>
+      <div class="log-line">
+        <span class="log-time">14:32:08</span>
+        <span class="log-tag ok">OK</span>
+        <span class="log-msg">Formular geladen · 11 Freifelder erkannt</span>
+      </div>
+
+      <div class="log-line" style="margin-top:8px; opacity:0.7;">
+        <span class="log-time">14:32:08</span>
+        <span class="log-tag info">RUN</span>
+        <span class="log-msg">Fülle Bereich A · Adressdaten</span>
+      </div>
+
+      <div class="log-line">
+        <span class="log-time">14:32:09</span>
+        <span class="log-tag act">✎</span>
+        <span class="log-msg">anrede = <span class="val">"Herr"</span></span>
+      </div>
+      <div class="log-line">
+        <span class="log-time">14:32:09</span>
+        <span class="log-tag act">✎</span>
+        <span class="log-msg">vorname = <span class="val">"Ben"</span></span>
+      </div>
+      <div class="log-line">
+        <span class="log-time">14:32:10</span>
+        <span class="log-tag act">✎</span>
+        <span class="log-msg">nachname = <span class="val">"Mustermann"</span></span>
+      </div>
+      <div class="log-line">
+        <span class="log-time">14:32:10</span>
+        <span class="log-tag act">✎</span>
+        <span class="log-msg">geburtsdatum = <span class="val">"15.03.2013"</span></span>
+      </div>
+      <div class="log-line">
+        <span class="log-time">14:32:11</span>
+        <span class="log-tag act">✎</span>
+        <span class="log-msg">nationalitaet = <span class="val">"Deutschland"</span></span>
+      </div>
+      <div class="log-line">
+        <span class="log-time">14:32:11</span>
+        <span class="log-tag act">✎</span>
+        <span class="log-msg">strasse = <span class="val">"Testerstraße 42"</span> <em style="color:#FBBF24">← aktiv</em></span>
+      </div>
+
+      <div class="log-line" style="opacity:0.4;">
+        <span class="log-time">–</span>
+        <span class="log-tag act">✎</span>
+        <span class="log-msg">plzOrt = "50767 Köln"</span>
+      </div>
+      <div class="log-line" style="opacity:0.4;">
+        <span class="log-time">–</span>
+        <span class="log-tag act">✎</span>
+        <span class="log-msg">vereinseintritt = "13.07.2026"</span>
+      </div>
+      <div class="log-line" style="opacity:0.4;">
+        <span class="log-time">–</span>
+        <span class="log-tag warn">⚠</span>
+        <span class="log-msg">Passfoto: leer lassen (Trainer lädt später)</span>
+      </div>
+      <div class="log-line" style="opacity:0.4;">
+        <span class="log-time">–</span>
+        <span class="log-tag info">MODAL</span>
+        <span class="log-msg">Adressprüfungs-Popup → click "Beibehalten"</span>
+      </div>
+      <div class="log-line" style="opacity:0.4;">
+        <span class="log-time">–</span>
+        <span class="log-tag act">→</span>
+        <span class="log-msg">POST /webflow.do · event=speichern</span>
+      </div>
+      <div class="log-line" style="opacity:0.4;">
+        <span class="log-time">–</span>
+        <span class="log-tag ok">✓</span>
+        <span class="log-msg">Antragsnr. = <span class="val">"LO-26-049499"</span> · in DB geloggt</span>
+      </div>
+      <div class="log-line" style="opacity:0.4;">
+        <span class="log-time">–</span>
+        <span class="log-tag info">MAIL</span>
+        <span class="log-msg">Passwart-Benachrichtigung → lars.irion@…</span>
+      </div>
+
+    </div>
+  </aside>
+
+</div>
+
+<div class="cockpit-summary">
+  <div class="stat">
+    <div class="stat-label">Bot-Laufzeit heute</div>
+    <div class="stat-value">14<span class="unit">s</span></div>
+    <div class="stat-note">Erwartet: 12–18 s pro Spielerpass</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Zeitersparnis pro Fall</div>
+    <div class="stat-value">18<span class="unit">min</span></div>
+    <div class="stat-note">Manuell: ~20 min · Bot: ~2 min inkl. Prüfung</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Neue Mitglieder heute</div>
+    <div class="stat-value">7<span class="unit">/7</span></div>
+    <div class="stat-note">Alle Pass-Drafts erfolgreich angelegt</div>
+  </div>
+</div>
+
+<div class="sim-nav">
+  <strong>🎬 Vorstands-Demo · Ende</strong>
+  Dies ist die letzte Simulation der End-to-End-Reise vom Klick <em>„Probetraining anmelden"</em> bis zum fertigen Spielerpass-Draft im DFBnet.<br>
+  <a href="00-homepage.html">→ Zurück zum Start (Homepage)</a>
+  &nbsp;·&nbsp;
+  <a href="10-erfolg.html">→ Zum Wizard-Erfolg-Screen</a>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CfB Ford Köln Niehl 09/52 e.V. — Mitgliedsantrag [DFBnet-Simulation]</title>
+<style>
+  /* ==========================================================
+     DFBnet Mitgliedsantrag-Nachbau (echt-nah)
+     Basierend auf Live-Discovery 2026-07-08 mit realen Screenshots.
+     Nachbau der 5 Schritte: Antragsteller → Mitgliedsdaten →
+     Zahlungsart → Zusatzdaten → Kontrolle/Absenden
+     ========================================================== */
+
+  :root {
+    --dfb-green: #00b050;
+    --dfb-green-d: #009444;
+    --dfb-text: #2c2c2c;
+    --dfb-text-soft: #6b6b6b;
+    --dfb-border: #d0d0d0;
+    --dfb-bg: #ffffff;
+    --dfb-page-bg: #f4f4f4;
+    --dfb-required: #d40000;
+    --dfb-info-bg: #eef7f0;
+    --dfb-info-border: #b8dcc2;
+    --demo-yellow: #ffd233;
+    --demo-yellow-d: #b48800;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+    background: var(--dfb-page-bg);
+    color: var(--dfb-text);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Demo-Banner (macht sichtbar dass Screen simuliert ist) */
+  .demo-banner {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: var(--demo-yellow);
+    color: var(--demo-yellow-d);
+    padding: 10px 20px;
+    font-weight: 700;
+    font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--demo-yellow-d);
+  }
+  .demo-banner a {
+    color: var(--demo-yellow-d);
+    text-decoration: underline;
+    font-weight: 700;
+  }
+
+  /* Header — grüner DFB-Balken */
+  .dfb-header {
+    background: var(--dfb-green);
+    color: #fff;
+    padding: 20px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .dfb-header h1 {
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+  }
+  .dfb-header .club {
+    font-size: 14px;
+    opacity: 0.92;
+    text-align: right;
+  }
+
+  /* Steps-Navigation oben */
+  .step-nav {
+    background: #fff;
+    padding: 18px 40px;
+    border-bottom: 1px solid var(--dfb-border);
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+  }
+  .step-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--dfb-text-soft);
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .step-nav-item.active {
+    color: var(--dfb-green);
+    border-bottom-color: var(--dfb-green);
+  }
+  .step-nav-item .num {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #ddd;
+    color: #fff;
+    display: grid;
+    place-items: center;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .step-nav-item.active .num {
+    background: var(--dfb-green);
+  }
+  .step-nav-item.done .num {
+    background: var(--dfb-green);
+    color: #fff;
+  }
+  .step-nav-item.done {
+    color: var(--dfb-green);
+  }
+
+  /* Content-Container */
+  .container {
+    max-width: 900px;
+    margin: 32px auto;
+    padding: 0 32px;
+  }
+
+  /* Section-Box */
+  .form-section {
+    background: #fff;
+    border: 1px solid var(--dfb-border);
+    margin-bottom: 20px;
+  }
+  .form-section-head {
+    background: #f7f7f7;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--dfb-border);
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--dfb-text);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .form-section-body {
+    padding: 20px 24px;
+  }
+
+  /* Form Rows */
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 14px;
+  }
+  .form-row.single { grid-template-columns: 1fr; }
+  .form-field label {
+    display: block;
+    font-size: 12px;
+    color: var(--dfb-text-soft);
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+  .form-field label .req {
+    color: var(--dfb-required);
+    margin-left: 2px;
+  }
+  .form-field input[type=text],
+  .form-field input[type=email],
+  .form-field input[type=date],
+  .form-field select {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid var(--dfb-border);
+    background: #fff;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--dfb-text);
+  }
+  .form-field input:focus,
+  .form-field select:focus {
+    outline: none;
+    border-color: var(--dfb-green);
+    box-shadow: 0 0 0 2px rgba(0, 176, 80, 0.15);
+  }
+
+  /* Radios */
+  .radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .radio-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--dfb-text);
+  }
+
+  /* Buttons unten */
+  .actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 0 60px;
+  }
+  .btn-back, .btn-next, .btn-submit {
+    padding: 10px 24px;
+    border: 1px solid var(--dfb-green);
+    background: #fff;
+    color: var(--dfb-green);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    letter-spacing: 0.3px;
+  }
+  .btn-next, .btn-submit {
+    background: var(--dfb-green);
+    color: #fff;
+  }
+  .btn-next:hover, .btn-submit:hover { background: var(--dfb-green-d); }
+  .btn-back:hover { background: #f0f0f0; }
+
+  /* Info-Boxes */
+  .info-box {
+    background: var(--dfb-info-bg);
+    border-left: 4px solid var(--dfb-green);
+    padding: 12px 18px;
+    margin: 16px 0;
+    font-size: 13px;
+    color: var(--dfb-text);
+    line-height: 1.6;
+  }
+  .info-box strong { display: block; margin-bottom: 4px; }
+
+  /* Kontroll-Übersicht */
+  .review-row {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+  }
+  .review-row:last-child { border: none; }
+  .review-label {
+    color: var(--dfb-text-soft);
+    font-weight: 500;
+  }
+  .review-value {
+    color: var(--dfb-text);
+    font-weight: 400;
+  }
+
+  /* Captcha */
+  .captcha-box {
+    background: #f9f9f9;
+    border: 2px solid var(--dfb-green);
+    padding: 20px;
+    margin: 24px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+  }
+  .captcha-icon {
+    font-size: 40px;
+    color: var(--dfb-green);
+  }
+  .captcha-info {
+    flex: 1;
+  }
+  .captcha-info strong { display: block; font-size: 15px; margin-bottom: 4px; }
+  .captcha-info small { color: var(--dfb-text-soft); font-size: 12px; }
+  .captcha-btn {
+    background: var(--dfb-green);
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .captcha-btn.done {
+    background: #999;
+    cursor: default;
+  }
+
+  /* Checkbox blocks */
+  .consent-block {
+    display: flex;
+    gap: 12px;
+    align-items: start;
+    padding: 12px 0;
+    border-top: 1px solid #eee;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .consent-block input[type=checkbox] {
+    margin-top: 3px;
+    accent-color: var(--dfb-green);
+  }
+
+  /* Ad-Sidebar (echt in DFBnet) */
+  .ad-side {
+    display: none;
+  }
+
+  /* Simulations-Steuerung unten */
+  .sim-nav {
+    max-width: 900px;
+    margin: 0 auto 40px;
+    padding: 20px 32px;
+    background: #fff;
+    border: 2px dashed var(--demo-yellow);
+    text-align: center;
+    font-size: 13px;
+    color: var(--dfb-text-soft);
+  }
+  .sim-nav strong { display: block; margin-bottom: 8px; color: var(--dfb-text); }
+  .sim-nav a {
+    color: var(--dfb-green);
+    text-decoration: none;
+    font-weight: 700;
+  }
+  .sim-nav a:hover { text-decoration: underline; }
+
+  @media (max-width: 720px) {
+    .form-row { grid-template-columns: 1fr; }
+    .review-row { grid-template-columns: 1fr; }
+    .review-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .dfb-header { flex-direction: column; align-items: flex-start; gap: 8px; padding: 16px 20px; }
+    .step-nav { padding: 12px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Sticky Demo-Banner -->
+<div class="demo-banner">
+  <span>🎬 DEMO-SIMULATION · DFBnet-Ansicht (kein echter Antrag)</span>
+  <a href="05-dfb-uebergabe.html">← Zurück zum CfB-Wizard</a>
+</div>
+
+<header class="dfb-header">
+  <h1>Mitgliedsantrag online</h1>
+  <div class="club">CfB Ford Köln-Niehl 09/52 e.V.</div>
+</header>
+
+<nav class="step-nav" aria-label="DFB-Antrag Fortschritt">
+  <div class="step-nav-item done"><span class="num">1</span>Antragsteller*in</div>
+  <div class="step-nav-item done"><span class="num">2</span>Mitgliedsdaten</div>
+  <div class="step-nav-item done"><span class="num">3</span>Zahlungsart</div>
+  <div class="step-nav-item done"><span class="num">4</span>Zusatzdaten</div>
+  <div class="step-nav-item active"><span class="num">5</span>Kontrolle/Absenden</div>
+</nav>
+
+<div class="container">
+
+  <div class="form-section">
+    <div class="form-section-head">Kontrolle · Alle Angaben auf einen Blick</div>
+    <div class="form-section-body">
+
+      <p style="margin-bottom: 12px; font-size: 13px; color: var(--dfb-text-soft);">
+        Bitte kontrolliere alle Angaben. Über den Zurück-Button kannst Du Änderungen vornehmen.
+      </p>
+
+      <h4 style="margin: 16px 0 8px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--dfb-green);">Antragsteller*in</h4>
+      <div class="review-row"><span class="review-label">Vorname</span><span class="review-value">Max</span></div>
+      <div class="review-row"><span class="review-label">Nachname</span><span class="review-value">Mustermann</span></div>
+      <div class="review-row"><span class="review-label">E-Mail</span><span class="review-value">max.mustermann@example.de</span></div>
+      <div class="review-row"><span class="review-label">Telefon</span><span class="review-value">0221 123 4567</span></div>
+      <div class="review-row"><span class="review-label">Rolle</span><span class="review-value">Gesetzliche/r Vertreter*in des neuen Mitglieds</span></div>
+
+      <h4 style="margin: 20px 0 8px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--dfb-green);">Mitgliedsdaten</h4>
+      <div class="review-row"><span class="review-label">Anrede</span><span class="review-value">—</span></div>
+      <div class="review-row"><span class="review-label">Vorname</span><span class="review-value">Ben</span></div>
+      <div class="review-row"><span class="review-label">Nachname</span><span class="review-value">Mustermann</span></div>
+      <div class="review-row"><span class="review-label">Straße</span><span class="review-value">Testerstraße 42</span></div>
+      <div class="review-row"><span class="review-label">PLZ · Ort</span><span class="review-value">50767 Köln</span></div>
+      <div class="review-row"><span class="review-label">Land</span><span class="review-value">Deutschland</span></div>
+      <div class="review-row"><span class="review-label">Geburtsdatum</span><span class="review-value">15.03.2013 (12 Jahre)</span></div>
+      <div class="review-row"><span class="review-label">Geschlecht</span><span class="review-value">männlich</span></div>
+      <div class="review-row"><span class="review-label">Eintrittsdatum</span><span class="review-value">13.07.2026</span></div>
+      <div class="review-row"><span class="review-label">Status (Verein)</span><span class="review-value">Aktiv</span></div>
+      <div class="review-row"><span class="review-label">Abteilungen</span><span class="review-value">Fußball</span></div>
+
+      <h4 style="margin: 20px 0 8px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--dfb-green);">Zahlungsart</h4>
+      <div class="review-row"><span class="review-label">Zahlungsart</span><span class="review-value">Lastschrift</span></div>
+      <div class="review-row"><span class="review-label">Kontoinhaber</span><span class="review-value">Max Mustermann</span></div>
+      <div class="review-row"><span class="review-label">IBAN</span><span class="review-value">DE89 3704 0044 0532 0130 00</span></div>
+      <div class="review-row"><span class="review-label">Lastschrifteinzug</span><span class="review-value">Zustimmung erteilt</span></div>
+
+      <h4 style="margin: 20px 0 8px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--dfb-green);">Zusatzdaten</h4>
+      <div class="review-row"><span class="review-label">Beitragsart</span><span class="review-value">300 € · Aktives Mitglied Jugend &amp; Senioren</span></div>
+      <div class="review-row"><span class="review-label">Aufnahmegebühr</span><span class="review-value">20 € · beim ersten Beitragseinzug per Lastschrift</span></div>
+      <div class="review-row"><span class="review-label">Mannschaftswunsch</span><span class="review-value">U12-2 D3-Junioren · Johannes Degenhardt</span></div>
+
+      <div class="consent-block" style="border-top: 1px solid #eee; margin-top: 16px; padding-top: 16px;">
+        <input type="checkbox" checked disabled>
+        <span>Mit der Speicherung, Übermittlung und Verarbeitung personenbezogener Daten für Vereinszwecke, gemäß den Bestimmungen der Datenschutzgrundverordnung (DSGVO) und des Bundesdatenschutzgesetzes (BDSG), bin ich einverstanden.</span>
+      </div>
+      <div class="consent-block">
+        <input type="checkbox" checked disabled>
+        <span>Zustimmung des Antragstellers: Ich habe zur Kenntnis genommen, dass mit der erfolgreichen Datenübermittlung ein rechtsverbindlicher Vereinsaufnahmeantrag gestellt wird für die unter „Mitgliedsdaten" aufgeführte Person.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <strong>Nach dem Absenden erhältst Du eine E-Mail an <code>max.mustermann@example.de</code>.</strong>
+    In der E-Mail findest Du einen <strong>Bestätigungslink</strong> — erst wenn Du diesen Link klickst, wird Dein Antrag an den Verein gesendet.
+  </div>
+
+  <div class="captcha-box">
+    <div class="captcha-icon">🛡️</div>
+    <div class="captcha-info">
+      <strong>Anti-Roboter-Verifizierung ✓ bestanden</strong>
+      <small>FriendlyCaptcha · sitekey FCMMC0792QBD16M9</small>
+    </div>
+    <button class="captcha-btn done" type="button" disabled>Verifiziert</button>
+  </div>
+
+  <div class="actions">
+    <a href="05-dfb-uebergabe.html" class="btn-back">← Zurück</a>
+    <a href="05-dfb-uebergabe.html?dfb=done" class="btn-submit">Absenden ✓</a>
+  </div>
+
+  <p style="text-align: center; font-size: 12px; color: var(--dfb-text-soft); margin-bottom: 20px;">
+    Bei Rückfragen: <a href="mailto:cfbfordniehlkoeln@gmail.com" style="color: var(--dfb-green);">cfbfordniehlkoeln@gmail.com</a>
+  </p>
+
+</div>
+
+<div class="sim-nav">
+  <strong>🎬 Demo-Steuerung</strong>
+  Dies ist eine <em>Simulation</em> des DFBnet-Mitgliedsantrags (Schritt 5/5 · Kontrolle). Echter Ort: <code>verein.dfbnet.org/mitgliedsantrag/cfbfordniehl</code><br>
+  <a href="05-dfb-uebergabe.html?dfb=done">→ „Absenden" simulieren und zurück zum CfB-Wizard</a>
+</div>
+
+</body>
+</html>

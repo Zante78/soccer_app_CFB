@@ -1,0 +1,666 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CfB Digitale Passstelle · Nachweise</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary:     #004A9F;
+    --primary-d:   #003479;
+    --primary-l:   #1A6ACC;
+    --accent-green:#2D9B5A;
+    --accent-green-l:#3DB870;
+    --surface-0:   #F7F9FC;
+    --surface-1:   #EDF1F7;
+    --surface-2:   #DDE5F0;
+    --text:        #111820;
+    --text-soft:   #4A5568;
+    --white:       #FFFFFF;
+    --error:       #B91C1C;
+
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-accent:  'Barlow Condensed', sans-serif;
+    --font-body:    'DM Sans', sans-serif;
+
+    --radius-sm: 4px;
+    --radius-md: 8px;
+
+    --nav-h: 72px;
+    --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--surface-0);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+  }
+
+  /* ============ NAV ============ */
+  .wiz-nav {
+    height: var(--nav-h);
+    background: rgba(0, 74, 159, 0.96);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    display: flex; align-items: center;
+    padding: 0 clamp(16px, 5vw, 80px);
+    color: var(--white);
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .logo-mark {
+    width: 44px; height: 44px;
+    background: var(--white);
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--primary);
+    letter-spacing: -0.02em;
+  }
+  .brand-text {
+    font-family: var(--font-accent);
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.5px;
+    line-height: 1.2;
+  }
+  .brand-text span {
+    display: block;
+    font-weight: 400;
+    font-size: 11px;
+    opacity: 0.7;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .nav-right { margin-left: auto; }
+  .progress-marker {
+    font-family: var(--font-accent);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.7);
+  }
+  .progress-marker strong { color: var(--white); font-weight: 700; }
+
+  /* ============ MAIN ============ */
+  .main {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: clamp(48px, 8vh, 96px) clamp(16px, 5vw, 80px) 40px;
+    width: 100%;
+  }
+
+  .hero {
+    animation: fadeUp 400ms 100ms both ease-out;
+    margin-bottom: 40px;
+  }
+
+  .eyebrow {
+    font-family: var(--font-accent);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--primary);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 32px;
+    height: 2px;
+    background: var(--primary);
+  }
+
+  .headline {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(40px, 6vw, 72px);
+    line-height: 0.95;
+    letter-spacing: 1px;
+    color: var(--primary);
+    margin: 0 0 20px;
+  }
+  .sub {
+    font-family: var(--font-body);
+    font-size: clamp(15px, 1.6vw, 18px);
+    color: var(--text-soft);
+    max-width: 580px;
+    line-height: 1.55;
+  }
+
+  /* ============ CONTEXT-CHIPS ============ */
+  .context-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+  }
+  .context-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: var(--surface-1);
+    border-radius: 999px;
+    font-family: var(--font-accent);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--primary);
+  }
+  .context-chip svg { width: 12px; height: 12px; color: var(--primary); }
+
+  /* ============ UPLOAD SLOTS ============ */
+  .upload-block {
+    animation: fadeUp 400ms 220ms both ease-out;
+  }
+
+  .upload-slot {
+    background: var(--white);
+    border: 1.5px dashed var(--surface-2);
+    border-radius: var(--radius-md);
+    padding: 24px 24px 28px;
+    margin-bottom: 20px;
+    transition: border-color var(--transition), background var(--transition);
+  }
+  .upload-slot:hover:not(.is-uploaded) { border-color: var(--primary-l); }
+  .upload-slot.is-uploaded {
+    border-style: solid;
+    border-color: var(--surface-2);
+    background: var(--white);
+  }
+  .upload-slot.is-required-empty {
+    border-color: var(--surface-2);
+  }
+
+  .slot-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+  .slot-title {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 17px;
+    color: var(--text);
+    letter-spacing: -0.005em;
+  }
+  .slot-title .req {
+    color: var(--primary);
+    margin-left: 4px;
+  }
+  .slot-tag {
+    font-family: var(--font-accent);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 999px;
+  }
+  .slot-tag.tag-required {
+    background: rgba(0, 74, 159, 0.08);
+    color: var(--primary);
+  }
+  .slot-tag.tag-optional {
+    background: var(--surface-1);
+    color: var(--text-soft);
+  }
+  .slot-tag.tag-done {
+    background: rgba(45, 155, 90, 0.12);
+    color: var(--accent-green);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .slot-tag.tag-done svg { width: 12px; height: 12px; }
+
+  .slot-desc {
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--text-soft);
+    line-height: 1.5;
+    margin-bottom: 20px;
+  }
+
+  /* Empty state — drop zone */
+  .slot-dropzone {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 18px;
+    background: var(--surface-0);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background var(--transition);
+  }
+  .slot-dropzone:hover { background: var(--surface-1); }
+  .slot-dropzone-icon {
+    width: 48px; height: 48px;
+    flex-shrink: 0;
+    display: grid; place-items: center;
+    color: var(--primary);
+    background: var(--surface-1);
+    border-radius: 50%;
+  }
+  .slot-dropzone-icon svg { width: 24px; height: 24px; }
+  .slot-dropzone-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .slot-dropzone-primary {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--primary);
+  }
+  .slot-dropzone-secondary {
+    font-family: var(--font-body);
+    font-size: 13px;
+    color: var(--text-soft);
+  }
+
+  input[type="file"] { display: none; }
+
+  /* Uploaded state */
+  .slot-uploaded {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 16px;
+    align-items: center;
+    padding: 14px 16px;
+    background: var(--surface-0);
+    border-radius: var(--radius-sm);
+  }
+  .slot-thumb {
+    width: 56px; height: 72px;
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    display: grid; place-items: center;
+    color: var(--primary);
+    overflow: hidden;
+  }
+  .slot-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .slot-thumb svg { width: 24px; height: 24px; }
+  .slot-uploaded-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+  .slot-uploaded-name {
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .slot-uploaded-meta {
+    font-family: var(--font-body);
+    font-size: 12px;
+    color: var(--text-soft);
+  }
+  .slot-remove {
+    all: unset;
+    cursor: pointer;
+    padding: 8px;
+    color: var(--text-soft);
+    border-radius: var(--radius-sm);
+    transition: color var(--transition), background var(--transition);
+  }
+  .slot-remove:hover {
+    color: var(--error);
+    background: var(--surface-1);
+  }
+  .slot-remove:focus-visible {
+    outline: 3px solid rgba(0, 74, 159, 0.4);
+    outline-offset: 2px;
+  }
+  .slot-remove svg { width: 18px; height: 18px; display: block; }
+
+  /* Photo-Anforderungen Details */
+  .slot-req-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--surface-2);
+    font-family: var(--font-body);
+    font-size: 13px;
+    color: var(--text-soft);
+  }
+  .slot-req-list span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .slot-req-list svg {
+    width: 12px; height: 12px;
+    color: var(--accent-green);
+  }
+
+  /* Info-Box: Was passiert damit */
+  .info-box {
+    display: flex;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--surface-1);
+    border-left: 3px solid var(--primary);
+    border-radius: var(--radius-sm);
+    margin-top: 32px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    color: var(--text-soft);
+    line-height: 1.55;
+  }
+  .info-box svg {
+    flex-shrink: 0;
+    width: 16px; height: 16px;
+    color: var(--primary);
+    margin-top: 2px;
+  }
+  .info-box strong { color: var(--primary-d); }
+
+  /* ============ NAV ACTIONS ============ */
+  .actions {
+    margin-top: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    animation: fadeUp 400ms 340ms both ease-out;
+  }
+  .btn-back {
+    all: unset;
+    font-family: var(--font-accent);
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-soft);
+    cursor: pointer;
+    padding: 12px 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: color var(--transition);
+    border-bottom: 1px solid transparent;
+  }
+  .btn-back:hover { color: var(--primary); border-bottom-color: var(--primary); }
+  .btn-back:focus-visible {
+    outline: 3px solid rgba(0, 74, 159, 0.4);
+    outline-offset: 4px;
+  }
+  .btn-back svg { width: 14px; height: 14px; }
+
+  .btn-next {
+    font-family: var(--font-accent);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    background: var(--primary);
+    color: var(--white);
+    border: none; cursor: pointer;
+    padding: 16px 32px;
+    border-radius: var(--radius-sm);
+    transition: background var(--transition), transform var(--transition), opacity var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .btn-next:hover:not(:disabled) {
+    background: var(--primary-d);
+    transform: translateY(-2px);
+  }
+  .btn-next:focus-visible {
+    outline: 3px solid rgba(0, 74, 159, 0.4);
+    outline-offset: 2px;
+  }
+  .btn-next:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn-next svg {
+    width: 16px; height: 16px;
+    transition: transform var(--transition);
+  }
+  .btn-next:hover:not(:disabled) svg { transform: translateX(3px); }
+
+  /* ============ FOOTER ============ */
+  .footer {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 24px clamp(16px, 5vw, 80px) 40px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--surface-2);
+    font-family: var(--font-body);
+    font-size: 13px;
+    color: var(--text-soft);
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .footer a {
+    color: var(--text-soft);
+    text-decoration: underline;
+    text-decoration-color: var(--surface-2);
+    text-underline-offset: 3px;
+  }
+  .footer a:hover { color: var(--text); text-decoration-color: currentColor; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero, .upload-block, .actions { animation: none; }
+    .btn-next, .btn-back, .upload-slot, .slot-dropzone { transition: none; }
+    .btn-next:hover:not(:disabled) { transform: none; }
+  }
+
+  @media (max-width: 640px) {
+    .main { padding-top: 40px; }
+    .actions { flex-direction: column-reverse; align-items: stretch; }
+    .btn-next { width: 100%; justify-content: center; }
+    .btn-back { justify-content: center; }
+    .slot-uploaded { grid-template-columns: 40px 1fr auto; }
+    .slot-thumb { width: 40px; height: 52px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <nav class="wiz-nav" role="navigation" aria-label="Wizard-Navigation">
+    <div class="brand">
+      <div class="logo-mark">CfB</div>
+      <div class="brand-text">
+        CfB Ford Köln-Niehl 09/52
+        <span>Digitale Passstelle</span>
+      </div>
+    </div>
+    <div class="nav-right">
+      <span class="progress-marker">Schritt <strong>04</strong> von <strong>08</strong></span>
+    </div>
+  </nav>
+
+  <main class="main">
+
+    <section class="hero">
+      <span class="eyebrow">Nachweise</span>
+      <h1 class="headline">Nur die Nachweise, kein Foto.</h1>
+      <p class="sub">
+        Wir brauchen einen Nachweis des Geburtsdatums bei Junioren &mdash;
+        Foto vom Handy reicht. <strong>Das Passfoto macht später der Trainer</strong>
+        direkt im Spielerprofil, sobald der Antrag durch ist. Du musst hier nichts liefern.
+      </p>
+    </section>
+
+    <div class="context-row">
+      <span class="context-chip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 1l4 4-4 4M3 11V9a4 4 0 014-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 01-4 4H3"/>
+        </svg>
+        Vereinswechsel
+      </span>
+      <span class="context-chip">Junior · U13</span>
+    </div>
+
+    <form class="upload-block" novalidate>
+
+      <!-- ================================================
+           SLOT 1 — GEBURTSNACHWEIS (Pflicht bei Junior, aus Step 3 Geburtsdatum abgeleitet)
+           ================================================ -->
+      <div class="upload-slot is-required-empty" data-slot="birth-proof">
+        <div class="slot-head">
+          <span class="slot-title">Nachweis des Geburtsdatums <span class="req">*</span></span>
+          <span class="slot-tag tag-required">Pflicht bei Junioren</span>
+        </div>
+        <p class="slot-desc">
+          Foto oder Scan der <strong>Geburtsurkunde</strong> oder einer <strong>Meldebescheinigung</strong>.
+          Der WDFV verlangt den Nachweis für die Altersklasse. Das Original schickt später der
+          Passwart mit dem Antrag ein &mdash; du machst nur ein Foto damit wir den Antrag vorbereiten können.
+        </p>
+        <label for="upload-birth" class="slot-dropzone">
+          <span class="slot-dropzone-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+          </span>
+          <span class="slot-dropzone-text">
+            <span class="slot-dropzone-primary">Datei auswählen</span>
+            <span class="slot-dropzone-secondary">Foto vom Handy oder PDF · max 10 MB</span>
+          </span>
+          <input id="upload-birth" type="file" accept="image/jpeg,image/png,image/webp,application/pdf">
+        </label>
+        <div class="slot-req-list">
+          <span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Geburtsurkunde
+          </span>
+          <span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Meldebescheinigung
+          </span>
+          <span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            beides ist gleichwertig
+          </span>
+        </div>
+      </div>
+
+      <!-- ================================================
+           SLOT 3 — ABMELDEBESTÄTIGUNG (optional bei Vereinswechsel)
+           ================================================ -->
+      <div class="upload-slot" data-slot="deregistration">
+        <div class="slot-head">
+          <span class="slot-title">Abmeldebestätigung vom Vorverein</span>
+          <span class="slot-tag tag-optional">Optional</span>
+        </div>
+        <p class="slot-desc">
+          Falls dir die Bestätigung vom alten Verein vorliegt, lade sie hoch &mdash; das beschleunigt die
+          Prüfung. Wenn nicht: kein Problem, wir arbeiten mit den Angaben aus dem letzten Schritt.
+        </p>
+        <label for="upload-deregistration" class="slot-dropzone">
+          <span class="slot-dropzone-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+          </span>
+          <span class="slot-dropzone-text">
+            <span class="slot-dropzone-primary">Datei auswählen</span>
+            <span class="slot-dropzone-secondary">PDF, JPG oder PNG · max 10 MB</span>
+          </span>
+          <input id="upload-deregistration" type="file" accept="image/jpeg,image/png,image/webp,application/pdf">
+        </label>
+      </div>
+
+      <!-- Info-Box: Datenschutz-Ankündigung -->
+      <div class="info-box" role="note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        <div>
+          <strong>Was passiert mit den Nachweisen?</strong>
+          Alles landet verschlüsselt bei uns und wird <strong>48 Stunden nach der DFBnet-Freigabe automatisch gelöscht</strong>.
+          Der Passwart braucht sie nur um bei der Antragstellung bestätigen zu können, dass die
+          Unterlagen vorliegen &mdash; die Originale bleiben bei dir.
+        </div>
+      </div>
+
+    </form>
+
+    <div class="actions">
+      <button type="button" class="btn-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M11 18l-6-6 6-6"/>
+        </svg>
+        Zurück
+      </button>
+      <button type="button" class="btn-next" disabled>
+        Zur Spielberechtigung
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14M13 6l6 6-6 6"/>
+        </svg>
+      </button>
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    <div>© CfB Ford Köln-Niehl 09/52 e.V.</div>
+    <div>
+      <a href="#">Datenschutz</a>
+      &nbsp;·&nbsp;
+      <a href="#">Impressum</a>
+      &nbsp;·&nbsp;
+      <a href="mailto:michael.dobiat@cfbfordniehl.de">Kontakt</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const back = document.querySelector('.btn-back');
+    const next = document.querySelector('.btn-next');
+    if (back) back.addEventListener('click', e => { e.preventDefault(); location.href = '03-spielerdaten.html'; });
+    if (next) {
+      next.disabled = false;
+      next.addEventListener('click', e => { e.preventDefault(); location.href = '05-dfb-uebergabe.html'; });
+    }
+  });
+</script>
+</body>
+</html>
