@@ -841,6 +841,212 @@
   </div>
 </div>
 
+<!-- ============ NEXT STEPS · Wie es weitergeht ============ -->
+<section style="max-width:1400px;margin:0 auto 40px;padding:0 clamp(16px,3vw,32px);">
+  <div style="background:#fff;border:1px solid #DDE5F0;border-radius:8px;padding:clamp(24px,3vw,36px);">
+
+    <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:8px;padding-bottom:16px;border-bottom:2px solid #004A9F;">
+      <span style="font-family:'Bebas Neue',sans-serif;font-size:38px;letter-spacing:1px;color:#004A9F;line-height:1;">So machen wir weiter</span>
+      <span style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#4A5568;">Konkrete nächste Schritte · Stand 13.07.2026</span>
+    </div>
+
+    <p style="font-family:'DM Sans',sans-serif;font-size:14px;color:#4A5568;line-height:1.6;margin:14px 0 24px;max-width:900px;">
+      Was ihr eben gesehen habt, ist ein <strong>Klick-Prototyp</strong> — die Reise funktioniert im Kopf, aber noch nicht mit echten Daten.
+      Bevor der erste echte Neuzugang durch den Wizard läuft, brauchen wir <strong>vier Sachen in dieser Reihenfolge</strong>.
+      Ausserdem eine parallele Sache, die Simon schon angestoßen hat.
+    </p>
+
+    <!-- Blocker prominent oben -->
+    <div style="background:linear-gradient(90deg,rgba(217,50,50,.06),transparent);border-left:4px solid #D93232;padding:14px 18px;border-radius:0 6px 6px 0;margin-bottom:24px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#D93232;">🔴 Läuft parallel · seit Anfang Juli</span>
+      </div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:0.8px;color:#111820;line-height:1.1;margin-bottom:6px;">
+        WDFV-Rollen-Erweiterung „Passwart" für Simons DFBnet-Kennung
+      </div>
+      <div style="font-family:'DM Sans',sans-serif;font-size:13px;color:#4A5568;line-height:1.55;">
+        Ohne diese Rolle kann der Bot keine Spielerpass-Drafts anlegen — er sieht nur Vertragsspieler.
+        Anfrage läuft bei WDFV Passstelle Duisburg. Dauer erfahrungsgemäss 1–2 Wochen.
+        Danach: V1-Discovery mit Testantrag „TESTTEST WIZARDDISCOVERY" (Abbruch vor Freigabe) zur finalen Selektor-Verifikation.
+      </div>
+    </div>
+
+    <!-- 4-Step Roadmap -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:24px;">
+
+      <!-- Sprint 1 -->
+      <div style="background:#F7F9FC;border-top:4px solid #004A9F;padding:20px;border-radius:0 0 6px 6px;">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;">
+          <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:#004A9F;">Sprint 1 · Backend</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#4A5568;">~1 Woche</span>
+        </div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:0.8px;color:#111820;line-height:1;margin-bottom:12px;">
+          Foundation aufsetzen
+        </div>
+        <div style="font-family:'DM Sans',sans-serif;font-size:13px;color:#4A5568;line-height:1.55;margin-bottom:12px;">
+          Backend-Architektur v2 (vom Vorstand am 04.07. per Prokura freigegeben) real machen.
+        </div>
+        <ul style="list-style:none;padding:0;margin:0;font-family:'DM Sans',sans-serif;font-size:13px;color:#111820;line-height:1.7;">
+          <li>◇ Neon Postgres Frankfurt anlegen</li>
+          <li>◇ Cloudflare R2 EU-Bucket (falls Foto-Upload bleibt)</li>
+          <li>◇ Tailscale Setup für Bot-Fernwartung</li>
+          <li>◇ AVVs mit Neon/CF/Tailscale Self-Service ziehen</li>
+          <li>◇ Mini-PC beschaffen + Ubuntu-Basis-Install</li>
+        </ul>
+        <div style="margin-top:14px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#004A9F;font-weight:600;">
+          Tasks #62 – #66 · kein Blocker
+        </div>
+      </div>
+
+      <!-- Sprint 2 -->
+      <div style="background:#F7F9FC;border-top:4px solid #004A9F;padding:20px;border-radius:0 0 6px 6px;">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;">
+          <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:#004A9F;">Sprint 2 · Migration</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#4A5568;">~1–2 Wochen</span>
+        </div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:0.8px;color:#111820;line-height:1;margin-bottom:12px;">
+          Von Supabase auf Neon
+        </div>
+        <div style="font-family:'DM Sans',sans-serif;font-size:13px;color:#4A5568;line-height:1.55;margin-bottom:12px;">
+          Der Wizard-Code redet aktuell noch mit Supabase. Umziehen auf die neue Foundation.
+        </div>
+        <ul style="list-style:none;padding:0;margin:0;font-family:'DM Sans',sans-serif;font-size:13px;color:#111820;line-height:1.7;">
+          <li>◇ Wizard-Backend Supabase → Neon</li>
+          <li>◇ BetterAuth-Sessions in Neon verankern</li>
+          <li>◇ Bot (`apps/rpa-bot/`) von Supabase entkoppeln</li>
+          <li>◇ DSGVO-Purger-Cron (48h für Nachweise)</li>
+          <li>◇ Wizard-Klicktour reaktivieren (aktuell geparkt)</li>
+        </ul>
+        <div style="margin-top:14px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#004A9F;font-weight:600;">
+          Abhängig von Sprint 1
+        </div>
+      </div>
+
+      <!-- Sprint 3 -->
+      <div style="background:#F7F9FC;border-top:4px solid #004A9F;padding:20px;border-radius:0 0 6px 6px;">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;">
+          <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:#004A9F;">Sprint 3 · Bot-Bau</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#4A5568;">~2–3 Wochen</span>
+        </div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:0.8px;color:#111820;line-height:1;margin-bottom:12px;">
+          Passstellen-Bot bauen
+        </div>
+        <div style="font-family:'DM Sans',sans-serif;font-size:13px;color:#4A5568;line-height:1.55;margin-bottom:12px;">
+          Das Discovery-Wissen aus V1.2/V1.3 in echten Code umsetzen — mit realer Passwart-Rolle.
+        </div>
+        <ul style="list-style:none;padding:0;margin:0;font-family:'DM Sans',sans-serif;font-size:13px;color:#111820;line-height:1.7;">
+          <li>◇ Read-Path-Bot: Antragsübersicht via CSRF-Pagehash</li>
+          <li>◇ Write-Path: Erstausstellung 6 Bereiche + Modal</li>
+          <li>◇ Vereinswechsel-Flow (Passsuche + Freigabe)</li>
+          <li>◇ Learning-Feature L2 wieder scharf schalten</li>
+          <li>◇ E2E-Test mit 3 Test-Anmeldungen</li>
+        </ul>
+        <div style="margin-top:14px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#004A9F;font-weight:600;">
+          Braucht: Passwart-Rolle + Sprint 2 durch
+        </div>
+      </div>
+
+      <!-- Sprint 4 -->
+      <div style="background:#F7F9FC;border-top:4px solid #2D9B5A;padding:20px;border-radius:0 0 6px 6px;">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px;">
+          <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:#2D9B5A;">Sprint 4 · Pilot</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#4A5568;">2 Wochen</span>
+        </div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:0.8px;color:#111820;line-height:1;margin-bottom:12px;">
+          Pilot mit 5 Familien
+        </div>
+        <div style="font-family:'DM Sans',sans-serif;font-size:13px;color:#4A5568;line-height:1.55;margin-bottom:12px;">
+          Erst live gehen wenn es klein wehtut. Nicht der ganze Verein auf einmal.
+        </div>
+        <ul style="list-style:none;padding:0;margin:0;font-family:'DM Sans',sans-serif;font-size:13px;color:#111820;line-height:1.7;">
+          <li>◇ 5 handverlesene Neuzugänge über Wizard</li>
+          <li>◇ Passwart Michael beobachtet, greift ein</li>
+          <li>◇ Nach jedem Fall: 15 min Retro</li>
+          <li>◇ Bot-Fehlerraten messen, Selektoren nachziehen</li>
+          <li>◇ Danach: Öffnung für alle Neuzugänge</li>
+        </ul>
+        <div style="margin-top:14px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#2D9B5A;font-weight:700;">
+          Go-Live-Meilenstein
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Was PARALLEL passieren kann -->
+    <div style="background:#EDF1F7;padding:20px;border-radius:6px;margin-bottom:20px;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2.5px;text-transform:uppercase;color:#004A9F;margin-bottom:12px;">
+        Was parallel laufen kann (blockiert Sprint 1–4 nicht)
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;font-family:'DM Sans',sans-serif;font-size:13px;color:#111820;line-height:1.55;">
+        <div>
+          <strong style="display:block;margin-bottom:4px;">Passwart-Interview (SL-5)</strong>
+          <span style="color:#4A5568;">Michael 60 min interviewen: was macht er heute manuell? Voice-of-User als Ground-Truth für Bot-Priorisierung.</span>
+        </div>
+        <div>
+          <strong style="display:block;margin-bottom:4px;">Content-Investment Homepage</strong>
+          <span style="color:#4A5568;">Foto-Session (Drohne + Trainingsalltag), 3–4 Trainer-Zitate, echte Story-Line für Marco-Score ≥ 9,0.</span>
+        </div>
+        <div>
+          <strong style="display:block;margin-bottom:4px;">Jimdo-Frage klären</strong>
+          <span style="color:#4A5568;">Kann Jimdo Custom-JS/iFrame? Falls nein → Umzug der neuen v4.1 auf Vercel. Aktuellen Jimdo-Content vorher als HTML-Export sichern.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Kosten -->
+    <div style="background:linear-gradient(135deg,#F7F9FC,#EDF1F7);border-left:4px solid #2D9B5A;padding:20px;border-radius:0 6px 6px 0;margin-bottom:20px;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+        <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:2.5px;text-transform:uppercase;color:#2D9B5A;">💶 Kosten pro Jahr für den Verein</span>
+        <span style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;color:#4A5568;letter-spacing:0.5px;">Prokura-Rahmen 04.07.: 400 € einmalig + 30 €/Monat laufend</span>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;">
+
+        <!-- Laufende Kosten -->
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:0.8px;color:#111820;line-height:1;margin-bottom:10px;">Laufend · pro Jahr</div>
+          <div style="display:grid;grid-template-columns:1fr auto;gap:4px 12px;font-family:'JetBrains Mono',monospace;font-size:12px;color:#4A5568;line-height:1.7;">
+            <span>Neon Postgres Free-Tier</span><span style="font-weight:600;color:#111820;">0 €</span>
+            <span>Cloudflare R2 EU (Nachweise 48h)</span><span style="font-weight:600;color:#111820;">0–24 €</span>
+            <span>Tailscale Free (Bot-Admin)</span><span style="font-weight:600;color:#111820;">0 €</span>
+            <span>Vercel Pro (Frontend/Wizard)</span><span style="font-weight:600;color:#111820;">228 €</span>
+            <span>Domain cfb-fordniehl.de</span><span style="font-weight:600;color:#111820;">~15 €</span>
+            <span>Mini-PC Strom (~10 W · 24/7)</span><span style="font-weight:600;color:#111820;">~35 €</span>
+            <span>Puffer (E-Mail · Backups)</span><span style="font-weight:600;color:#111820;">~30 €</span>
+            <span style="padding-top:8px;border-top:1px solid #DDE5F0;margin-top:6px;font-weight:700;color:#111820;">Realistisch pro Jahr</span>
+            <span style="padding-top:8px;border-top:1px solid #DDE5F0;margin-top:6px;font-weight:700;color:#2D9B5A;font-size:14px;">~110–330 €</span>
+          </div>
+          <div style="margin-top:10px;font-family:'DM Sans',sans-serif;font-size:12px;font-style:italic;color:#4A5568;line-height:1.5;">
+            Vercel-Pro-Frage offen (Sprint 5): Frontend könnte auch self-hosted auf dem Mini-PC laufen → dann ohne die 228 €.
+          </div>
+        </div>
+
+        <!-- Einmalig -->
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:0.8px;color:#111820;line-height:1;margin-bottom:10px;">Einmalig · Setup</div>
+          <div style="display:grid;grid-template-columns:1fr auto;gap:4px 12px;font-family:'JetBrains Mono',monospace;font-size:12px;color:#4A5568;line-height:1.7;">
+            <span>Mini-PC (Intel N100 · 16 GB · 512 GB SSD)</span><span style="font-weight:600;color:#111820;">~350 €</span>
+            <span>USV (kleine Stromausfall-Absicherung)</span><span style="font-weight:600;color:#111820;">~50 €</span>
+            <span style="padding-top:8px;border-top:1px solid #DDE5F0;margin-top:6px;font-weight:700;color:#111820;">Einmal-Investition</span>
+            <span style="padding-top:8px;border-top:1px solid #DDE5F0;margin-top:6px;font-weight:700;color:#2D9B5A;font-size:14px;">~400 €</span>
+          </div>
+          <div style="margin-top:14px;padding:12px;background:#fff;border-radius:4px;font-family:'DM Sans',sans-serif;font-size:12px;color:#4A5568;line-height:1.55;">
+            <strong style="color:#111820;">Vergleichs-Anker:</strong> 1 Erwachsenen-Jahresbeitrag = 300 €.
+            Das komplette System kostet den Verein weniger als <strong>2 Mitgliedsbeiträge im Jahr</strong> — bei gleichzeitig ~18 min Ersparnis pro Neuzugang für den Passwart.
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div style="padding:18px 20px;background:#004A9F;color:#fff;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.6;">
+      <strong style="font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;font-size:12px;display:block;margin-bottom:6px;">Nächster konkreter Klick</strong>
+      <strong>Task #62: Neon-Account + Projekt Frankfurt anlegen.</strong>
+      Danach automatisch #63 → #64 → #65 → #66. Sprint 1 kann heute starten und braucht keine Freigabe mehr (Prokura vom 04.07. deckt das ab).
+    </div>
+
+  </div>
+</section>
+
 <div class="sim-nav">
   <strong>🎬 Vorstands-Demo · Ende</strong>
   Dies ist die letzte Simulation der End-to-End-Reise vom Klick <em>„Probetraining anmelden"</em> bis zum fertigen Spielerpass-Draft im DFBnet.<br>
